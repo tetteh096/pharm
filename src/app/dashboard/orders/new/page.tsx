@@ -1,0 +1,38 @@
+import Link from "next/link"
+import { ArrowLeft } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { getActiveBranches } from "@/app/dashboard/branches/actions"
+import { ManualOrderForm } from "@/components/dashboard/ManualOrderForm"
+
+export const dynamic = "force-dynamic"
+
+export default async function NewOrderPage() {
+  const branches = await getActiveBranches()
+
+  return (
+    <div className="dashboard-page space-y-6">
+      <div className="flex items-center gap-3">
+        <Button variant="ghost" size="icon" asChild>
+          <Link href="/dashboard/orders">
+            <ArrowLeft size={20} />
+          </Link>
+        </Button>
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Create order</h1>
+          <p className="text-sm text-muted-foreground">
+            For phone-in or walk-in customers. Stock is reserved as soon as the
+            order is created.
+          </p>
+        </div>
+      </div>
+
+      <ManualOrderForm
+        branches={branches.map((b) => ({
+          id: b.id,
+          name: b.name,
+          location: b.location ?? null,
+        }))}
+      />
+    </div>
+  )
+}

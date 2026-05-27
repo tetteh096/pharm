@@ -1,0 +1,781 @@
+"use client"
+
+import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react"
+import {
+  Search,
+  SlidersHorizontal,
+  Package,
+  X,
+  Loader2,
+  Filter as FilterIcon,
+  CheckCircle2,
+  Sparkles,
+} from "lucide-react"
+import { motion, AnimatePresence } from "framer-motion"
+import ProductCard from "@/components/medizen/ProductCard"
+import PriceRangeSlider from "@/components/medizen/shop/PriceRangeSlider"
+import {
+  searchShopProducts,
+  type ShopFilterMeta,
+  type ShopFilters,
+  type ShopProduct,
+  type ShopSearchResult,
+  type ShopSort,
+} from "@/app/actions/storefront"
+import { formatGhs } from "@/lib/format"
+
+type Props = {
+  initialResult: ShopSearchResult
+  meta: ShopFilterMeta
+  /** From URL `?q=` (e.g. header search) */
+  initialQuery?: string
+}
+
+type FilterState = {
+  query: string
+  categories: string[]
+  branches: string[]
+  price: [number, number]
+  inStockOnly: boolean
+  featuredOnly: boolean
+  sort: ShopSort
+  page: number
+}
+
+const PAGE_SIZE = 9
+const SEARCH_DEBOUNCE_MS = 350
+
+export default function ShopBrowser({ initialResult, meta, initialQuery = "" }: Props) {
+  const initialFilters: FilterState = {
+    query: initialQuery,
+    categories: [],
+    branches: [],
+    price: [meta.priceBounds.min, meta.priceBounds.max],
+    inStockOnly: false,
+    featuredOnly: false,
+    sort: "latest",
+    page: 1,
+  }
+
+  const [filters, setFilters] = useState<FilterState>(initialFilters)
+  const [result, setResult] = useState<ShopSearchResult>(initialResult)
+  const [isPending, startTransition] = useTransition()
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false)
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const requestSeq = useRef(0)
+
+  const fetchProducts = useCallback(
+    (next: FilterState) => {
+      const payload: ShopFilters = {
+        query: next.query.trim() || undefined,
+        categories: next.categories.length ? next.categories : undefined,
+        branches: next.branches.length ? next.branches : undefined,
+        minPrice: next.price[0] !== meta.priceBounds.min ? next.price[0] : undefined,
+        maxPrice: next.price[1] !== meta.priceBounds.max ? next.price[1] : undefined,
+        inStockOnly: next.inStockOnly || undefined,
+        featuredOnly: next.featuredOnly || undefined,
+        sort: next.sort,
+        page: next.page,
+        pageSize: PAGE_SIZE,
+      }
+
+      const seq = ++requestSeq.current
+      startTransition(async () => {
+        const res = await searchShopProducts(payload)
+        if (seq === requestSeq.current) {
+          setResult(res)
+        }
+      })
+    },
+    [meta.priceBounds.min, meta.priceBounds.max]
+  )
+
+  // Latest filter state is captured in a ref so handlers can read it
+  // without depending on stale closures.
+  const filtersRef = useRef(filters)
+  useEffect(() => {
+    filtersRef.current = filters
+  }, [filters])
+
+  // Debounce text query, fire immediately for other filters.
+  const applyFilter = useCallback(
+    (patch: Partial<FilterState>, opts: { debounce?: boolean } = {}) => {
+      const next: FilterState = {
+        ...filtersRef.current,
+        ...patch,
+        // Reset to page 1 unless the patch explicitly sets a page.
+        page: patch.page ?? 1,
+      }
+      filtersRef.current = next
+      setFilters(next)
+
+      if (debounceRef.current) clearTimeout(debounceRef.current)
+      if (opts.debounce) {
+        debounceRef.current = setTimeout(() => fetchProducts(next), SEARCH_DEBOUNCE_MS)
+      } else {
+        fetchProducts(next)
+      }
+    },
+    [fetchProducts]
+  )
+
+  useEffect(() => {
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current)
+    }
+  }, [])
+
+  const toggleArrayValue = useCallback(
+    (key: "categories" | "branches", value: string) => {
+      const prev = filtersRef.current
+      const list = prev[key]
+      const nextList = list.includes(value)
+        ? list.filter((v) => v !== value)
+        : [...list, value]
+      const next: FilterState = { ...prev, [key]: nextList, page: 1 }
+      filtersRef.current = next
+      setFilters(next)
+      fetchProducts(next)
+    },
+    [fetchProducts]
+  )
+
+  const resetFilters = useCallback(() => {
+    filtersRef.current = initialFilters
+    setFilters(initialFilters)
+    fetchProducts(initialFilters)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fetchProducts])
+
+  const activeFilterChips = useMemo(() => {
+    const chips: Array<{ label: string; clear: () => void }> = []
+    if (filters.query)
+      chips.push({
+        label: `“${filters.query}”`,
+        clear: () => applyFilter({ query: "" }),
+      })
+    filters.categories.forEach((cat) =>
+      chips.push({
+        label: cat,
+        clear: () => toggleArrayValue("categories", cat),
+      })
+    )
+    filters.branches.forEach((br) =>
+      chips.push({
+        label: br,
+        clear: () => toggleArrayValue("branches", br),
+      })
+    )
+    if (
+      filters.price[0] !== meta.priceBounds.min ||
+      filters.price[1] !== meta.priceBounds.max
+    ) {
+      chips.push({
+        label: `${formatGhs(filters.price[0])} – ${formatGhs(filters.price[1])}`,
+        clear: () =>
+          applyFilter({
+            price: [meta.priceBounds.min, meta.priceBounds.max],
+          }),
+      })
+    }
+    if (filters.inStockOnly)
+      chips.push({
+        label: "In stock only",
+        clear: () => applyFilter({ inStockOnly: false }),
+      })
+    if (filters.featuredOnly)
+      chips.push({
+        label: "Featured only",
+        clear: () => applyFilter({ featuredOnly: false }),
+      })
+    return chips
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filters, meta.priceBounds.min, meta.priceBounds.max])
+
+  const showingFrom =
+    result.total === 0 ? 0 : (result.page - 1) * result.pageSize + 1
+  const showingTo = Math.min(result.page * result.pageSize, result.total)
+
+  const SidebarContent = (
+    <FilterSidebar
+      filters={filters}
+      meta={meta}
+      applyFilter={applyFilter}
+      toggleArrayValue={toggleArrayValue}
+      resetFilters={resetFilters}
+      hasActiveFilters={activeFilterChips.length > 0}
+    />
+  )
+
+  return (
+    <>
+      <div className="row g-5">
+        <div className="col-lg-3 d-none d-lg-block">{SidebarContent}</div>
+
+        <div className="col-lg-9">
+          <div className="shop-toolbar glass-card p-3 rounded-pill mb-3 d-flex justify-content-between align-items-center px-4 shadow-sm flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => setMobileFiltersOpen(true)}
+              className="d-lg-none border-0 bg-transparent d-inline-flex align-items-center gap-2 fw_700 black"
+              style={{ fontSize: "0.85rem" }}
+            >
+              <FilterIcon size={16} />
+              Filters
+              {activeFilterChips.length > 0 && (
+                <span
+                  className="p1-bg text-white rounded-pill px-2"
+                  style={{ fontSize: "0.65rem" }}
+                >
+                  {activeFilterChips.length}
+                </span>
+              )}
+            </button>
+
+            <div className="fs-eight fw_600 black opacity-60 d-flex align-items-center gap-2">
+              {isPending ? (
+                <>
+                  <Loader2 size={14} className="animate-spin" />
+                  Searching…
+                </>
+              ) : result.total === 0 ? (
+                "No products found"
+              ) : (
+                `Showing ${showingFrom}–${showingTo} of ${result.total}`
+              )}
+            </div>
+
+            <div className="d-flex align-items-center gap-2">
+              <SlidersHorizontal size={16} className="opacity-40" />
+              <select
+                className="bg-transparent border-0 fs-eight fw_700 black outline-none cursor-pointer"
+                value={filters.sort}
+                onChange={(e) => applyFilter({ sort: e.target.value as ShopSort })}
+              >
+                <option value="latest">Latest</option>
+                <option value="featured">Featured first</option>
+                <option value="priceAsc">Price: low → high</option>
+                <option value="priceDesc">Price: high → low</option>
+                <option value="name">Name: A → Z</option>
+              </select>
+            </div>
+          </div>
+
+          {activeFilterChips.length > 0 && (
+            <div className="d-flex flex-wrap align-items-center gap-2 mb-3">
+              <span className="black fw_700" style={{ fontSize: "0.78rem" }}>
+                Filters:
+              </span>
+              {activeFilterChips.map((chip, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={chip.clear}
+                  className="d-inline-flex align-items-center gap-1 rounded-pill px-3 py-1 border-0"
+                  style={{
+                    background: "rgba(19, 236, 138, 0.12)",
+                    color: "#09162a",
+                    fontSize: "0.78rem",
+                    fontWeight: 700,
+                    cursor: "pointer",
+                  }}
+                >
+                  {chip.label}
+                  <X size={12} />
+                </button>
+              ))}
+              <button
+                type="button"
+                onClick={resetFilters}
+                className="border-0 bg-transparent text-decoration-underline"
+                style={{
+                  fontSize: "0.78rem",
+                  fontWeight: 600,
+                  color: "rgba(0,0,0,0.55)",
+                }}
+              >
+                Clear all
+              </button>
+            </div>
+          )}
+
+          {result.total === 0 ? (
+            <EmptyState onReset={resetFilters} />
+          ) : (
+            <>
+              <div className="row g-4" style={{ opacity: isPending ? 0.55 : 1, transition: "opacity 0.15s" }}>
+                {result.products.map((product, idx) => (
+                  <motion.div
+                    className="col-xl-4 col-lg-6 col-md-6"
+                    key={product.id}
+                    initial={{ opacity: 0, y: 18 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: Math.min(idx * 0.04, 0.2) }}
+                  >
+                    <ProductCard product={product} />
+                  </motion.div>
+                ))}
+              </div>
+
+              {result.totalPages > 1 && (
+                <Pagination
+                  page={result.page}
+                  totalPages={result.totalPages}
+                  onPage={(num) => applyFilter({ page: num })}
+                />
+              )}
+            </>
+          )}
+        </div>
+      </div>
+
+      <MobileFilterDrawer
+        open={mobileFiltersOpen}
+        onClose={() => setMobileFiltersOpen(false)}
+      >
+        {SidebarContent}
+      </MobileFilterDrawer>
+    </>
+  )
+}
+
+// ── Sub-components ─────────────────────────────────────────────────────────────
+
+function FilterSidebar({
+  filters,
+  meta,
+  applyFilter,
+  toggleArrayValue,
+  resetFilters,
+  hasActiveFilters,
+}: {
+  filters: FilterState
+  meta: ShopFilterMeta
+  applyFilter: (patch: Partial<FilterState>, opts?: { debounce?: boolean }) => void
+  toggleArrayValue: (key: "categories" | "branches", value: string) => void
+  resetFilters: () => void
+  hasActiveFilters: boolean
+}) {
+  return (
+    <div className="shop-sidebar glass-card p-4 rounded-5 shadow-sm border-1 border-white/20">
+      <div className="d-flex justify-content-between align-items-center mb-4">
+        <h5 className="fw_800 black mb-0">Filter products</h5>
+        {hasActiveFilters && (
+          <button
+            type="button"
+            onClick={resetFilters}
+            className="border-0 bg-transparent text-decoration-underline"
+            style={{ fontSize: "0.75rem", fontWeight: 600, color: "var(--p2-clr)" }}
+          >
+            Reset
+          </button>
+        )}
+      </div>
+
+      <div className="mb-4">
+        <div className="position-relative">
+          <input
+            type="search"
+            value={filters.query}
+            onChange={(e) => applyFilter({ query: e.target.value }, { debounce: true })}
+            placeholder="Search medicines…"
+            className="shop-search-input w-100 rounded-pill px-4 py-2 outline-none"
+            style={{ paddingRight: "2.5rem", fontSize: "0.85rem" }}
+          />
+          <Search
+            size={16}
+            className="position-absolute end-0 top-50 translate-middle-y me-3"
+            style={{ color: "rgba(0,0,0,0.35)", pointerEvents: "none" }}
+          />
+        </div>
+      </div>
+
+      <div className="mb-4">
+        <h6 className="fw_800 black mb-3" style={{ fontSize: "0.82rem", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+          Price range
+        </h6>
+        <PriceRangeSlider
+          min={meta.priceBounds.min}
+          max={meta.priceBounds.max}
+          value={filters.price}
+          onChange={(next) => applyFilter({ price: next })}
+        />
+      </div>
+
+      <div className="mb-4">
+        <h6 className="fw_800 black mb-3" style={{ fontSize: "0.82rem", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+          Quick filters
+        </h6>
+        <div className="d-flex flex-column gap-2">
+          <ToggleRow
+            label="In stock only"
+            active={filters.inStockOnly}
+            icon={<CheckCircle2 size={14} />}
+            onChange={(v) => applyFilter({ inStockOnly: v })}
+          />
+          <ToggleRow
+            label="Featured products"
+            active={filters.featuredOnly}
+            icon={<Sparkles size={14} />}
+            onChange={(v) => applyFilter({ featuredOnly: v })}
+          />
+        </div>
+      </div>
+
+      {meta.categories.length > 0 && (
+        <div className="mb-4">
+          <h6 className="fw_800 black mb-3" style={{ fontSize: "0.82rem", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+            Categories
+          </h6>
+          <ul
+            className="list-unstyled d-flex flex-column gap-1 mb-0"
+            style={{ maxHeight: 280, overflowY: "auto" }}
+          >
+            {meta.categories.map((cat) => (
+              <li key={cat.name}>
+                <CheckRow
+                  label={cat.name}
+                  count={cat.count}
+                  checked={filters.categories.includes(cat.name)}
+                  onChange={() => toggleArrayValue("categories", cat.name)}
+                />
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      <div
+        className="rounded-4 p-3 mt-2"
+        style={{
+          background: "rgba(19, 236, 138, 0.06)",
+          border: "1px dashed rgba(19, 236, 138, 0.25)",
+        }}
+      >
+        <p className="black fw_700 mb-1" style={{ fontSize: "0.82rem" }}>
+          Need help?
+        </p>
+        <p className="pra mb-2" style={{ fontSize: "0.76rem", lineHeight: 1.5 }}>
+          Call our Madina branch on 055 461 2072 — open 24 hours.
+        </p>
+        <a
+          href="tel:+233554612072"
+          className="fw_800 text-decoration-none"
+          style={{ color: "var(--p1-clr)", fontSize: "0.82rem" }}
+        >
+          Call now →
+        </a>
+      </div>
+
+      <style jsx>{`
+        :global(.shop-search-input) {
+          background: #ffffff !important;
+          border: 1px solid rgba(0, 0, 0, 0.08) !important;
+          color: #09162a !important;
+          font-weight: 600;
+        }
+        :global(.shop-search-input::placeholder) {
+          color: rgba(0, 0, 0, 0.4) !important;
+          font-weight: 500;
+        }
+        :global(.shop-search-input:focus) {
+          border-color: var(--p1-clr) !important;
+          color: #09162a !important;
+          box-shadow: 0 0 0 3px rgba(19, 236, 138, 0.12) !important;
+        }
+        :global(.check-row:hover) {
+          background: rgba(0, 0, 0, 0.03) !important;
+        }
+        :global(.check-row[aria-pressed="true"]:hover) {
+          background: rgba(19, 236, 138, 0.14) !important;
+        }
+      `}</style>
+    </div>
+  )
+}
+
+function ToggleRow({
+  label,
+  active,
+  icon,
+  onChange,
+}: {
+  label: string
+  active: boolean
+  icon: React.ReactNode
+  onChange: (v: boolean) => void
+}) {
+  return (
+    <label
+      className="d-flex align-items-center justify-content-between gap-2 rounded-3 px-3 py-2"
+      style={{
+        background: active ? "rgba(19, 236, 138, 0.1)" : "rgba(0,0,0,0.025)",
+        border: active ? "1px solid rgba(19, 236, 138, 0.3)" : "1px solid transparent",
+        cursor: "pointer",
+        transition: "all 0.15s",
+      }}
+    >
+      <span className="d-flex align-items-center gap-2 black fw_600" style={{ fontSize: "0.82rem" }}>
+        <span style={{ color: active ? "var(--p1-clr)" : "rgba(0,0,0,0.45)" }}>{icon}</span>
+        {label}
+      </span>
+      <span
+        className="position-relative d-inline-block"
+        style={{
+          width: 32,
+          height: 18,
+          background: active ? "var(--p1-clr)" : "rgba(0,0,0,0.15)",
+          borderRadius: 999,
+          transition: "background 0.15s",
+        }}
+      >
+        <input
+          type="checkbox"
+          className="visually-hidden"
+          checked={active}
+          onChange={(e) => onChange(e.target.checked)}
+          aria-label={label}
+        />
+        <span
+          style={{
+            position: "absolute",
+            top: 2,
+            left: active ? 16 : 2,
+            width: 14,
+            height: 14,
+            background: "#ffffff",
+            borderRadius: "50%",
+            transition: "left 0.15s",
+            boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
+          }}
+        />
+      </span>
+    </label>
+  )
+}
+
+function CheckRow({
+  label,
+  count,
+  checked,
+  onChange,
+}: {
+  label: string
+  count: number
+  checked: boolean
+  onChange: () => void
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onChange}
+      className="check-row d-flex align-items-center justify-content-between gap-2 rounded-2 px-2 py-2 border-0 w-100 text-start"
+      style={{
+        background: checked ? "rgba(19, 236, 138, 0.1)" : "transparent",
+        transition: "background 0.12s",
+        cursor: "pointer",
+      }}
+      aria-pressed={checked}
+    >
+      <span className="d-flex align-items-center gap-2" style={{ minWidth: 0 }}>
+        <span
+          className="d-inline-flex align-items-center justify-content-center flex-shrink-0"
+          style={{
+            width: 18,
+            height: 18,
+            borderRadius: 5,
+            border: checked ? "1.5px solid var(--p1-clr)" : "1.5px solid rgba(0,0,0,0.2)",
+            background: checked ? "var(--p1-clr)" : "#ffffff",
+            transition: "all 0.12s",
+          }}
+        >
+          {checked && (
+            <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
+              <path d="M2.5 6.5L4.5 8.5L9.5 3.5" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          )}
+        </span>
+        <span
+          style={{
+            fontSize: "0.82rem",
+            fontWeight: checked ? 700 : 500,
+            color: "#09162a",
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+          }}
+        >
+          {label}
+        </span>
+      </span>
+      <span
+        className="rounded-pill px-2 flex-shrink-0"
+        style={{
+          fontSize: "0.66rem",
+          fontWeight: 700,
+          background: checked ? "rgba(19, 236, 138, 0.18)" : "rgba(0,0,0,0.05)",
+          color: checked ? "var(--p1-clr)" : "rgba(0,0,0,0.55)",
+        }}
+      >
+        {count}
+      </span>
+    </button>
+  )
+}
+
+function MobileFilterDrawer({
+  open,
+  onClose,
+  children,
+}: {
+  open: boolean
+  onClose: () => void
+  children: React.ReactNode
+}) {
+  return (
+    <AnimatePresence>
+      {open && (
+        <>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={onClose}
+            style={{
+              position: "fixed",
+              inset: 0,
+              background: "rgba(9, 22, 42, 0.5)",
+              zIndex: 1090,
+            }}
+          />
+          <motion.div
+            initial={{ x: "-100%" }}
+            animate={{ x: 0 }}
+            exit={{ x: "-100%" }}
+            transition={{ type: "tween", duration: 0.22 }}
+            style={{
+              position: "fixed",
+              top: 0,
+              left: 0,
+              bottom: 0,
+              width: "min(360px, 90vw)",
+              background: "#ffffff",
+              zIndex: 1100,
+              overflowY: "auto",
+              padding: "1rem",
+            }}
+          >
+            <div className="d-flex justify-content-between align-items-center mb-3">
+              <h5 className="black fw_800 mb-0">Filter products</h5>
+              <button
+                type="button"
+                onClick={onClose}
+                className="border-0 bg-transparent d-flex align-items-center justify-content-center rounded-circle"
+                style={{ width: 36, height: 36, background: "rgba(0,0,0,0.05)" }}
+                aria-label="Close filters"
+              >
+                <X size={18} />
+              </button>
+            </div>
+            {children}
+            <button
+              type="button"
+              onClick={onClose}
+              className="common-btn box-style p1-bg text-white w-100 rounded-5 py-3 fw_800 border-0 mt-3"
+            >
+              See results
+            </button>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
+  )
+}
+
+function EmptyState({ onReset }: { onReset: () => void }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="text-center py-5 rounded-4"
+      style={{
+        background: "rgba(255,255,255,0.6)",
+        border: "1px solid rgba(0,0,0,0.06)",
+      }}
+    >
+      <Package size={48} className="opacity-30 mb-3" />
+      <h5 className="black fw_800 mb-2">No products match your filters</h5>
+      <p className="pra mb-4" style={{ maxWidth: 400, margin: "0 auto 1rem" }}>
+        Try a different search term, widen the price range, or clear a category.
+      </p>
+      <button
+        type="button"
+        onClick={onReset}
+        className="common-btn box-style first-box rounded-5 px-4 py-2 fw_800 border-0"
+      >
+        Reset filters
+      </button>
+    </motion.div>
+  )
+}
+
+function Pagination({
+  page,
+  totalPages,
+  onPage,
+}: {
+  page: number
+  totalPages: number
+  onPage: (n: number) => void
+}) {
+  // Show up to 5 page numbers, centered on the current page.
+  const start = Math.max(1, page - 2)
+  const end = Math.min(totalPages, start + 4)
+  const realStart = Math.max(1, end - 4)
+  const nums: number[] = []
+  for (let i = realStart; i <= end; i++) nums.push(i)
+
+  return (
+    <div className="pagination-wrapper mt-60">
+      <ul className="blog-pagination d-flex gap-2 list-unstyled justify-content-center mb-0 flex-wrap">
+        <li>
+          <button
+            type="button"
+            onClick={() => onPage(Math.max(1, page - 1))}
+            disabled={page <= 1}
+            className="d-center rounded-circle border-0 fw_700 glass-card black"
+            style={{ width: 45, height: 45, opacity: page <= 1 ? 0.4 : 1 }}
+          >
+            ‹
+          </button>
+        </li>
+        {nums.map((num) => {
+          const active = num === page
+          return (
+            <li key={num}>
+              <button
+                type="button"
+                onClick={() => onPage(num)}
+                className={`d-center rounded-circle border-0 fw_700 ${active ? "p1-bg text-white" : "glass-card black"}`}
+                style={{ width: 45, height: 45 }}
+              >
+                {num}
+              </button>
+            </li>
+          )
+        })}
+        <li>
+          <button
+            type="button"
+            onClick={() => onPage(Math.min(totalPages, page + 1))}
+            disabled={page >= totalPages}
+            className="d-center rounded-circle border-0 fw_700 glass-card black"
+            style={{ width: 45, height: 45, opacity: page >= totalPages ? 0.4 : 1 }}
+          >
+            ›
+          </button>
+        </li>
+      </ul>
+    </div>
+  )
+}
