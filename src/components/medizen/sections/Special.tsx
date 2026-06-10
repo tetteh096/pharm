@@ -157,11 +157,11 @@ const Special = () => {
           >
             Find Us
           </p>
-          <div className="row g-5">
+          <div className="row g-4">
 
             {/* Madina */}
             <motion.div
-              className="col-md-4"
+              className="col-md-3"
               initial={{ opacity: 0, y: 16 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
@@ -173,16 +173,16 @@ const Special = () => {
                   borderLeft: "3px solid var(--p1-clr)",
                 }}
               >
-                <h5 className="black fw_800 mb-1" style={{ fontSize: "1.1rem" }}>Madina Branch</h5>
-                <p className="pra mb-1" style={{ fontSize: "0.88rem" }}>La-Nkwantanang-Madina, Accra</p>
-                <p className="mb-2" style={{ fontSize: "0.82rem", color: "var(--p1-clr)", fontWeight: 700 }}>
+                <h5 className="black fw_800 mb-1" style={{ fontSize: "1.05rem" }}>Madina Branch</h5>
+                <p className="pra mb-1" style={{ fontSize: "0.85rem" }}>La-Nkwantanang-Madina, Accra</p>
+                <p className="mb-2" style={{ fontSize: "0.8rem", color: "var(--p1-clr)", fontWeight: 700 }}>
                   Open 24 hours · Every day
                 </p>
-                <div className="d-flex align-items-center gap-4">
+                <div className="d-flex align-items-center gap-3">
                   <a
                     href="tel:0554612072"
                     className="fw_700 text-decoration-none"
-                    style={{ color: "var(--p1-clr)", fontSize: "0.9rem" }}
+                    style={{ color: "var(--p1-clr)", fontSize: "0.85rem" }}
                   >
                     055 461 2072
                   </a>
@@ -191,7 +191,7 @@ const Special = () => {
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-decoration-none pra"
-                    style={{ fontSize: "0.82rem" }}
+                    style={{ fontSize: "0.8rem" }}
                   >
                     Get directions →
                   </a>
@@ -201,7 +201,7 @@ const Special = () => {
 
             {/* Odorkor */}
             <motion.div
-              className="col-md-4"
+              className="col-md-3"
               initial={{ opacity: 0, y: 16 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.12 }}
@@ -213,16 +213,16 @@ const Special = () => {
                   borderLeft: "3px solid var(--p2-clr)",
                 }}
               >
-                <h5 className="black fw_800 mb-1" style={{ fontSize: "1.1rem" }}>Odorkor Branch</h5>
-                <p className="pra mb-1" style={{ fontSize: "0.88rem" }}>Odorkor, Accra</p>
-                <p className="mb-2" style={{ fontSize: "0.82rem", color: "var(--p2-clr)", fontWeight: 700 }}>
+                <h5 className="black fw_800 mb-1" style={{ fontSize: "1.05rem" }}>Odorkor Branch</h5>
+                <p className="pra mb-1" style={{ fontSize: "0.85rem" }}>Odorkor, Accra</p>
+                <p className="mb-2" style={{ fontSize: "0.8rem", color: "var(--p2-clr)", fontWeight: 700 }}>
                   Monday – Saturday
                 </p>
-                <div className="d-flex align-items-center gap-4">
+                <div className="d-flex align-items-center gap-3">
                   <a
                     href="tel:0599376675"
                     className="fw_700 text-decoration-none"
-                    style={{ color: "var(--p2-clr)", fontSize: "0.9rem" }}
+                    style={{ color: "var(--p2-clr)", fontSize: "0.85rem" }}
                   >
                     059 937 6675
                   </a>
@@ -231,7 +231,7 @@ const Special = () => {
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-decoration-none pra"
-                    style={{ fontSize: "0.82rem" }}
+                    style={{ fontSize: "0.8rem" }}
                   >
                     Get directions →
                   </a>
@@ -241,7 +241,7 @@ const Special = () => {
 
             {/* Sakumono */}
             <motion.div
-              className="col-md-4"
+              className="col-md-3"
               initial={{ opacity: 0, y: 16 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.24 }}
@@ -253,16 +253,16 @@ const Special = () => {
                   borderLeft: "3px solid #8b5cf6",
                 }}
               >
-                <h5 className="black fw_800 mb-1" style={{ fontSize: "1.1rem" }}>Sakumono Branch</h5>
-                <p className="pra mb-1" style={{ fontSize: "0.88rem" }}>NHTC Estate, Sakumono, Accra</p>
-                <p className="mb-2" style={{ fontSize: "0.82rem", color: "#8b5cf6", fontWeight: 700 }}>
+                <h5 className="black fw_800 mb-1" style={{ fontSize: "1.05rem" }}>Sakumono Branch</h5>
+                <p className="pra mb-1" style={{ fontSize: "0.85rem" }}>NHTC Estate, Sakumono, Accra</p>
+                <p className="mb-2" style={{ fontSize: "0.8rem", color: "#8b5cf6", fontWeight: 700 }}>
                   Monday – Saturday
                 </p>
-                <div className="d-flex align-items-center gap-4">
+                <div className="d-flex align-items-center gap-3">
                   <a
                     href="tel:0530883354"
                     className="fw_700 text-decoration-none"
-                    style={{ color: "#8b5cf6", fontSize: "0.9rem" }}
+                    style={{ color: "#8b5cf6", fontSize: "0.85rem" }}
                   >
                     053 088 3354
                   </a>
@@ -271,10 +271,40 @@ const Special = () => {
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-decoration-none pra"
-                    style={{ fontSize: "0.82rem" }}
+                    style={{ fontSize: "0.8rem" }}
                   >
                     Get directions →
                   </a>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Santeo */}
+            <motion.div
+              className="col-md-3"
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.36 }}
+              viewport={{ once: true }}
+            >
+              <div
+                style={{
+                  paddingLeft: "1.25rem",
+                  borderLeft: "3px solid #f59e0b",
+                }}
+              >
+                <h5 className="black fw_800 mb-1" style={{ fontSize: "1.05rem" }}>Santeo Branch</h5>
+                <p className="pra mb-1" style={{ fontSize: "0.85rem" }}>Santeo, Accra</p>
+                <p className="mb-2" style={{ fontSize: "0.8rem", color: "#f59e0b", fontWeight: 700 }}>
+                  Coming Soon · Monday – Saturday
+                </p>
+                <div className="d-flex align-items-center gap-3">
+                  <span
+                    className="fw_700"
+                    style={{ color: "#f59e0b", fontSize: "0.85rem" }}
+                  >
+                    Phone coming soon
+                  </span>
                 </div>
               </div>
             </motion.div>

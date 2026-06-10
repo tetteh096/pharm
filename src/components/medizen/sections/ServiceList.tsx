@@ -48,7 +48,7 @@ const ServiceList = () => {
                 className="pra"
                 style={{ maxWidth: "520px", margin: "0 auto" }}
               >
-                Walk-in health checks, prescription dispensing, and pharmacist consultations at our Madina and Odorkor branches.
+                Walk-in health checks, prescription dispensing, and pharmacist consultations at our branches.
               </motion.p>
             </div>
           </div>

@@ -20,7 +20,16 @@ export default function SignInPage() {
 function SignInContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const callbackUrl = searchParams.get("callbackUrl") || "/dashboard"
+  const rawCallback = searchParams.get("callbackUrl") || "/dashboard"
+  // Strip any absolute origin so a localhost callbackUrl from next-auth never
+  // redirects a production user back to localhost.
+  const callbackUrl = (() => {
+    try {
+      return new URL(rawCallback).pathname || "/dashboard"
+    } catch {
+      return rawCallback.startsWith("/") ? rawCallback : "/dashboard"
+    }
+  })()
 
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")

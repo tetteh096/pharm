@@ -13,9 +13,9 @@ import { cn } from "@/lib/utils";
 const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
 export const metadata: Metadata = {
-  title: `${BRAND_NAME} | Pharmacy Care in Madina and Odorkor`,
+  title: `${BRAND_NAME} | Pharmacy Care in Madina, Odorkor, Sakumono and Santeo`,
   description:
-    "Enviro Pharmacy serves Madina and Odorkor with trusted pharmacy care, local support, and dependable branch access.",
+    "Enviro Pharmacy serves Madina, Odorkor, Sakumono and Santeo with trusted pharmacy care, local support, and dependable branch access.",
   icons: {
     icon: [
       { url: BRAND_LOGO.favicon32, sizes: "32x32", type: "image/png" },

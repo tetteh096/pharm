@@ -268,11 +268,24 @@ export default function BlogSidebar({
         </a>
         <a
           href="tel:+233599376675"
-          className="fw_800 d-block text-decoration-none"
+          className="fw_800 d-block text-decoration-none mb-1"
           style={{ color: "var(--p2-clr)" }}
         >
           Odorkor · 059 937 6675
         </a>
+        <a
+          href="tel:+233530883354"
+          className="fw_800 d-block text-decoration-none mb-1"
+          style={{ color: "var(--p2-clr)" }}
+        >
+          Sakumono · 053 088 3354
+        </a>
+        <span
+          className="fw_800 d-block"
+          style={{ color: "var(--p2-clr)" }}
+        >
+          Santeo · Coming soon
+        </span>
       </div>
 
       {tags.length > 0 && (

@@ -5,7 +5,7 @@ import PageTitle from "@/components/medizen/PageTitle";
 
 export const metadata: Metadata = {
   title: "Contact Us | Enviro Pharmacy",
-  description: "Contact Enviro Pharmacy branches in Madina and Odorkor for directions, branch hours, and pharmacy support.",
+  description: "Contact Enviro Pharmacy branches in Madina, Odorkor, Sakumono and Santeo for directions, branch hours, and pharmacy support.",
 };
 
 export default function ContactPage() {
@@ -25,7 +25,8 @@ export default function ContactPage() {
                       <h4 className="fw-bold black d-block mb-1">Branches</h4>
                       <p className="pra fs-seven mb-1">Madina, La-Nkwantanang-Madina</p>
                       <p className="pra fs-seven mb-1">Odorkor, Accra</p>
-                      <p className="pra fs-seven mb-0">Sakumono NHTC Estate, Accra</p>
+                      <p className="pra fs-seven mb-1">Sakumono NHTC Estate, Accra</p>
+                      <p className="pra fs-seven mb-0">Santeo, Accra (Coming Soon)</p>
                     </div>
                   </div>
                 </div>
@@ -36,7 +37,8 @@ export default function ContactPage() {
                       <h4 className="fw-bold black d-block mb-1">Hours</h4>
                       <p className="pra fs-seven mb-1">Madina: Open 24 hours</p>
                       <p className="pra fs-seven mb-1">Odorkor: Mon – Sat</p>
-                      <p className="pra fs-seven mb-0">Sakumono: Mon – Sat</p>
+                      <p className="pra fs-seven mb-1">Sakumono: Mon – Sat</p>
+                      <p className="pra fs-seven mb-0">Santeo: Mon – Sat</p>
                     </div>
                   </div>
                 </div>
@@ -48,6 +50,7 @@ export default function ContactPage() {
                       <a href="tel:+233554612072" className="pra fs-seven d-block">Madina: 055 461 2072</a>
                       <a href="tel:+233599376675" className="pra fs-seven d-block">Odorkor: 059 937 6675</a>
                       <a href="tel:+233530883354" className="pra fs-seven d-block">Sakumono: 053 088 3354</a>
+                      <span className="pra fs-seven d-block">Santeo: Coming soon</span>
                     </div>
                   </div>
                 </div>

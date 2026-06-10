@@ -11,7 +11,7 @@ interface PageTitleProps {
 const heroCopy: Record<string, { eyebrow: string; description: string }> = {
   "About Us": {
     eyebrow: "Trusted pharmacy care",
-    description: "Learn how Enviro Pharmacy supports families in Madina and Odorkor with reliable care, real guidance, and genuine medications.",
+    description: "Learn how Enviro Pharmacy supports families across Madina, Odorkor, Sakumono and Santeo with reliable care, real guidance, and genuine medications.",
   },
   "Health Insights & News": {
     eyebrow: "Pharmacy updates",
@@ -26,18 +26,18 @@ const heroCopy: Record<string, { eyebrow: string; description: string }> = {
     description: "Browse trusted wellness products, everyday pharmacy items, and medical essentials in one place.",
   },
   "Contact Us": {
-    eyebrow: "Two Accra branches",
+    eyebrow: "Four Accra branches",
     description: "Reach the branch nearest to you, ask about stock, and get help arranging pickup or delivery.",
   },
   Services: {
     eyebrow: "Pharmacy support",
     description:
-      "Walk-in health checks, prescription dispensing, and pharmacist consultations at our Madina and Odorkor branches.",
+      "Walk-in health checks, prescription dispensing, and pharmacist consultations at our Madina, Odorkor, Sakumono and Santeo branches.",
   },
   Service: {
     eyebrow: "Pharmacy support",
     description:
-      "Walk-in health checks, prescription dispensing, and pharmacist consultations at our Madina and Odorkor branches.",
+      "Walk-in health checks, prescription dispensing, and pharmacist consultations at our Madina, Odorkor, Sakumono and Santeo branches.",
   },
   "Service Details": {
     eyebrow: "Care details",
@@ -256,7 +256,7 @@ const PageTitle: React.FC<PageTitleProps> = ({ title }) => {
                 <MapPin className="h-[18px] w-[18px]" style={{ color: "#13ec8a", flexShrink: 0, marginTop: 2 }} />
                 <div>
                   <span style={{ display: "block", color: bgImage ? "rgba(255,255,255,0.55)" : "#6b7280", fontSize: 12, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase" }}>Locations</span>
-                  <p className="mb-0" style={{ color: bgImage ? "#fff" : "#09162a", fontSize: 17, fontWeight: 700, lineHeight: 1.45, marginTop: 4 }}>Madina · Odorkor · Sakumono</p>
+                  <p className="mb-0" style={{ color: bgImage ? "#fff" : "#09162a", fontSize: 17, fontWeight: 700, lineHeight: 1.45, marginTop: 4 }}>Madina · Odorkor · Sakumono · Santeo</p>
                 </div>
               </div>
               <div style={{ display: "flex", alignItems: "flex-start", gap: 14 }}>

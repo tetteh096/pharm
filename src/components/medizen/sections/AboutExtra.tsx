@@ -42,7 +42,7 @@ const commitments = [
   { icon: "fas fa-clock",          label: "24-Hour Access",       text: "Our Madina branch never closes — because health needs don't follow office hours." },
   { icon: "fas fa-shield-alt",     label: "Genuine Medications",  text: "Every product on our shelves is sourced from verified, licensed suppliers only." },
   { icon: "fas fa-user-md",        label: "Expert Guidance",      text: "Our qualified pharmacists counsel every patient — not just dispense pills." },
-  { icon: "fas fa-hands-helping",  label: "Community First",      text: "We serve Madina and Odorkor as neighbours, not just customers." },
+  { icon: "fas fa-hands-helping",  label: "Community First",      text: "We serve our local branch areas as neighbours, not just customers." },
 ];
 
 export default function AboutExtra() {
@@ -82,8 +82,8 @@ export default function AboutExtra() {
                 <h4 className="about-mv-card-title">Our Mission</h4>
                 <p className="about-mv-card-body">
                   To alleviate the suffering of all who walk through our doors, impart life-saving knowledge through
-                  information and counselling, and ensure measurable delivery of accountable healthcare to the
-                  communities of Madina and Odorkor.
+                  information and counselling, and ensure measurable delivery of accountable healthcare to our
+                  communities across Madina, Odorkor, Sakumono and Santeo.
                 </p>
               </div>
             </motion.div>

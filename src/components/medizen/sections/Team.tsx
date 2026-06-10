@@ -17,7 +17,7 @@ const teamMembers = [
     role: "CEO & Founder",
     icon: "fas fa-crown",
     accent: "var(--p1-clr)",
-    message: "At Enviro Pharmacy, we believe healthcare should be accessible, personal, and trustworthy. Our mission is to serve the Madina and Odorkor communities with the same care we'd give our own families. Every medication, every consultation, and every interaction reflects our commitment to your wellness.",
+    message: "At Enviro Pharmacy, we believe healthcare should be accessible, personal, and trustworthy. Our mission is to serve our branch communities with the same care we'd give our own families. Every medication, every consultation, and every interaction reflects our commitment to your wellness.",
   },
   {
     id: 2,

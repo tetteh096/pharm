@@ -32,8 +32,8 @@ const Footer = () => {
                                 </div>
                                 <div className="footer-content">
                                     <p className="pra2">
-                                        Serving Madina and Odorkor with trusted medications, pharmacist support,
-                                        and 24-hour pharmacy service in Madina.
+                                        Serving Madina, Odorkor, Sakumono and Santeo with trusted medications, pharmacist support,
+                                        and 24-hour pharmacy service.
                                     </p>
                                     <div className="social-wrapper d-flex align-items-center">
                                     <a href="https://www.facebook.com/enviropharmacygh" target="_blank" rel="noopener noreferrer" className="black"><i className="fab fa-facebook-f"></i></a>
@@ -100,7 +100,7 @@ const Footer = () => {
                                         <span className="icon d-center"><i className="fa-solid fa-location-dot"></i></span>
                                         <div className="cont">
                                             <span className="pra fs-seven d-block">Branches</span>
-                                            <a href="#" className="fs-six fw_500 white sub-font">Madina, Odorkor &amp; Sakumono, Accra</a>
+                                            <a href="#" className="fs-six fw_500 white sub-font">Madina, Odorkor, Sakumono &amp; Santeo, Accra</a>
                                         </div>
                                     </li>
                                     <li className="d-flex align-items-center gap-xl-3 gap-2">
@@ -122,6 +122,13 @@ const Footer = () => {
                                         <div className="cont">
                                             <span className="pra fs-seven d-block">Sakumono Branch</span>
                                             <a href="tel:+233530883354" className="fs-six fw_500 white sub-font">053 088 3354</a>
+                                        </div>
+                                    </li>
+                                    <li className="d-flex align-items-center gap-xl-3 gap-2">
+                                        <span className="icon d-center"><i className="fa-solid fa-phone"></i></span>
+                                        <div className="cont">
+                                            <span className="pra fs-seven d-block">Santeo Branch</span>
+                                            <span className="fs-six fw_500 white sub-font">Coming soon</span>
                                         </div>
                                     </li>
                                     <li className="d-flex align-items-center gap-xl-3 gap-2">

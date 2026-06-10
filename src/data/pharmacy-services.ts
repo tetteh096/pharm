@@ -43,9 +43,9 @@ export const pharmacyServices: PharmacyService[] = [
       "Our pharmacists are not just dispensers — they are your first line of healthcare. Book a private 15-minute consultation to discuss your medication regimen, manage chronic conditions, or get advice before visiting a doctor.",
     steps: [
       { label: "Choose your topic", detail: "Medication review, side-effect management, supplement advice, or chronic disease (diabetes, hypertension, asthma) counselling." },
-      { label: "Private consultation", detail: "Held in our consultation room at Madina or Odorkor. Confidential and non-judgmental." },
+      { label: "Private consultation", detail: "Held in our private consultation rooms. Confidential and non-judgmental." },
       { label: "Personalised plan", detail: "You leave with clear written notes: what to take, when, and what to watch for." },
-      { label: "Follow-up", detail: "Call or WhatsApp us on 055 461 2072 (Madina) for follow-up questions after your visit." },
+      { label: "Follow-up", detail: "Call or WhatsApp our branches for follow-up questions after your visit." },
     ],
     note: "Free for existing customers. Walk-in or book via phone.",
   },
@@ -57,7 +57,7 @@ export const pharmacyServices: PharmacyService[] = [
     desc: "Order from our online shop and get medications delivered quickly — with pharmacist support when you need it.",
     panelTitle: "Medication Delivery",
     panelIntro:
-      "Can’t make it to the branch? Order through our shop and we’ll arrange delivery for eligible items in the Madina and Odorkor areas. Our team confirms your order and counsels you on safe use before dispatch.",
+      "Can’t make it to the branch? Order through our shop and we’ll arrange delivery for eligible items in our branch delivery areas. Our team confirms your order and counsels you on safe use before dispatch.",
     steps: [
       { label: "Browse the shop", detail: "Find medicines and wellness products on our website." },
       { label: "Place your order", detail: "Add items to cart and complete checkout with your delivery details." },
@@ -76,12 +76,12 @@ export const pharmacyServices: PharmacyService[] = [
     panelIntro:
       "Malaria remains one of the most common illnesses in Ghana. Our pharmacists perform a certified rapid test in-store and give you results within 15 minutes, so you can start the right treatment immediately.",
     steps: [
-      { label: "Walk in", detail: "No appointment needed. Visit either our Madina or Odorkor branch." },
+      { label: "Walk in", detail: "No appointment needed. Visit any of our branches." },
       { label: "Finger-prick sample", detail: "A small blood drop is collected by a trained pharmacy technician." },
       { label: "15-minute result", detail: "The RDT strip detects Plasmodium falciparum antigens." },
       { label: "Pharmacist review", detail: "Our pharmacist explains the result and recommends ACT treatment if positive, or alternative diagnosis if negative." },
     ],
-    note: "Cost: GH₵ 30. Available at both branches. Madina branch is open 24 hours.",
+    note: "Cost: GH₵ 30. Available at our branches. Madina branch is open 24 hours.",
   },
   {
     id: 5,

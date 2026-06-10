@@ -137,6 +137,24 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose }) => {
                       <Link href="tel:+233599376675" className="black fw_700 fs-seven">059 937 6675</Link>
                     </div>
                   </div>
+                  <div className="d-flex align-items-center gap-3">
+                    <div className="icon p2-bg-light rounded-circle d-center" style={{ width: '40px', height: '40px', background: 'rgba(17, 87, 238, 0.12)' }}>
+                      <Phone size={18} className="p2-clr" />
+                    </div>
+                    <div>
+                      <p className="mb-0 fs-nine text-muted">Sakumono Branch</p>
+                      <Link href="tel:+233530883354" className="black fw_700 fs-seven">053 088 3354</Link>
+                    </div>
+                  </div>
+                  <div className="d-flex align-items-center gap-3">
+                    <div className="icon p1-bg-light rounded-circle d-center" style={{ width: '40px', height: '40px', background: 'rgba(19, 236, 138, 0.12)' }}>
+                      <Phone size={18} className="p1-clr" />
+                    </div>
+                    <div>
+                      <p className="mb-0 fs-nine text-muted">Santeo Branch</p>
+                      <span className="black fw_700 fs-seven">Coming soon</span>
+                    </div>
+                  </div>
                 </div>
 
                 <div className="social-links d-flex gap-3 mt-5">

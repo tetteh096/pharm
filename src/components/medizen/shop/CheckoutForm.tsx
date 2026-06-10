@@ -229,35 +229,7 @@ export default function CheckoutForm({ branches }: { branches: Branch[] }) {
             </div>
           </div>
 
-          {branches.length > 0 && (
-            <div className="mb-3">
-              <label className="black mb-2 d-block fw_700">
-                {fulfillment === "pickup" ? "Pickup branch *" : "Dispensing branch *"}
-              </label>
-              <select
-                className="form-select rounded-5"
-                value={branchId}
-                onChange={(e) => setBranchId(e.target.value)}
-              >
-                {branches.map((b) => (
-                  <option key={b.id} value={b.id}>
-                    {b.name}
-                    {b.location ? ` — ${b.location}` : ""}
-                  </option>
-                ))}
-              </select>
-              {selectedBranch && (
-                <div className="mt-2 d-flex flex-wrap gap-3" style={{ fontSize: "0.78rem" }}>
-                  {selectedBranch.hours && (
-                    <span className="pra"><strong>Hours:</strong> {selectedBranch.hours}</span>
-                  )}
-                  {selectedBranch.phone && (
-                    <span className="pra"><strong>Phone:</strong> {selectedBranch.phone}</span>
-                  )}
-                </div>
-              )}
-            </div>
-          )}
+          {/* Branch selector hidden for now */}
 
           {fulfillment === "delivery" && (
             <div className="mb-3">

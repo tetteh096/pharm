@@ -50,16 +50,29 @@ async function main() {
   const seedBranches = [
     {
       name: "Madina",
-      location: "Madina Old Road, Accra",
+      location: "La-Nkwantanang-Madina, Accra",
       phone: "055 461 2072",
-      hours: "24 hours",
+      hours: "Open 24 hours · Every day",
       notes: "Main branch — open 24/7",
     },
     {
       name: "Odorkor",
       location: "Odorkor, Accra",
       phone: "059 937 6675",
-      hours: "Mon–Sat 8am–9pm",
+      hours: "Monday – Saturday",
+    },
+    {
+      name: "Sakumono",
+      location: "NHTC Estate, Sakumono, Accra",
+      phone: "053 088 3354",
+      hours: "Monday – Saturday",
+    },
+    {
+      name: "Santeo",
+      location: "Santeo, Accra (Coming Soon)",
+      phone: "Coming soon",
+      hours: "Monday – Saturday",
+      notes: "Branch opening soon",
     },
   ]
 

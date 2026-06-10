@@ -1,9 +1,26 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { sendPasswordResetEmail } from "@/lib/email"
+import { createRateLimiter, getClientIp } from "@/lib/rate-limit"
 import crypto from "crypto"
 
+// 5 requests per 15 minutes per IP — prevents email bombing
+const limiter = createRateLimiter({ limit: 5, windowMs: 15 * 60 * 1000 })
+
 export async function POST(req: NextRequest) {
+  // Rate limit check
+  const ip = getClientIp(req)
+  const { allowed, resetAt } = limiter.check(`forgot-password:${ip}`)
+  if (!allowed) {
+    return NextResponse.json(
+      { error: "Too many requests. Please wait a few minutes and try again." },
+      {
+        status: 429,
+        headers: { "Retry-After": String(Math.ceil((resetAt - Date.now()) / 1000)) },
+      }
+    )
+  }
+
   try {
     const { email } = await req.json()
     if (!email) return NextResponse.json({ error: "Email required" }, { status: 400 })
