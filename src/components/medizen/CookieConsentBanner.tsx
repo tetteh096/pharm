@@ -30,8 +30,12 @@ export function CookieConsentBanner() {
           <p className="cookie-consent-text">
             Enviro Pharmacy uses cookies to remember your preferences and keep the site
             working. See our{" "}
-            <Link href="/contact" className="cookie-consent-link">
-              privacy information
+            <Link href="/privacy-policy" className="cookie-consent-link">
+              Privacy Policy
+            </Link>{" "}
+            and{" "}
+            <Link href="/cookie-policy" className="cookie-consent-link">
+              Cookie Policy
             </Link>
             .
           </p>

@@ -89,16 +89,16 @@ const Footer = async () => {
                                 </div>
                                 <ul className="list-area">
                                     <li>
-                                        <Link href="/contact">Terms & Conditions</Link>
+                                        <Link href="/terms">Terms & Conditions</Link>
                                     </li>
                                     <li>
-                                        <Link href="/contact">Privacy Policy</Link>
+                                        <Link href="/privacy-policy">Privacy Policy</Link>
+                                    </li>
+                                    <li>
+                                        <Link href="/cookie-policy">Cookie Policy</Link>
                                     </li>
                                     <li>
                                         <Link href="/contact">Contact Us</Link>
-                                    </li>
-                                    <li>
-                                        <Link href="/contact">Terms of Use</Link>
                                     </li>
                                 </ul>
                             </div>
@@ -150,8 +150,15 @@ const Footer = async () => {
         </div>
         <div className="footer-bottom text-center">
             <div className="container">
-                <p className="body-font text-center py-4">
+                <p className="body-font text-center pt-4 pb-2 mb-0">
                     &copy; {new Date().getFullYear()} Enviro Pharmacy &middot; All Rights Reserved
+                </p>
+                <p className="body-font text-center pb-4 mb-0 fs-seven">
+                    <Link href="/privacy-policy" className="white">Privacy Policy</Link>
+                    {" · "}
+                    <Link href="/terms" className="white">Terms &amp; Conditions</Link>
+                    {" · "}
+                    <Link href="/cookie-policy" className="white">Cookie Policy</Link>
                 </p>
             </div>
         </div>
