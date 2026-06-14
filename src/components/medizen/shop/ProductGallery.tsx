@@ -29,8 +29,7 @@ export default function ProductGallery({ images, name, badges }: ProductGalleryP
   if (safeImages.length === 0) {
     return (
       <div
-        className="rounded-4 overflow-hidden border d-flex align-items-center justify-content-center"
-        style={{ background: "#f4f6f8", aspectRatio: "1 / 1" }}
+        className="product-gallery-empty rounded-4 overflow-hidden border d-flex align-items-center justify-content-center"
       >
         <div className="text-center pra">
           <ImageOff size={48} style={{ opacity: 0.3 }} />
@@ -52,7 +51,7 @@ export default function ProductGallery({ images, name, badges }: ProductGalleryP
 
   return (
     <div className="product-gallery">
-      <div className="product-gallery-main position-relative rounded-4 overflow-hidden border">
+      <div className="product-gallery-main position-relative rounded-4 overflow-hidden border product-gallery-frame">
         <Swiper
           modules={[FreeMode, Navigation, Thumbs, Zoom]}
           spaceBetween={0}
@@ -70,10 +69,7 @@ export default function ProductGallery({ images, name, badges }: ProductGalleryP
         >
           {safeImages.map((img, i) => (
             <SwiperSlide key={i}>
-              <div
-                className="swiper-zoom-container d-flex align-items-center justify-content-center"
-                style={{ background: "#f4f6f8", aspectRatio: "1 / 1" }}
-              >
+              <div className="product-gallery-slide-bg swiper-zoom-container d-flex align-items-center justify-content-center">
                 {brokenImages.has(i) ? (
                   <div className="text-center pra">
                     <ImageOff size={48} style={{ opacity: 0.3 }} />
@@ -106,47 +102,21 @@ export default function ProductGallery({ images, name, badges }: ProductGalleryP
             <button
               type="button"
               aria-label="Previous image"
-              className="pg-prev d-flex align-items-center justify-content-center rounded-circle border-0 position-absolute top-50 translate-middle-y"
-              style={{
-                left: 12,
-                width: 38,
-                height: 38,
-                background: "rgba(255,255,255,0.92)",
-                color: "#09162a",
-                boxShadow: "0 4px 12px rgba(0,0,0,0.12)",
-                zIndex: 10,
-                cursor: "pointer",
-              }}
+              className="pg-prev pg-nav-btn d-flex align-items-center justify-content-center rounded-circle border-0 position-absolute top-50 translate-middle-y"
+              style={{ left: 12, zIndex: 10, cursor: "pointer" }}
             >
               <ChevronLeft size={18} />
             </button>
             <button
               type="button"
               aria-label="Next image"
-              className="pg-next d-flex align-items-center justify-content-center rounded-circle border-0 position-absolute top-50 translate-middle-y"
-              style={{
-                right: 12,
-                width: 38,
-                height: 38,
-                background: "rgba(255,255,255,0.92)",
-                color: "#09162a",
-                boxShadow: "0 4px 12px rgba(0,0,0,0.12)",
-                zIndex: 10,
-                cursor: "pointer",
-              }}
+              className="pg-next pg-nav-btn d-flex align-items-center justify-content-center rounded-circle border-0 position-absolute top-50 translate-middle-y"
+              style={{ right: 12, zIndex: 10, cursor: "pointer" }}
             >
               <ChevronRight size={18} />
             </button>
 
-            <span
-              className="position-absolute bottom-0 end-0 m-3 px-3 py-1 rounded-pill text-white"
-              style={{
-                background: "rgba(9,22,42,0.7)",
-                fontSize: "0.72rem",
-                fontWeight: 700,
-                backdropFilter: "blur(4px)",
-              }}
-            >
+            <span className="product-gallery-count position-absolute bottom-0 end-0 m-3 px-3 py-1 rounded-pill text-white">
               {safeImages.length} photos
             </span>
           </>
@@ -172,12 +142,8 @@ export default function ProductGallery({ images, name, badges }: ProductGalleryP
               <SwiperSlide key={i} className="pg-thumb-slide">
                 <button
                   type="button"
-                  className="rounded-3 overflow-hidden border-0 p-0 w-100 d-flex align-items-center justify-content-center"
-                  style={{
-                    aspectRatio: "1 / 1",
-                    background: "#f4f6f8",
-                    cursor: "pointer",
-                  }}
+                  className="product-gallery-thumb-btn rounded-3 overflow-hidden border-0 p-0 w-100 d-flex align-items-center justify-content-center"
+                  style={{ cursor: "pointer" }}
                   aria-label={`View image ${i + 1}`}
                 >
                   {brokenImages.has(i) ? (

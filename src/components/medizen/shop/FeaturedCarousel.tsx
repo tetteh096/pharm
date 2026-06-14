@@ -31,14 +31,7 @@ export default function FeaturedCarousel({
 
   return (
     <section className="featured-carousel mb-5">
-      <div
-        className="rounded-4 p-4 p-md-4"
-        style={{
-          background:
-            "linear-gradient(135deg, rgba(19, 236, 138, 0.06), rgba(17, 87, 238, 0.04))",
-          border: "1px solid rgba(19, 236, 138, 0.18)",
-        }}
-      >
+      <div className="featured-carousel-panel rounded-4 p-4 p-md-4">
         <div className="d-flex justify-content-between align-items-end gap-3 mb-3 flex-wrap">
           <div>
             <span
@@ -69,16 +62,7 @@ export default function FeaturedCarousel({
               aria-label="Previous featured product"
               onClick={() => swiperRef.current?.slidePrev()}
               disabled={isBeginning}
-              className="d-flex align-items-center justify-content-center rounded-circle border-0"
-              style={{
-                width: 40,
-                height: 40,
-                background: isBeginning ? "rgba(0,0,0,0.04)" : "#ffffff",
-                color: isBeginning ? "rgba(0,0,0,0.3)" : "#09162a",
-                boxShadow: isBeginning ? "none" : "0 4px 12px rgba(0,0,0,0.08)",
-                cursor: isBeginning ? "not-allowed" : "pointer",
-                transition: "all 0.15s",
-              }}
+              className={`featured-nav-btn d-flex align-items-center justify-content-center rounded-circle border-0${isBeginning ? " featured-nav-btn--disabled" : ""}`}
             >
               <ChevronLeft size={18} />
             </button>
@@ -87,16 +71,7 @@ export default function FeaturedCarousel({
               aria-label="Next featured product"
               onClick={() => swiperRef.current?.slideNext()}
               disabled={isEnd}
-              className="d-flex align-items-center justify-content-center rounded-circle border-0"
-              style={{
-                width: 40,
-                height: 40,
-                background: isEnd ? "rgba(0,0,0,0.04)" : "#ffffff",
-                color: isEnd ? "rgba(0,0,0,0.3)" : "#09162a",
-                boxShadow: isEnd ? "none" : "0 4px 12px rgba(0,0,0,0.08)",
-                cursor: isEnd ? "not-allowed" : "pointer",
-                transition: "all 0.15s",
-              }}
+              className={`featured-nav-btn d-flex align-items-center justify-content-center rounded-circle border-0${isEnd ? " featured-nav-btn--disabled" : ""}`}
             >
               <ChevronRight size={18} />
             </button>
@@ -164,17 +139,8 @@ function FeaturedSlide({ product }: { product: ShopProduct }) {
     <Link
       href={`/shop/${product.id}`}
       className="featured-slide d-block rounded-4 text-decoration-none overflow-hidden h-100"
-      style={{
-        background: "#ffffff",
-        border: "1px solid rgba(0,0,0,0.04)",
-        boxShadow: "0 6px 20px rgba(9, 22, 42, 0.05)",
-        transition: "all 0.3s",
-      }}
     >
-      <div
-        className="position-relative overflow-hidden"
-        style={{ aspectRatio: "1 / 1", background: "#f4f6f8" }}
-      >
+      <div className="featured-slide-thumb position-relative overflow-hidden">
         <SafeProductImage
           src={product.image}
           alt={product.name}
@@ -202,16 +168,7 @@ function FeaturedSlide({ product }: { product: ShopProduct }) {
             </span>
           )}
         </div>
-        <span
-          className="position-absolute top-0 end-0 m-3 d-flex align-items-center justify-content-center rounded-circle"
-          style={{
-            width: 34,
-            height: 34,
-            background: "rgba(255,255,255,0.95)",
-            color: "#09162a",
-            boxShadow: "0 4px 12px rgba(0,0,0,0.12)",
-          }}
-        >
+        <span className="featured-slide-eye position-absolute top-0 end-0 m-3 d-flex align-items-center justify-content-center rounded-circle">
           <Eye size={14} />
         </span>
       </div>
@@ -242,7 +199,7 @@ function FeaturedSlide({ product }: { product: ShopProduct }) {
         >
           {product.name}
         </h6>
-        <div className="d-flex align-items-center justify-content-between mt-auto pt-2 border-top border-black/5 gap-2">
+        <div className="d-flex align-items-center justify-content-between mt-auto pt-2 border-top featured-slide-footer gap-2">
           <div className="d-flex flex-column" style={{ minWidth: 0 }}>
             <span
               className="fw_900"

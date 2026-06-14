@@ -101,10 +101,10 @@ export default async function BlogDetailsPage({ searchParams }: { searchParams: 
           <div className="container">
             <div className="row g-4">
               <div className="col-lg-8">
-                <div className="blog-details-wraping">
+                <div className="blog-details-wraping blog-details-article">
                   <div className="mb-xxl-4 mb-4">
                     <h2 className="black mb-xxl-4 mb-3">{post.title}</h2>
-                    <div className="admin-area d-flex align-items-center gap-xl-4 gap-3 mb-xl-3 mb-2">
+                    <div className="admin-area blog-details-meta d-flex align-items-center gap-xl-4 gap-3 mb-xl-3 mb-2">
                       <div className="d-flex align-items-center gap-1 fs-eight pra">
                         <i className="fa-solid fa-calendar-days p2-clr"></i>
                         {new Date(post.createdAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
@@ -150,12 +150,7 @@ export default async function BlogDetailsPage({ searchParams }: { searchParams: 
                             <li key={tag}>
                               <Link
                                 href={`/blog?q=${encodeURIComponent(tag)}`}
-                                className="d-inline-flex px-3 py-1 rounded-pill text-decoration-none fw_700"
-                                style={{
-                                  background: "rgba(0,0,0,0.04)",
-                                  color: "#09162a",
-                                  fontSize: "0.76rem",
-                                }}
+                                className="blog-tag d-inline-flex px-3 py-1 rounded-pill text-decoration-none fw_700"
                               >
                                 {tag}
                               </Link>

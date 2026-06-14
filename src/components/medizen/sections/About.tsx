@@ -8,10 +8,7 @@ const About = () => {
   return (
     <section className="about-section fix section-padding position-relative overflow-hidden">
       {/* Decorative Blur */}
-      <div className="position-absolute top-0 start-0 w-100 h-100" style={{ 
-        background: 'radial-gradient(circle at 10% 20%, rgba(19, 236, 138, 0.05) 0%, transparent 50%)',
-        zIndex: 0 
-      }}></div>
+      <div className="about-section-glow position-absolute top-0 start-0 w-100 h-100" style={{ zIndex: 0 }} />
 
       <div className="container position-relative" style={{ zIndex: 1 }}>
         <div className="row g-5 align-items-center justify-content-between">
@@ -61,16 +58,12 @@ const About = () => {
                     title: "Safe Prescription Handling",
                     desc: "Our certified pharmacists ensure your medications are dispensed accurately and safely with personalized care.",
                     icon: "fas fa-shield-alt",
-                    accent: "var(--p1-clr)",
-                    bg: "rgba(19,236,138,0.10)",
                   },
                   {
                     num: "02",
                     title: "Wellness & Supplements",
                     desc: "Discover a curated range of high-quality vitamins and health essentials tailored to your unique goals.",
                     icon: "fas fa-leaf",
-                    accent: "var(--p2-clr)",
-                    bg: "rgba(17,87,238,0.09)",
                   },
                 ].map((step, idx) => (
                   <motion.div
@@ -79,32 +72,22 @@ const About = () => {
                     whileInView={{ opacity: 1, x: 0 }}
                     transition={{ duration: 0.5, delay: 0.5 + idx * 0.2 }}
                     viewport={{ once: true }}
-                    className="about-step-card p-4 rounded-4 d-flex gap-4 align-items-start"
-                    style={{
-                      background: "#fff",
-                      border: `1.5px solid ${step.accent}33`,
-                      boxShadow: "0 4px 24px rgba(0,0,0,0.06)",
-                    }}
+                    className={`about-step-card about-step-card--${idx === 0 ? "green" : "blue"} p-4 rounded-4 d-flex gap-4 align-items-start`}
                   >
-                    {/* Icon circle */}
                     <div
-                      className="step-icon flex-shrink-0 d-flex align-items-center justify-content-center rounded-circle"
-                      style={{ width: 56, height: 56, background: step.bg, border: `2px solid ${step.accent}44` }}
+                      className={`about-step-icon about-step-icon--${idx === 0 ? "green" : "blue"} step-icon flex-shrink-0 d-flex align-items-center justify-content-center rounded-circle`}
                     >
-                      <i className={step.icon} style={{ fontSize: "1.3rem", color: step.accent }} />
+                      <i className={step.icon} />
                     </div>
 
                     <div className="cont flex-grow-1">
                       <div className="d-flex align-items-center justify-content-between mb-1">
-                        <h5 className="black fw_700 mb-0" style={{ fontSize: "1rem" }}>{step.title}</h5>
-                        <span
-                          className="fw_800 ms-2"
-                          style={{ fontSize: "1.6rem", color: step.accent, opacity: 0.18, lineHeight: 1, fontVariantNumeric: "tabular-nums" }}
-                        >
+                        <h5 className="black fw_700 mb-0 about-step-title">{step.title}</h5>
+                        <span className={`about-step-num about-step-num--${idx === 0 ? "green" : "blue"} fw_800 ms-2`}>
                           {step.num}
                         </span>
                       </div>
-                      <p className="pra mb-0" style={{ fontSize: "0.88rem", lineHeight: 1.7 }}>{step.desc}</p>
+                      <p className="pra mb-0 about-step-desc">{step.desc}</p>
                     </div>
                   </motion.div>
                 ))}
@@ -127,14 +110,7 @@ const About = () => {
                 </Link>
                 <Link
                   href="/contact"
-                  className="d-inline-flex align-items-center gap-2 fw_700 px-4 py-3 rounded-5"
-                  style={{
-                    border: "1.5px solid var(--p2-clr)",
-                    color: "var(--p2-clr)",
-                    textDecoration: "none",
-                    fontSize: "0.95rem",
-                    background: "transparent",
-                  }}
+                  className="about-cta-secondary d-inline-flex align-items-center gap-2 fw_700 px-4 py-3 rounded-5"
                 >
                   Contact Us <i className="fas fa-phone" style={{ fontSize: "0.8rem" }} />
                 </Link>
@@ -174,13 +150,8 @@ const About = () => {
                   whileInView={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, delay: 0.9 }}
                   viewport={{ once: true }}
-                  className="position-absolute bottom-0 start-0 m-4 d-flex align-items-center gap-3 px-4 py-3 rounded-4"
-                  style={{
-                    zIndex: 2,
-                    background: "rgba(255,255,255,0.12)",
-                    backdropFilter: "blur(10px)",
-                    border: "1px solid rgba(255,255,255,0.25)",
-                  }}
+                  className="about-rating-badge position-absolute bottom-0 start-0 m-4 d-flex align-items-center gap-3 px-4 py-3 rounded-4"
+                  style={{ zIndex: 2 }}
                 >
                   <i className="fas fa-star" style={{ color: "var(--p1-clr)", fontSize: "1.4rem" }} />
                   <div>
@@ -194,30 +165,17 @@ const About = () => {
               <motion.div
                 animate={{ y: [0, -12, 0] }}
                 transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                className="position-absolute bg-white rounded-4 shadow-lg p-3 text-center"
-                style={{ top: "-24px", right: "-20px", minWidth: "130px", border: "1.5px solid rgba(19,236,138,0.25)", zIndex: 3 }}
+                className="about-float-stat-card position-absolute bg-white rounded-4 shadow-lg p-3 text-center"
+                style={{ top: "-24px", right: "-20px", minWidth: "130px", zIndex: 3 }}
               >
-                <div
-                  className="mx-auto mb-2 d-flex align-items-center justify-content-center rounded-circle"
-                  style={{ width: 44, height: 44, background: "rgba(19,236,138,0.15)" }}
-                >
+                <div className="about-float-stat-icon mx-auto mb-2 d-flex align-items-center justify-content-center rounded-circle">
                   <i className="fas fa-users" style={{ color: "var(--p1-clr)", fontSize: "1.1rem" }} />
                 </div>
-                <p className="fw_800 black mb-0" style={{ fontSize: "1.25rem" }}>10K+</p>
-                <p className="pra mb-0" style={{ fontSize: "0.72rem" }}>Happy Patients</p>
+                <p className="fw_800 black mb-0 about-float-stat-value">10K+</p>
+                <p className="pra mb-0 about-float-stat-label">Happy Patients</p>
               </motion.div>
 
-              {/* Green accent ring behind image */}
-              <div
-                className="position-absolute rounded-4"
-                style={{
-                  inset: "-10px",
-                  background: "linear-gradient(135deg, var(--p1-clr) 0%, var(--p2-clr) 100%)",
-                  zIndex: -1,
-                  opacity: 0.18,
-                  filter: "blur(18px)",
-                }}
-              />
+              <div className="about-img-accent position-absolute rounded-4" style={{ inset: "-10px", zIndex: -1 }} />
             </motion.div>
           </div>
         </div>

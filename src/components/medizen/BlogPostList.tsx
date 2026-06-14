@@ -20,11 +20,7 @@ export function BlogPostList({ posts }: { posts: BlogPost[] }) {
   if (!posts || posts.length === 0) {
     return (
       <div
-        className="text-center rounded-4 p-5"
-        style={{
-          background: "rgba(255,255,255,0.6)",
-          border: "1px solid rgba(0,0,0,0.05)",
-        }}
+        className="blog-empty-state text-center rounded-4 p-5"
       >
         <div
           className="d-inline-flex align-items-center justify-content-center rounded-circle mb-3"
@@ -53,21 +49,14 @@ export function BlogPostList({ posts }: { posts: BlogPost[] }) {
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: index * 0.05 }}
           viewport={{ once: true }}
-          className="blog-card rounded-5 overflow-hidden shadow-sm"
-          style={{
-            background: "#ffffff",
-            border: "1px solid rgba(0,0,0,0.05)",
-          }}
+          className="blog-card blog-surface rounded-5 overflow-hidden shadow-sm"
         >
           <Link
             href={`/blog-details?id=${post.id}`}
             className="d-block text-decoration-none"
             style={{ color: "inherit" }}
           >
-            <div
-              className="position-relative overflow-hidden"
-              style={{ height: 280, background: "#f4f6f8" }}
-            >
+            <div className="blog-thumb position-relative overflow-hidden">
               <SafeProductImage
                 src={post.coverImage}
                 alt={post.title}
@@ -94,10 +83,7 @@ export function BlogPostList({ posts }: { posts: BlogPost[] }) {
           </Link>
 
           <div className="p-4 p-md-5">
-            <div
-              className="d-flex gap-4 mb-3"
-              style={{ fontSize: "0.78rem", color: "rgba(0,0,0,0.55)" }}
-            >
+            <div className="blog-meta d-flex gap-4 mb-3">
               <span className="d-flex align-items-center gap-2">
                 <Calendar size={14} style={{ color: "var(--p1-clr)" }} />
                 {new Date(post.createdAt).toLocaleDateString("en-US", {
@@ -128,10 +114,7 @@ export function BlogPostList({ posts }: { posts: BlogPost[] }) {
             </h3>
 
             {post.excerpt && (
-              <p
-                className="pra mb-4"
-                style={{ lineHeight: 1.65, color: "rgba(0,0,0,0.65)" }}
-              >
+              <p className="blog-excerpt pra mb-4">
                 {post.excerpt}
               </p>
             )}

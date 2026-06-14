@@ -47,7 +47,6 @@ const Footer = async () => {
                                             href={link.url}
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            className="black"
                                             aria-label={link.label}
                                           >
                                             <i className={link.icon} />

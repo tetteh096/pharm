@@ -66,14 +66,7 @@ const News = ({ posts = [] }: { posts?: NewsPost[] }) => {
         </div>
 
         {!featured ? (
-          <div
-            className="text-center rounded-4 p-5 mx-auto"
-            style={{
-              maxWidth: 560,
-              background: "#ffffff",
-              border: "1px solid rgba(0,0,0,0.05)",
-            }}
-          >
+          <div className="news-empty-state text-center rounded-4 p-5 mx-auto">
             <div
               className="d-inline-flex align-items-center justify-content-center rounded-circle mb-3"
               style={{

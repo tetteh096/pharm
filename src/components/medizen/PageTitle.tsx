@@ -6,6 +6,8 @@ import { ArrowRight, Clock3, MapPin, Phone } from "lucide-react";
 
 interface PageTitleProps {
   title: string;
+  /** Use a preset hero image/copy key while keeping a custom page title (e.g. product name). */
+  heroKey?: string;
 }
 
 const heroCopy: Record<string, { eyebrow: string; description: string }> = {
@@ -93,24 +95,19 @@ const heroImages: Record<string, string> = {
 /** Pages where the branch/locations sidebar card should not appear in the hero. */
 const pagesWithoutInfoCard = new Set(["Checkout"]);
 
-const PageTitle: React.FC<PageTitleProps> = ({ title }) => {
-  const bgImage = heroImages[title] ?? null;
-  const showInfoCard = !pagesWithoutInfoCard.has(title);
-  const content = heroCopy[title] ?? {
+const PageTitle: React.FC<PageTitleProps> = ({ title, heroKey }) => {
+  const lookupKey = heroKey ?? title;
+  const bgImage = heroImages[lookupKey] ?? null;
+  const showInfoCard = !pagesWithoutInfoCard.has(title) && !pagesWithoutInfoCard.has(lookupKey);
+  const content = heroCopy[lookupKey] ?? {
     eyebrow: "Enviro Pharmacy",
     description: "Clear information, fast branch access, and a better pharmacy experience across every page.",
   };
 
   return (
     <section
-      className="page-title-section fix position-relative overflow-hidden"
-      style={{
-        padding: "150px 0 72px",
-        background: bgImage
-          ? "#09162a"
-          : "radial-gradient(circle at top left, rgba(19, 236, 138, 0.10), transparent 26%), radial-gradient(circle at top right, rgba(17, 87, 238, 0.10), transparent 28%), linear-gradient(180deg, #ffffff 0%, #f7fbff 100%)",
-        borderBottom: "1px solid rgba(9, 22, 42, 0.08)",
-      }}
+      className={`page-title-section fix position-relative overflow-hidden${bgImage ? " page-title-section--image" : " page-title-section--plain"}`}
+      style={{ padding: "150px 0 72px", ...(bgImage ? { background: "#09162a" } : {}) }}
     >
       {bgImage && (
         <>
@@ -142,140 +139,70 @@ const PageTitle: React.FC<PageTitleProps> = ({ title }) => {
         </>
       )}
 
-      {!bgImage && (
-        <div
-          aria-hidden="true"
-          style={{
-            position: "absolute",
-            inset: 0,
-            background:
-              "linear-gradient(180deg, rgba(255,255,255,0.58) 0%, rgba(255,255,255,0.22) 100%)",
-          }}
-        />
-      )}
+      {!bgImage && <div className="page-title-plain-scrim" aria-hidden="true" />}
 
       <div className="container position-relative" style={{ zIndex: 2 }}>
         <div className="row g-4 align-items-center">
           <div className={showInfoCard ? "col-lg-8" : "col-lg-10"}>
             <div className="page-title-content">
               <span
-                className="d-inline-flex align-items-center gap-2 mb-4"
-                style={{
-                  border: bgImage ? "1px solid rgba(255,255,255,0.18)" : "1px solid rgba(17, 87, 238, 0.12)",
-                  background: bgImage ? "rgba(255,255,255,0.12)" : "rgba(255,255,255,0.88)",
-                  color: bgImage ? "#fff" : "#2559a7",
-                  borderRadius: "999px",
-                  padding: "10px 16px",
-                  fontSize: "12px",
-                  fontWeight: 700,
-                  letterSpacing: "0.12em",
-                  textTransform: "uppercase",
-                  boxShadow: "0 12px 32px rgba(6, 16, 29, 0.06)",
-                  backdropFilter: bgImage ? "blur(8px)" : undefined,
-                }}
+                className={`page-title-eyebrow d-inline-flex align-items-center gap-2 mb-4${bgImage ? " page-title-eyebrow--image" : ""}`}
               >
-                <span
-                  style={{
-                    width: 8,
-                    height: 8,
-                    borderRadius: 999,
-                    background: "#13ec8a",
-                    boxShadow: "0 0 0 6px rgba(19, 236, 138, 0.14)",
-                  }}
-                />
+                <span className="page-title-eyebrow-dot" />
                 {content.eyebrow}
               </span>
 
-              <h1
-                className="mb-3"
-                style={{
-                  color: bgImage ? "#ffffff" : "#09162a",
-                  fontSize: "clamp(2.7rem, 5vw, 4.8rem)",
-                  lineHeight: 0.98,
-                  fontWeight: 800,
-                  letterSpacing: "-0.04em",
-                  marginTop: 0,
-                }}
-              >
+              <h1 className={`page-title-h1 mb-3${bgImage ? " page-title-h1--image" : ""}`}>
                 {title}
               </h1>
-              <p
-                className="mb-4"
-                style={{
-                  maxWidth: 760,
-                  color: bgImage ? "rgba(255,255,255,0.78)" : "#4b5563",
-                  fontSize: "clamp(1rem, 1.5vw, 1.14rem)",
-                  lineHeight: 1.8,
-                }}
-              >
+              <p className={`page-title-desc mb-4${bgImage ? " page-title-desc--image" : ""}`}>
                 {content.description}
               </p>
 
               <ul className="breadcrumb-area d-flex align-items-center flex-wrap gap-2 mb-0 list-unstyled">
                 <li>
-                  <Link href="/" style={{ color: bgImage ? "#13ec8a" : "#09162a", fontWeight: 700 }}>
+                  <Link
+                    href="/"
+                    className={`page-title-crumb-link text-decoration-none${bgImage ? " page-title-crumb-link--image" : ""}`}
+                  >
                     Home
                   </Link>
                 </li>
-                <li aria-hidden="true" style={{ color: bgImage ? "rgba(255,255,255,0.5)" : "#6b7280" }}>
+                <li
+                  aria-hidden="true"
+                  className={`page-title-crumb-sep${bgImage ? " page-title-crumb-sep--image" : ""}`}
+                >
                   <ArrowRight className="h-4 w-4" />
                 </li>
-                <li style={{ color: bgImage ? "rgba(255,255,255,0.85)" : "#4b5563", fontWeight: 600 }}>{title}</li>
+                <li className={`page-title-crumb-current${bgImage ? " page-title-crumb-current--image" : ""}`}>
+                  {title}
+                </li>
               </ul>
             </div>
           </div>
 
           {showInfoCard && (
           <div className="col-lg-4">
-            <div
-              className="ms-lg-auto"
-              style={{
-                maxWidth: 360,
-                borderRadius: 24,
-                border: bgImage ? "1px solid rgba(255,255,255,0.15)" : "1px solid rgba(9, 22, 42, 0.08)",
-                background: bgImage ? "rgba(255,255,255,0.10)" : "rgba(255,255,255,0.82)",
-                boxShadow: "0 18px 45px rgba(6, 16, 29, 0.08)",
-                backdropFilter: "blur(12px)",
-                padding: 22,
-              }}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "flex-start",
-                  gap: 14,
-                  paddingBottom: 14,
-                  marginBottom: 14,
-                  borderBottom: bgImage ? "1px solid rgba(255,255,255,0.12)" : "1px solid rgba(9, 22, 42, 0.08)",
-                }}
-              >
-                <Clock3 className="h-[18px] w-[18px]" style={{ color: "#1157ee", flexShrink: 0, marginTop: 2 }} />
+            <div className={`page-title-info-card ms-lg-auto${bgImage ? " page-title-info-card--image" : ""}`}>
+              <div className={`page-title-info-row${bgImage ? " page-title-info-row--image" : ""}`}>
+                <Clock3 className="h-[18px] w-[18px] page-title-info-icon page-title-info-icon--clock" />
                 <div>
-                  <span style={{ display: "block", color: bgImage ? "rgba(255,255,255,0.55)" : "#6b7280", fontSize: 12, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase" }}>Madina branch</span>
-                  <p className="mb-0" style={{ color: bgImage ? "#fff" : "#09162a", fontSize: 17, fontWeight: 700, lineHeight: 1.45, marginTop: 4 }}>Open 24 hours</p>
+                  <span className={`page-title-info-label${bgImage ? " page-title-info-label--image" : ""}`}>Madina branch</span>
+                  <p className={`page-title-info-value mb-0${bgImage ? " page-title-info-value--image" : ""}`}>Open 24 hours</p>
                 </div>
               </div>
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "flex-start",
-                  gap: 14,
-                  paddingBottom: 14,
-                  marginBottom: 14,
-                  borderBottom: bgImage ? "1px solid rgba(255,255,255,0.12)" : "1px solid rgba(9, 22, 42, 0.08)",
-                }}
-              >
-                <MapPin className="h-[18px] w-[18px]" style={{ color: "#13ec8a", flexShrink: 0, marginTop: 2 }} />
+              <div className={`page-title-info-row${bgImage ? " page-title-info-row--image" : ""}`}>
+                <MapPin className="h-[18px] w-[18px] page-title-info-icon page-title-info-icon--map" />
                 <div>
-                  <span style={{ display: "block", color: bgImage ? "rgba(255,255,255,0.55)" : "#6b7280", fontSize: 12, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase" }}>Locations</span>
-                  <p className="mb-0" style={{ color: bgImage ? "#fff" : "#09162a", fontSize: 17, fontWeight: 700, lineHeight: 1.45, marginTop: 4 }}>Madina · Odorkor · Sakumono · Santeo</p>
+                  <span className={`page-title-info-label${bgImage ? " page-title-info-label--image" : ""}`}>Locations</span>
+                  <p className={`page-title-info-value mb-0${bgImage ? " page-title-info-value--image" : ""}`}>Madina · Odorkor · Sakumono · Santeo</p>
                 </div>
               </div>
-              <div style={{ display: "flex", alignItems: "flex-start", gap: 14 }}>
-                <Phone className="h-[18px] w-[18px]" style={{ color: "#1157ee", flexShrink: 0, marginTop: 2 }} />
+              <div className="page-title-info-row page-title-info-row--last">
+                <Phone className="h-[18px] w-[18px] page-title-info-icon page-title-info-icon--phone" />
                 <div>
-                  <span style={{ display: "block", color: bgImage ? "rgba(255,255,255,0.55)" : "#6b7280", fontSize: 12, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase" }}>Quick contact</span>
-                  <p className="mb-0" style={{ color: bgImage ? "#fff" : "#09162a", fontSize: 17, fontWeight: 700, lineHeight: 1.45, marginTop: 4 }}>055 461 2072</p>
+                  <span className={`page-title-info-label${bgImage ? " page-title-info-label--image" : ""}`}>Quick contact</span>
+                  <p className={`page-title-info-value mb-0${bgImage ? " page-title-info-value--image" : ""}`}>055 461 2072</p>
                 </div>
               </div>
             </div>

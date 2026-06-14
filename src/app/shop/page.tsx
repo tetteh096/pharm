@@ -59,13 +59,8 @@ export default async function ShopPage({
           <div className="container">
             {meta.totalActive === 0 ? (
               <div
-                className="text-center py-5 rounded-4"
-                style={{
-                  background: "rgba(255,255,255,0.6)",
-                  border: "1px solid rgba(0,0,0,0.06)",
-                  maxWidth: 560,
-                  margin: "0 auto",
-                }}
+                className="shop-empty-state text-center py-5 rounded-4"
+                style={{ maxWidth: 560, margin: "0 auto" }}
               >
                 <h4 className="black fw_800 mb-2">No products in the shop yet</h4>
                 <p className="pra mb-4">

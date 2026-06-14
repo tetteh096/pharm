@@ -137,7 +137,7 @@ export default function AboutExtra() {
       {/* ════════════════════════════════════════════════════════
           SECTION 2 — Our Story  ·  WHITE SPLIT
       ════════════════════════════════════════════════════════ */}
-      <section className="section-padding" style={{ background: "#fff" }}>
+      <section className="about-story-section section-padding">
         <div className="container">
           <div className="row g-5 align-items-center">
 
@@ -164,7 +164,7 @@ export default function AboutExtra() {
               <h2 className="black fw_800 mb-4" style={{ fontSize: "clamp(1.7rem, 3vw, 2.4rem)", lineHeight: 1.2 }}>
                 A Pharmacy Built to <br /> Serve You Better
               </h2>
-              <p className="pra mb-5" style={{ lineHeight: 1.9, color: "rgba(0,0,0,0.72)" }}>
+              <p className="pra mb-5 about-story-lead">
                 At Enviro Pharmacy, everything we do is driven by one purpose — making sure the people we serve
                 get the care they deserve. Genuine medications, real pharmacist guidance, and a team that shows up
                 for you every single day.

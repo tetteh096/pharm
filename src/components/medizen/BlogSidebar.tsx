@@ -55,13 +55,7 @@ export default function BlogSidebar({
 
   return (
     <aside className="blog-details-right d-flex flex-column gap-4">
-      <div
-        className="details-common search-box rounded-4 p-4"
-        style={{
-          background: "#ffffff",
-          border: "1px solid rgba(0,0,0,0.05)",
-        }}
-      >
+      <div className="blog-sidebar-panel details-common search-box rounded-4 p-4">
         <h5 className="black fw_800 mb-3 d-flex align-items-center gap-2">
           <Search size={18} style={{ color: "var(--p1-clr)" }} /> Search
         </h5>
@@ -71,8 +65,7 @@ export default function BlogSidebar({
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search articles…"
-            className="form-control rounded-pill pe-5"
-            style={{ color: "#09162a", paddingLeft: 16 }}
+            className="form-control blog-search-input rounded-pill pe-5"
           />
           <button
             type="submit"
@@ -96,13 +89,7 @@ export default function BlogSidebar({
       </div>
 
       {categories.length > 0 && (
-        <div
-          className="details-common category-blog rounded-4 p-4"
-          style={{
-            background: "#ffffff",
-            border: "1px solid rgba(0,0,0,0.05)",
-          }}
-        >
+        <div className="blog-sidebar-panel details-common category-blog rounded-4 p-4">
           <h5 className="black fw_800 mb-3 d-flex align-items-center gap-2">
             <FolderOpen size={18} style={{ color: "var(--p1-clr)" }} /> Categories
           </h5>
@@ -114,14 +101,7 @@ export default function BlogSidebar({
                     ? `/blog?q=${encodeURIComponent(currentQuery)}`
                     : "/blog"
                 }
-                className="d-flex align-items-center justify-content-between text-decoration-none fw_700 rounded-3 px-3 py-2"
-                style={{
-                  background: !currentCategoryId
-                    ? "rgba(19, 236, 138, 0.1)"
-                    : "transparent",
-                  color: !currentCategoryId ? "var(--p1-clr)" : "#09162a",
-                  fontSize: "0.92rem",
-                }}
+                className={`blog-category-link d-flex align-items-center justify-content-between text-decoration-none fw_700 rounded-3 px-3 py-2${!currentCategoryId ? " blog-category-link--active" : ""}`}
               >
                 All articles
               </Link>
@@ -135,28 +115,11 @@ export default function BlogSidebar({
                 <li key={c.id}>
                   <Link
                     href={`/blog?${params.toString()}`}
-                    className="d-flex align-items-center justify-content-between text-decoration-none fw_700 rounded-3 px-3 py-2"
-                    style={{
-                      background: isActive
-                        ? "rgba(19, 236, 138, 0.1)"
-                        : "transparent",
-                      color: isActive ? "var(--p1-clr)" : "#09162a",
-                      fontSize: "0.92rem",
-                      transition: "background 0.18s ease",
-                    }}
+                    className={`blog-category-link d-flex align-items-center justify-content-between text-decoration-none fw_700 rounded-3 px-3 py-2${isActive ? " blog-category-link--active" : ""}`}
                   >
                     <span>{c.name}</span>
                     <span
-                      className="d-inline-flex align-items-center justify-content-center rounded-pill px-2"
-                      style={{
-                        background: isActive
-                          ? "var(--p1-clr)"
-                          : "rgba(0,0,0,0.06)",
-                        color: isActive ? "#ffffff" : "rgba(0,0,0,0.7)",
-                        fontSize: "0.72rem",
-                        minWidth: 28,
-                        height: 22,
-                      }}
+                      className={`blog-category-count d-inline-flex align-items-center justify-content-center rounded-pill px-2${isActive ? " blog-category-count--active" : ""}`}
                     >
                       {c._count?.posts ?? 0}
                     </span>
@@ -169,13 +132,7 @@ export default function BlogSidebar({
       )}
 
       {recent.length > 0 && (
-        <div
-          className="details-common rounded-4 p-4"
-          style={{
-            background: "#ffffff",
-            border: "1px solid rgba(0,0,0,0.05)",
-          }}
-        >
+        <div className="blog-sidebar-panel details-common rounded-4 p-4">
           <h5 className="black fw_800 mb-3 d-flex align-items-center gap-2">
             <Calendar size={18} style={{ color: "var(--p1-clr)" }} /> Recent posts
           </h5>
@@ -187,14 +144,7 @@ export default function BlogSidebar({
                 className="d-flex gap-3 text-decoration-none align-items-center"
                 style={{ color: "inherit" }}
               >
-                <div
-                  className="flex-shrink-0 rounded-3 overflow-hidden"
-                  style={{
-                    width: 72,
-                    height: 72,
-                    background: "#f4f6f8",
-                  }}
-                >
+                <div className="blog-recent-thumb flex-shrink-0 rounded-3 overflow-hidden">
                   <SafeProductImage
                     src={post.coverImage}
                     alt={post.title}
@@ -238,14 +188,7 @@ export default function BlogSidebar({
         </div>
       )}
 
-      <div
-        className="details-common rounded-4 p-4 text-center"
-        style={{
-          background:
-            "linear-gradient(135deg, rgba(19, 236, 138, 0.08), rgba(17, 87, 238, 0.06))",
-          border: "1px solid rgba(19, 236, 138, 0.22)",
-        }}
-      >
+      <div className="blog-help-box details-common rounded-4 p-4 text-center">
         <h5 className="black fw_800 mb-2">Need help? Call us</h5>
         <div className="d-flex justify-content-center mb-3">
           <a
@@ -289,13 +232,7 @@ export default function BlogSidebar({
       </div>
 
       {tags.length > 0 && (
-        <div
-          className="details-common rounded-4 p-4"
-          style={{
-            background: "#ffffff",
-            border: "1px solid rgba(0,0,0,0.05)",
-          }}
-        >
+        <div className="blog-sidebar-panel details-common rounded-4 p-4">
           <h5 className="black fw_800 mb-3 d-flex align-items-center gap-2">
             <Tag size={18} style={{ color: "var(--p1-clr)" }} /> Tags
           </h5>
@@ -307,13 +244,7 @@ export default function BlogSidebar({
                 <li key={tag}>
                   <Link
                     href={`/blog?${params.toString()}`}
-                    className="d-inline-flex align-items-center px-3 py-1 rounded-pill text-decoration-none fw_700"
-                    style={{
-                      background: "rgba(0,0,0,0.04)",
-                      color: "#09162a",
-                      fontSize: "0.76rem",
-                      transition: "background 0.15s ease",
-                    }}
+                    className="blog-tag d-inline-flex align-items-center px-3 py-1 rounded-pill text-decoration-none fw_700"
                   >
                     {tag}
                   </Link>

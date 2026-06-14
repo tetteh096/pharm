@@ -162,130 +162,49 @@ const Features = () => {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setActive(null)}
-              style={{
-                position: "fixed",
-                inset: 0,
-                background: "rgba(4,10,18,0.55)",
-                backdropFilter: "blur(4px)",
-                zIndex: 1200,
-              }}
+              className="feat-drawer-backdrop"
             />
 
-            {/* Drawer panel */}
             <motion.div
               key="feat-drawer"
               initial={{ x: "100%" }}
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ type: "spring", stiffness: 300, damping: 32 }}
-              style={{
-                position: "fixed",
-                top: 0,
-                right: 0,
-                height: "100%",
-                width: "min(520px, 100vw)",
-                background: "#fff",
-                zIndex: 1300,
-                overflowY: "auto",
-                display: "flex",
-                flexDirection: "column",
-              }}
+              className="feat-drawer"
             >
-              {/* Drawer header — coloured bar, no image */}
-              <div
-                style={{
-                  position: "relative",
-                  flexShrink: 0,
-                  background: "linear-gradient(135deg, #040a12 0%, #0a1628 100%)",
-                  padding: "32px 28px 28px",
-                }}
-              >
-                {/* Close button */}
+              <div className="feat-drawer-header">
                 <button
+                  type="button"
                   onClick={() => setActive(null)}
-                  style={{
-                    position: "absolute",
-                    top: 16,
-                    right: 16,
-                    width: 38,
-                    height: 38,
-                    borderRadius: "50%",
-                    background: "rgba(255,255,255,0.08)",
-                    border: "1px solid rgba(255,255,255,0.18)",
-                    color: "#fff",
-                    fontSize: "1rem",
-                    cursor: "pointer",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
+                  className="feat-drawer-close"
+                  aria-label="Close panel"
                 >
                   ✕
                 </button>
-                <div style={{ display: "flex", alignItems: "center", gap: 14, marginTop: 8 }}>
-                  <div
-                    style={{
-                      width: 48, height: 48,
-                      borderRadius: "50%",
-                      background: "var(--p1-clr)",
-                      display: "flex", alignItems: "center", justifyContent: "center",
-                      flexShrink: 0,
-                    }}
-                  >
-                    <img src={active.icon} alt="" style={{ width: 24, height: 24 }} />
+                <div className="feat-drawer-header-inner">
+                  <div className="feat-drawer-header-icon">
+                    <img src={active.icon} alt="" />
                   </div>
-                  <h5 style={{ color: "#fff", fontWeight: 800, margin: 0, fontSize: "1.1rem", lineHeight: 1.3 }}>
+                  <h5 className="feat-drawer-header-title">
                     {active.title.replace("\n", " ")}
                   </h5>
                 </div>
               </div>
 
-              {/* Drawer body */}
-              <div style={{ padding: "28px 28px 40px" }}>
-                <span
-                  style={{
-                    display: "inline-block",
-                    background: "rgba(19,236,138,0.12)",
-                    color: "var(--p1-clr)",
-                    fontSize: "0.75rem",
-                    fontWeight: 700,
-                    letterSpacing: "0.08em",
-                    padding: "4px 14px",
-                    borderRadius: 999,
-                    marginBottom: 12,
-                  }}
-                >
-                  {active.details.tagline}
-                </span>
-                <p style={{ color: "#4a5568", fontSize: "0.95rem", lineHeight: 1.8, marginBottom: 24 }}>
-                  {active.details.body}
-                </p>
-                <ul style={{ listStyle: "none", padding: 0, margin: "0 0 32px", display: "flex", flexDirection: "column", gap: 12 }}>
+              <div className="feat-drawer-body">
+                <span className="feat-drawer-tag">{active.details.tagline}</span>
+                <p className="feat-drawer-desc">{active.details.body}</p>
+                <ul className="feat-drawer-points">
                   {active.details.points.map((pt, i) => (
                     <motion.li
                       key={i}
                       initial={{ opacity: 0, x: 16 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: 0.1 + i * 0.07 }}
-                      style={{ display: "flex", alignItems: "flex-start", gap: 10, fontSize: "0.9rem", color: "#2d3748" }}
+                      className="feat-drawer-point"
                     >
-                      <span
-                        style={{
-                          flexShrink: 0,
-                          marginTop: 3,
-                          width: 20,
-                          height: 20,
-                          borderRadius: "50%",
-                          background: "rgba(19,236,138,0.15)",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          fontSize: "0.65rem",
-                          color: "var(--p1-clr)",
-                        }}
-                      >
-                        ✓
-                      </span>
+                      <span className="feat-drawer-check">✓</span>
                       {pt}
                     </motion.li>
                   ))}
@@ -293,20 +212,9 @@ const Features = () => {
                 <Link
                   href="/service"
                   onClick={() => setActive(null)}
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: 8,
-                    background: "var(--p1-clr)",
-                    color: "#0a0a0a",
-                    fontWeight: 700,
-                    fontSize: "0.92rem",
-                    padding: "12px 28px",
-                    borderRadius: 999,
-                    textDecoration: "none",
-                  }}
+                  className="feat-drawer-cta"
                 >
-                  Visit Services Page <span style={{ fontSize: "0.8rem" }}>→</span>
+                  Visit Services Page <span>→</span>
                 </Link>
               </div>
             </motion.div>

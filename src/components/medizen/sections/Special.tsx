@@ -154,7 +154,7 @@ const Special = () => {
       </div>
 
       {/* ── Branch locations ── */}
-      <div className="mt-5 pt-5" style={{ borderTop: "1px solid rgba(0,0,0,0.08)" }}>
+      <div className="special-branches-wrap mt-5 pt-5">
         <div className="container">
           <h2 className="black fw_800 mb-4" style={{ fontSize: "clamp(1.5rem, 2.5vw, 2rem)" }}>
             Find Us

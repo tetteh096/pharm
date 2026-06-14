@@ -100,16 +100,7 @@ export function ContactPageContent() {
         <div className="container">
           <div className="row justify-content-center mb-5">
             <div className="col-lg-8 text-center">
-              <span
-                className="d-inline-block mb-3 px-4 py-2 rounded-pill fw_700"
-                style={{
-                  background: "rgba(19, 236, 138, 0.12)",
-                  color: "#0d7a4a",
-                  fontSize: "0.78rem",
-                  letterSpacing: "0.08em",
-                  textTransform: "uppercase",
-                }}
-              >
+              <span className="contact-eyebrow d-inline-block mb-3 px-4 py-2 rounded-pill fw_700">
                 Four branches across Accra
               </span>
               <h2 className="black fw_800 mb-3" style={{ fontSize: "clamp(1.8rem, 3vw, 2.5rem)" }}>
@@ -137,13 +128,7 @@ export function ContactPageContent() {
 
           <div className="row g-4 g-xl-5 align-items-stretch">
             <div className="col-lg-6">
-              <div
-                className="h-100 rounded-4 overflow-hidden shadow-sm"
-                style={{
-                  background: "#ffffff",
-                  border: "1px solid rgba(0,0,0,0.06)",
-                }}
-              >
+              <div className="contact-surface h-100 rounded-4 overflow-hidden shadow-sm">
                 <div className="p-4 p-md-5">
                   <div className="d-flex align-items-start gap-3 mb-4">
                     <div
@@ -320,10 +305,7 @@ export function ContactPageContent() {
             </div>
           </div>
 
-          <div
-            className="row g-3 mt-5 pt-4"
-            style={{ borderTop: "1px solid rgba(0,0,0,0.06)" }}
-          >
+          <div className="row g-3 mt-5 pt-4 contact-divider">
             <div className="col-md-4">
               <ContactStrip
                 icon={<Mail size={18} />}
@@ -375,15 +357,14 @@ function BranchCard({
       transition={{ duration: 0.35, delay }}
       viewport={{ once: true }}
       onClick={onSelect}
-      className="w-100 h-100 text-start rounded-4 p-4 border-0"
+      className={`contact-branch-card w-100 h-100 text-start rounded-4 p-4 border-0${active ? " contact-branch-card--active" : ""}`}
       style={{
-        background: active ? "#ffffff" : "rgba(255,255,255,0.88)",
         border: active
           ? `2px solid ${branch.accent}`
-          : "1px solid rgba(0,0,0,0.06)",
+          : undefined,
         boxShadow: active
           ? `0 18px 40px ${branch.accent}22`
-          : "0 8px 24px rgba(0,0,0,0.04)",
+          : undefined,
         cursor: "pointer",
       }}
     >
@@ -432,13 +413,7 @@ function BranchCard({
 
 function BranchDetailPanel({ branch }: { branch: PharmacyBranch }) {
   return (
-    <div
-      className="h-100 rounded-4 overflow-hidden shadow-sm d-flex flex-column"
-      style={{
-        background: "#ffffff",
-        border: "1px solid rgba(0,0,0,0.06)",
-      }}
-    >
+    <div className="contact-surface h-100 rounded-4 overflow-hidden shadow-sm d-flex flex-column">
       <div className="p-4 p-md-5 flex-grow-1">
         <span
           className="d-inline-block mb-2 px-3 py-1 rounded-pill fw_700"
@@ -482,12 +457,8 @@ function BranchDetailPanel({ branch }: { branch: PharmacyBranch }) {
             href={branch.maps}
             target="_blank"
             rel="noopener noreferrer"
-            className="common-btn box-style rounded-5 px-4 py-2 fw-bold text-decoration-none d-inline-flex align-items-center gap-2"
-            style={{
-              fontSize: "0.88rem",
-              background: "rgba(17, 87, 238, 0.08)",
-              color: "#1157ee",
-            }}
+            className="common-btn box-style contact-directions-btn rounded-5 px-4 py-2 fw-bold text-decoration-none d-inline-flex align-items-center gap-2"
+            style={{ fontSize: "0.88rem" }}
           >
             <Navigation size={15} />
             Get directions
@@ -495,7 +466,7 @@ function BranchDetailPanel({ branch }: { branch: PharmacyBranch }) {
         </div>
       </div>
 
-      <div style={{ height: 280, minHeight: 280, background: "#eef2f7" }}>
+      <div className="contact-map-embed" style={{ height: 280, minHeight: 280 }}>
         <iframe
           title={`${branch.name} on Google Maps`}
           src={branch.mapEmbed}
@@ -522,15 +493,7 @@ function DetailRow({
 }) {
   return (
     <div className="d-flex align-items-start gap-3">
-      <div
-        className="d-flex align-items-center justify-content-center rounded-2 flex-shrink-0"
-        style={{
-          width: 36,
-          height: 36,
-          background: "rgba(17, 87, 238, 0.08)",
-          color: "#1157ee",
-        }}
-      >
+      <div className="contact-detail-icon d-flex align-items-center justify-content-center rounded-2 flex-shrink-0">
         {icon}
       </div>
       <div>
@@ -561,22 +524,10 @@ function ContactStrip({
       href={href}
       target={external ? "_blank" : undefined}
       rel={external ? "noopener noreferrer" : undefined}
-      className="d-flex align-items-center gap-3 rounded-4 p-4 text-decoration-none h-100"
-      style={{
-        background: "#ffffff",
-        border: "1px solid rgba(0,0,0,0.06)",
-        color: "inherit",
-      }}
+      className="contact-strip contact-surface d-flex align-items-center gap-3 rounded-4 p-4 text-decoration-none h-100"
+      style={{ color: "inherit" }}
     >
-      <div
-        className="d-flex align-items-center justify-content-center rounded-3 flex-shrink-0"
-        style={{
-          width: 42,
-          height: 42,
-          background: "rgba(19, 236, 138, 0.12)",
-          color: "#0d7a4a",
-        }}
-      >
+      <div className="contact-strip-icon d-flex align-items-center justify-content-center rounded-3 flex-shrink-0">
         {icon}
       </div>
       <div className="min-w-0">

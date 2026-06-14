@@ -92,13 +92,7 @@ export function BlogComments({
       </h4>
 
       {commentCount === 0 ? (
-        <div
-          className="rounded-4 p-4 mb-4"
-          style={{
-            background: "rgba(19, 236, 138, 0.06)",
-            border: "1px dashed rgba(19, 236, 138, 0.35)",
-          }}
-        >
+        <div className="blog-comment-empty rounded-4 p-4 mb-4">
           <p className="pra mb-0">
             No comments yet — share your thoughts below and we&apos;ll reach
             out to you directly if you have a follow-up question.
@@ -112,11 +106,7 @@ export function BlogComments({
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.25 }}
-              className="d-flex gap-3 rounded-4 p-3 p-md-4"
-              style={{
-                background: "#ffffff",
-                border: "1px solid rgba(0,0,0,0.06)",
-              }}
+              className="blog-comment-card d-flex gap-3 rounded-4 p-3 p-md-4"
             >
               <div
                 className="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
@@ -135,10 +125,7 @@ export function BlogComments({
               <div className="flex-grow-1 min-w-0">
                 <div className="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-1">
                   <h5 className="black fw_800 mb-0">{c.name}</h5>
-                  <span
-                    className="pra"
-                    style={{ fontSize: "0.78rem", color: "rgba(0,0,0,0.55)" }}
-                  >
+                  <span className="blog-comment-date pra">
                     {formatDateTime(c.createdAt)}
                   </span>
                 </div>
@@ -153,11 +140,7 @@ export function BlogComments({
 
       <form
         onSubmit={handleSubmit}
-        className="contact-forms blog-form rounded-4 p-4 p-md-5"
-        style={{
-          background: "#ffffff",
-          border: "1px solid rgba(0,0,0,0.06)",
-        }}
+        className="contact-forms blog-form blog-comment-form rounded-4 p-4 p-md-5"
       >
         <h4 className="black mb-2">Leave a comment</h4>
         <p className="pra mb-4" style={{ fontSize: "0.88rem" }}>
@@ -183,8 +166,7 @@ export function BlogComments({
                 setForm((prev) => ({ ...prev, name: e.target.value }))
               }
               placeholder="Full name"
-              className="form-control"
-              style={{ color: "#09162a" }}
+              className="form-control blog-comment-input"
             />
           </div>
           <div className="col-lg-6">
@@ -204,8 +186,7 @@ export function BlogComments({
               }
               placeholder="e.g. 024 123 4567"
               inputMode="tel"
-              className="form-control"
-              style={{ color: "#09162a" }}
+              className="form-control blog-comment-input"
             />
           </div>
           <div className="col-lg-12">
@@ -226,8 +207,7 @@ export function BlogComments({
               }
               placeholder="Write something kind, ask a question, or share what helped you…"
               rows={5}
-              className="form-control"
-              style={{ color: "#09162a" }}
+              className="form-control blog-comment-input"
             />
           </div>
           <div className="col-lg-12 mt-4">

@@ -68,11 +68,11 @@ export default async function ProductDetailsPage({
     <>
       <Header />
       <main>
-        <PageTitle title={product.name} />
+        <PageTitle title={product.name} heroKey="Product Details" />
         <section className="product-details-section section-padding">
           <div className="container">
-            <nav aria-label="breadcrumb" className="mb-4">
-              <ol className="breadcrumb mb-0" style={{ fontSize: "0.85rem" }}>
+            <nav aria-label="breadcrumb" className="mb-4 product-details-breadcrumb">
+              <ol className="breadcrumb mb-0">
                 <li className="breadcrumb-item">
                   <Link href="/" className="text-decoration-none">Home</Link>
                 </li>
@@ -88,7 +88,7 @@ export default async function ProductDetailsPage({
             <ProductDetailsClient product={product} />
 
             {related.length > 0 && (
-              <div className="related-products mt-60 pt-5 border-top">
+              <div className="related-products mt-60 pt-5 border-top product-details-related">
                 <h3 className="black mb-4 fw_800 text-center">You may also like</h3>
                 <div className="row g-4">
                   {related.map((p) => (

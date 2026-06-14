@@ -59,7 +59,7 @@ export default function MedPreview({
 
         {!hasProducts ? (
           <div
-            className="text-center py-5 px-4 rounded-4 med-preview-card"
+            className="text-center py-5 px-4 rounded-4 med-preview-card med-preview-empty"
             style={{ borderStyle: "dashed", borderColor: "rgba(19, 236, 138, 0.25)" }}
           >
             <p className="black fw_700 mb-2">Featured products coming soon</p>
@@ -91,8 +91,7 @@ export default function MedPreview({
                 <Link href={`/shop/${med.id}`} className="text-decoration-none d-block h-100">
                   <div className="product-item med-preview-card">
                     <div
-                      className="overflow-hidden rounded-3 mb-3 position-relative"
-                      style={{ aspectRatio: "1 / 1", background: "#f4f6f8" }}
+                      className="med-preview-thumb overflow-hidden rounded-3 mb-3 position-relative"
                     >
                       <img
                         src={med.image}
@@ -130,7 +129,7 @@ export default function MedPreview({
                     </h6>
                     <div className="d-flex align-items-baseline gap-2">
                       <p
-                        className="mb-0 fw_800"
+                        className={`mb-0 fw_800 med-preview-price${med.hasDiscount ? " med-preview-price--discount" : ""}`}
                         style={{
                           color: med.hasDiscount ? "#dc2626" : "var(--p2-clr)",
                           fontSize: "0.95rem",
@@ -139,10 +138,7 @@ export default function MedPreview({
                         {med.price}
                       </p>
                       {med.hasDiscount && med.originalPriceLabel && (
-                        <span
-                          className="text-decoration-line-through"
-                          style={{ fontSize: "0.72rem", color: "rgba(0,0,0,0.45)", fontWeight: 600 }}
-                        >
+                        <span className="text-decoration-line-through med-preview-price-original">
                           {med.originalPriceLabel}
                         </span>
                       )}

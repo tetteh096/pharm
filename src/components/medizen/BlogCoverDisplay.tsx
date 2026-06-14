@@ -24,11 +24,10 @@ export function BlogCoverDisplay({
 }: BlogCoverDisplayProps) {
   return (
     <div
-      className={`relative w-100 overflow-hidden ${roundedClassName} ${className}`.trim()}
+      className={`blog-cover-frame relative w-100 overflow-hidden ${roundedClassName} ${className}`.trim()}
       style={{
         aspectRatio,
         maxHeight,
-        background: "#f4f6f8",
       }}
     >
       <SafeProductImage

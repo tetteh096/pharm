@@ -73,12 +73,7 @@ export default async function BlogPage({
                 {query && (
                   <Link
                     href={buildHref({ q: undefined, page: undefined })}
-                    className="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill text-decoration-none fw_700"
-                    style={{
-                      background: "rgba(17, 87, 238, 0.08)",
-                      color: "var(--p2-clr)",
-                      fontSize: "0.78rem",
-                    }}
+                    className="blog-filter-chip blog-filter-chip--search d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill text-decoration-none fw_700"
                   >
                     Search: &ldquo;{query}&rdquo; ×
                   </Link>
@@ -86,12 +81,7 @@ export default async function BlogPage({
                 {activeCategory && (
                   <Link
                     href={buildHref({ category: undefined, page: undefined })}
-                    className="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill text-decoration-none fw_700"
-                    style={{
-                      background: "rgba(19, 236, 138, 0.1)",
-                      color: "var(--p1-clr)",
-                      fontSize: "0.78rem",
-                    }}
+                    className="blog-filter-chip blog-filter-chip--category d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill text-decoration-none fw_700"
                   >
                     {activeCategory.name} ×
                   </Link>

@@ -97,7 +97,7 @@ export default function ProductCard({ product }: ProductCardProps) {
           <div className="d-flex justify-content-between align-items-center mt-auto pt-3 border-top border-black/5">
             <div className="d-flex flex-column" style={{ minWidth: 0 }}>
               <div
-                className="fw_900"
+                className={`fw_900 product-price${product.hasDiscount ? " product-price--discount" : ""}`}
                 style={{
                   fontSize: "1.4rem",
                   color: product.hasDiscount ? "#dc2626" : "var(--text-prm)",
@@ -108,7 +108,7 @@ export default function ProductCard({ product }: ProductCardProps) {
               </div>
               {product.hasDiscount && (
                 <div
-                  className="text-decoration-line-through tabular-nums"
+                  className="text-decoration-line-through tabular-nums product-price-original"
                   style={{ fontSize: "0.78rem", color: "rgba(0,0,0,0.45)", fontWeight: 600 }}
                 >
                   {product.originalPriceLabel}

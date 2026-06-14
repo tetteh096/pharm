@@ -297,7 +297,7 @@ export default function ShopBrowser({
             <div className="d-flex align-items-center gap-2">
               <SlidersHorizontal size={16} className="opacity-40" />
               <select
-                className="bg-transparent border-0 fs-eight fw_700 black outline-none cursor-pointer"
+                className="shop-sort-select bg-transparent border-0 fs-eight fw_700 black outline-none cursor-pointer"
                 value={filters.sort}
                 onChange={(e) => applyFilter({ sort: e.target.value as ShopSort })}
               >
@@ -320,14 +320,7 @@ export default function ShopBrowser({
                   key={i}
                   type="button"
                   onClick={chip.clear}
-                  className="d-inline-flex align-items-center gap-1 rounded-pill px-3 py-1 border-0"
-                  style={{
-                    background: "rgba(19, 236, 138, 0.12)",
-                    color: "#09162a",
-                    fontSize: "0.78rem",
-                    fontWeight: 700,
-                    cursor: "pointer",
-                  }}
+                  className="shop-filter-chip d-inline-flex align-items-center gap-1 rounded-pill px-3 py-1 border-0"
                 >
                   {chip.label}
                   <X size={12} />
@@ -497,13 +490,7 @@ function FilterSidebar({
         </div>
       )}
 
-      <div
-        className="rounded-4 p-3 mt-2"
-        style={{
-          background: "rgba(19, 236, 138, 0.06)",
-          border: "1px dashed rgba(19, 236, 138, 0.25)",
-        }}
-      >
+      <div className="shop-help-box rounded-4 p-3 mt-2">
         <p className="black fw_700 mb-1" style={{ fontSize: "0.82rem" }}>
           Need help?
         </p>
@@ -536,28 +523,14 @@ function ToggleRow({
 }) {
   return (
     <label
-      className="d-flex align-items-center justify-content-between gap-2 rounded-3 px-3 py-2"
-      style={{
-        background: active ? "rgba(19, 236, 138, 0.1)" : "rgba(0,0,0,0.025)",
-        border: active ? "1px solid rgba(19, 236, 138, 0.3)" : "1px solid transparent",
-        cursor: "pointer",
-        transition: "all 0.15s",
-      }}
+      className={`shop-toggle-row d-flex align-items-center justify-content-between gap-2 rounded-3 px-3 py-2${active ? " shop-toggle-row--active" : ""}`}
+      style={{ cursor: "pointer" }}
     >
-      <span className="d-flex align-items-center gap-2 black fw_600" style={{ fontSize: "0.82rem" }}>
-        <span style={{ color: active ? "var(--p1-clr)" : "rgba(0,0,0,0.45)" }}>{icon}</span>
+      <span className="d-flex align-items-center gap-2 black fw_600 shop-toggle-label" style={{ fontSize: "0.82rem" }}>
+        <span className="shop-toggle-icon">{icon}</span>
         {label}
       </span>
-      <span
-        className="position-relative d-inline-block"
-        style={{
-          width: 32,
-          height: 18,
-          background: active ? "var(--p1-clr)" : "rgba(0,0,0,0.15)",
-          borderRadius: 999,
-          transition: "background 0.15s",
-        }}
-      >
+      <span className="shop-toggle-track position-relative d-inline-block">
         <input
           type="checkbox"
           className="visually-hidden"
@@ -565,19 +538,7 @@ function ToggleRow({
           onChange={(e) => onChange(e.target.checked)}
           aria-label={label}
         />
-        <span
-          style={{
-            position: "absolute",
-            top: 2,
-            left: active ? 16 : 2,
-            width: 14,
-            height: 14,
-            background: "#ffffff",
-            borderRadius: "50%",
-            transition: "left 0.15s",
-            boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
-          }}
-        />
+        <span className="shop-toggle-knob" />
       </span>
     </label>
   )
@@ -608,15 +569,7 @@ function CheckRow({
     >
       <span className="d-flex align-items-center gap-2" style={{ minWidth: 0 }}>
         <span
-          className="d-inline-flex align-items-center justify-content-center flex-shrink-0"
-          style={{
-            width: 18,
-            height: 18,
-            borderRadius: 5,
-            border: checked ? "1.5px solid var(--p1-clr)" : "1.5px solid rgba(0,0,0,0.2)",
-            background: checked ? "var(--p1-clr)" : "#ffffff",
-            transition: "all 0.12s",
-          }}
+          className={`shop-check-box d-inline-flex align-items-center justify-content-center flex-shrink-0${checked ? " shop-check-box--checked" : ""}`}
         >
           {checked && (
             <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
@@ -624,28 +577,11 @@ function CheckRow({
             </svg>
           )}
         </span>
-        <span
-          style={{
-            fontSize: "0.82rem",
-            fontWeight: checked ? 700 : 500,
-            color: "#09162a",
-            whiteSpace: "nowrap",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-          }}
-        >
+        <span className="shop-check-label">
           {label}
         </span>
       </span>
-      <span
-        className="rounded-pill px-2 flex-shrink-0"
-        style={{
-          fontSize: "0.66rem",
-          fontWeight: 700,
-          background: checked ? "rgba(19, 236, 138, 0.18)" : "rgba(0,0,0,0.05)",
-          color: checked ? "var(--p1-clr)" : "rgba(0,0,0,0.55)",
-        }}
-      >
+      <span className={`shop-check-count rounded-pill px-2 flex-shrink-0${checked ? " shop-check-count--checked" : ""}`}>
         {count}
       </span>
     </button>
@@ -682,13 +618,13 @@ function MobileFilterDrawer({
             animate={{ x: 0 }}
             exit={{ x: "-100%" }}
             transition={{ type: "tween", duration: 0.22 }}
+            className="shop-mobile-drawer"
             style={{
               position: "fixed",
               top: 0,
               left: 0,
               bottom: 0,
               width: "min(360px, 90vw)",
-              background: "#ffffff",
               zIndex: 1100,
               overflowY: "auto",
               padding: "1rem",
@@ -699,8 +635,8 @@ function MobileFilterDrawer({
               <button
                 type="button"
                 onClick={onClose}
-                className="border-0 bg-transparent d-flex align-items-center justify-content-center rounded-circle"
-                style={{ width: 36, height: 36, background: "rgba(0,0,0,0.05)" }}
+                className="shop-mobile-drawer-close border-0 d-flex align-items-center justify-content-center rounded-circle"
+                style={{ width: 36, height: 36 }}
                 aria-label="Close filters"
               >
                 <X size={18} />
@@ -726,11 +662,7 @@ function EmptyState({ onReset }: { onReset: () => void }) {
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="text-center py-5 rounded-4"
-      style={{
-        background: "rgba(255,255,255,0.6)",
-        border: "1px solid rgba(0,0,0,0.06)",
-      }}
+      className="shop-empty-state text-center py-5 rounded-4"
     >
       <Package size={48} className="opacity-30 mb-3" />
       <h5 className="black fw_800 mb-2">No products match your filters</h5>

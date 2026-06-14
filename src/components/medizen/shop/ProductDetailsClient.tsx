@@ -76,7 +76,7 @@ export default function ProductDetailsClient({ product }: { product: ShopProduct
         <h2 className="black mb-3 fw_800">{product.name}</h2>
         <div className="d-flex align-items-end gap-3 mb-3 flex-wrap">
           <h3
-            className="fw_800 mb-0"
+            className={`fw_800 mb-0 product-detail-price${product.hasDiscount ? " product-detail-price--discount" : ""}`}
             style={{
               fontSize: "2rem",
               color: product.hasDiscount ? "#dc2626" : "var(--p2-clr)",
@@ -87,15 +87,7 @@ export default function ProductDetailsClient({ product }: { product: ShopProduct
           </h3>
           {product.hasDiscount && (
             <>
-              <span
-                className="text-decoration-line-through"
-                style={{
-                  fontSize: "1.1rem",
-                  color: "rgba(0,0,0,0.45)",
-                  fontWeight: 600,
-                  paddingBottom: "0.2rem",
-                }}
-              >
+              <span className="text-decoration-line-through product-detail-price-original">
                 {product.originalPriceLabel}
               </span>
               <span
@@ -123,13 +115,7 @@ export default function ProductDetailsClient({ product }: { product: ShopProduct
             {product.tags.map((tag) => (
               <span
                 key={tag}
-                className="d-inline-flex align-items-center gap-1 px-3 py-1 rounded-pill"
-                style={{
-                  fontSize: "0.72rem",
-                  fontWeight: 700,
-                  background: "rgba(19, 236, 138, 0.1)",
-                  color: "var(--p1-clr)",
-                }}
+                className="product-detail-tag d-inline-flex align-items-center gap-1 px-3 py-1 rounded-pill"
               >
                 <Tag size={11} />
                 {tag}
@@ -139,10 +125,7 @@ export default function ProductDetailsClient({ product }: { product: ShopProduct
         )}
 
         <div className="d-flex align-items-center gap-3 mb-4 flex-wrap">
-          <div
-            className="quantity-box d-flex align-items-center border rounded-5 px-3 py-2"
-            style={{ background: "#f8f9fa" }}
-          >
+          <div className="product-quantity-box quantity-box d-flex align-items-center border rounded-5 px-3 py-2">
             <button
               type="button"
               onClick={dec}
@@ -202,15 +185,12 @@ export default function ProductDetailsClient({ product }: { product: ShopProduct
         </div>
 
         {product.stock > 0 && product.stock <= 5 && (
-          <p className="mb-4" style={{ color: "#d97706", fontSize: "0.85rem", fontWeight: 600 }}>
+          <p className="mb-4 product-detail-low-stock">
             Hurry — only {product.stock} left in stock.
           </p>
         )}
 
-        <div
-          className="rounded-4 p-3 mb-4"
-          style={{ background: "rgba(17, 87, 238, 0.04)", border: "1px solid rgba(17, 87, 238, 0.1)" }}
-        >
+        <div className="product-delivery-box rounded-4 p-3 mb-4">
           <div className="d-flex align-items-start gap-2 mb-2">
             <Truck size={16} className="mt-1" style={{ color: "var(--p2-clr)" }} />
             <div>
@@ -245,7 +225,7 @@ export default function ProductDetailsClient({ product }: { product: ShopProduct
           </div>
         </div>
 
-        <div className="meta-info pt-3 border-top">
+        <div className="meta-info product-detail-meta pt-3 border-top">
           <p className="black mb-1 fw_700" style={{ fontSize: "0.85rem" }}>
             Category: <span className="pra fw_500">{product.category}</span>
           </p>
