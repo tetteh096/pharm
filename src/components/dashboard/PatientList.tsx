@@ -3,6 +3,7 @@
 import * as React from "react"
 import Link from "next/link"
 import { useRouter, useSearchParams, usePathname } from "next/navigation"
+import { getPatientTypeLabel, PATIENT_TYPE_FILTER_OPTIONS } from "@/lib/patient-labels"
 import { toast } from "sonner"
 import {
   Download,
@@ -225,11 +226,11 @@ export function PatientList({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All types</SelectItem>
-                <SelectItem value="Regular">Regular</SelectItem>
-                <SelectItem value="Walk-in">Walk-in</SelectItem>
-                <SelectItem value="Phone / Walk-in">Phone / Walk-in</SelectItem>
-                <SelectItem value="Chronic Client">Chronic Client</SelectItem>
+                {PATIENT_TYPE_FILTER_OPTIONS.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -365,17 +366,14 @@ export function PatientList({
                         variant={
                           p.clientType === "Chronic Client"
                             ? "default"
-                            : "outline"
+                            : p.source === "Online order"
+                              ? "secondary"
+                              : "outline"
                         }
                         className="text-xs"
                       >
-                        {p.clientType}
+                        {getPatientTypeLabel(p.clientType, p.source)}
                       </Badge>
-                      {p.source && (
-                        <div className="text-[10px] text-muted-foreground mt-1">
-                          {p.source}
-                        </div>
-                      )}
                     </TableCell>
                     <TableCell className="hidden lg:table-cell text-xs text-muted-foreground">
                       {age != null ? `${age}y` : "—"}

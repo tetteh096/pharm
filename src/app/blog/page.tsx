@@ -14,6 +14,13 @@ import { BlogPostList } from "@/components/medizen/BlogPostList"
 
 export const dynamic = "force-dynamic"
 
+export const metadata = {
+  title: "Health & Pharmacy Blog",
+  description:
+    "Health tips, medication guidance and pharmacy news from Enviro Pharmacy's pharmacists in Accra, Ghana — serving Madina, Odorkor, Sakumono and Santeo.",
+  alternates: { canonical: "/blog" },
+}
+
 type SearchParams = Promise<{
   q?: string
   category?: string

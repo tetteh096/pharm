@@ -276,6 +276,7 @@ model OrderItem {
 
 model ConsultationRequest {
   id                 String   @id @default(cuid())
+  idempotencyKey     String?  @unique
   fullName           String
   email              String
   phone              String
@@ -291,4 +292,66 @@ model ConsultationRequest {
 
   @@index([status])
   @@index([createdAt])
+}
+
+// ─── Contact form messages (from website Contact page) ─────────────────────
+
+model ContactMessage {
+  id            String   @id @default(cuid())
+  idempotencyKey String? @unique
+  fullName      String
+  email         String
+  phone         String
+  branchId      String
+  branchName    String
+  subject       String
+  message       String
+  status        String   @default("New")  // New | In Progress | Done | Dismissed
+  handledById   String?
+  handledByName String?
+  handledAt     DateTime?
+  notes         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([status])
+  @@index([createdAt])
+  @@index([branchId])
+}
+
+// ─── Public website team (Team page — not dashboard staff accounts) ───────────
+
+model TeamProfile {
+  id           String   @id @default(cuid())
+  name         String
+  role         String
+  image        String?  // data URL or external URL
+  facebookUrl  String?
+  linkedinUrl  String?
+  instagramUrl String?
+  sortOrder    Int      @default(0)
+  published    Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([published, sortOrder])
+}
+
+// ─── Public website settings (singleton — admin editable) ─────────────────────
+
+model SiteSettings {
+  id String @id @default("site")
+
+  facebookUrl  String?
+  linkedinUrl  String?
+  instagramUrl String?
+  twitterUrl   String?
+  tiktokUrl    String?
+
+  whatsappMadina   String?
+  whatsappOdorkor  String?
+  whatsappSakumono String?
+  whatsappSanteo   String?
+
+  updatedAt DateTime @updatedAt
 }

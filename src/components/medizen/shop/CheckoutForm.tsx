@@ -49,6 +49,14 @@ const PAYMENT_LABELS: Record<Payment, string> = {
   MOBILE_MONEY: "Mobile money",
 }
 
+const PAYMENT_DESCRIPTIONS: Record<Payment, string> = {
+  CASH_ON_DELIVERY: "Pay when you collect or when we deliver.",
+  MOBILE_MONEY: "Coming soon",
+}
+
+/** Payment methods shown but not yet available at checkout. */
+const PAYMENT_COMING_SOON = new Set<Payment>(["MOBILE_MONEY"])
+
 export default function CheckoutForm({ branches }: { branches: Branch[] }) {
   const router = useRouter()
   const { items, subtotal, isHydrated, clear, count } = useCart()
@@ -284,32 +292,57 @@ export default function CheckoutForm({ branches }: { branches: Branch[] }) {
         <div className="checkout-block p-4 rounded-4" style={{ background: "rgba(255,255,255,0.7)", border: "1px solid rgba(0,0,0,0.06)" }}>
           <h4 className="black mb-4 fw_800">Payment</h4>
           <div className="d-flex flex-column gap-2">
-            {(["CASH_ON_DELIVERY", "MOBILE_MONEY"] as Payment[]).map((option) => (
+            {(["CASH_ON_DELIVERY", "MOBILE_MONEY"] as Payment[]).map((option) => {
+              const comingSoon = PAYMENT_COMING_SOON.has(option)
+              const isSelected = payment === option && !comingSoon
+
+              return (
               <label
                 key={option}
-                className="d-flex align-items-start gap-3 px-3 py-3 rounded-3 cursor-pointer"
+                className="d-flex align-items-start gap-3 px-3 py-3 rounded-3"
                 style={{
-                  border: payment === option ? "2px solid var(--p1-clr)" : "1px solid rgba(0,0,0,0.08)",
-                  background: payment === option ? "rgba(19, 236, 138, 0.06)" : "transparent",
-                  cursor: "pointer",
+                  border: isSelected ? "2px solid var(--p1-clr)" : "1px solid rgba(0,0,0,0.08)",
+                  background: isSelected ? "rgba(19, 236, 138, 0.06)" : comingSoon ? "rgba(0,0,0,0.02)" : "transparent",
+                  cursor: comingSoon ? "not-allowed" : "pointer",
+                  opacity: comingSoon ? 0.65 : 1,
                 }}
               >
                 <input
                   type="radio"
                   className="form-check-input mt-1"
                   name="payment"
-                  checked={payment === option}
-                  onChange={() => setPayment(option)}
+                  checked={isSelected}
+                  disabled={comingSoon}
+                  onChange={() => {
+                    if (!comingSoon) setPayment(option)
+                  }}
                 />
                 <div>
-                  <p className="black fw_700 mb-0">{PAYMENT_LABELS[option]}</p>
+                  <p className="black fw_700 mb-0 d-flex align-items-center gap-2 flex-wrap">
+                    {PAYMENT_LABELS[option]}
+                    {comingSoon && (
+                      <span
+                        className="rounded-pill px-2 py-1"
+                        style={{
+                          fontSize: "0.68rem",
+                          fontWeight: 700,
+                          letterSpacing: "0.04em",
+                          textTransform: "uppercase",
+                          background: "rgba(0,0,0,0.06)",
+                          color: "#64748b",
+                        }}
+                      >
+                        Coming soon
+                      </span>
+                    )}
+                  </p>
                   <p className="pra mb-0" style={{ fontSize: "0.78rem" }}>
-                    {option === "CASH_ON_DELIVERY" && "Pay when you collect or when we deliver."}
-                    {option === "MOBILE_MONEY" && "We will send a prompt to your MoMo number."}
+                    {PAYMENT_DESCRIPTIONS[option]}
                   </p>
                 </div>
               </label>
-            ))}
+              )
+            })}
           </div>
         </div>
       </div>

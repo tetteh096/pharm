@@ -131,28 +131,6 @@ export default function ProductCard({ product }: ProductCardProps) {
         </div>
       </Link>
 
-      <style jsx>{`
-        :global(.product-card-link) {
-          color: inherit;
-          display: flex;
-          transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
-        }
-        :global(.product-card-link:hover) {
-          transform: translateY(-2px);
-          box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06) !important;
-          border-color: rgba(19, 236, 138, 0.4) !important;
-          color: inherit;
-        }
-        :global(.product-card-link:hover h5) {
-          color: var(--p1-clr) !important;
-        }
-        :global(.product-card-img) {
-          transition: transform 0.35s ease;
-        }
-        :global(.product-card-link:hover .product-card-img) {
-          transform: scale(1.03);
-        }
-      `}</style>
     </motion.div>
   )
 }

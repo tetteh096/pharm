@@ -1,7 +1,8 @@
 "use server"
 
-import { prisma } from "@/lib/prisma"
+import { prisma, prismaQuery } from "@/lib/prisma"
 import { formatGhs } from "@/lib/format"
+import { SHOP_PAGE_SIZE } from "@/lib/shop-constants"
 import { sendOrderConfirmationEmail } from "@/lib/email"
 import type { Prisma } from "@prisma/client"
 
@@ -118,26 +119,33 @@ function toShopProduct(p: ProductWithCategory): ShopProduct {
 }
 
 export async function getFeaturedProducts(limit = 12): Promise<StorefrontProduct[]> {
-  const products = await prisma.product.findMany({
-    where: { featured: true, active: true },
-    include: { category: true },
-    orderBy: { updatedAt: "desc" },
-    take: limit,
-  })
+  try {
+    const products = await prismaQuery(() =>
+      prisma.product.findMany({
+        where: { featured: true, active: true },
+        include: { category: true },
+        orderBy: { updatedAt: "desc" },
+        take: limit,
+      })
+    )
 
-  return products.map((p) => {
-    const shop = toShopProduct(p)
-    return {
-      id: shop.id,
-      name: shop.name,
-      price: shop.priceLabel,
-      category: shop.category,
-      image: shop.image,
-      hasDiscount: shop.hasDiscount,
-      discountPercent: shop.discountPercent,
-      originalPriceLabel: shop.hasDiscount ? shop.originalPriceLabel : null,
-    }
-  })
+    return products.map((p) => {
+      const shop = toShopProduct(p)
+      return {
+        id: shop.id,
+        name: shop.name,
+        price: shop.priceLabel,
+        category: shop.category,
+        image: shop.image,
+        hasDiscount: shop.hasDiscount,
+        discountPercent: shop.discountPercent,
+        originalPriceLabel: shop.hasDiscount ? shop.originalPriceLabel : null,
+      }
+    })
+  } catch (error) {
+    console.error("[storefront] getFeaturedProducts failed", error)
+    return []
+  }
 }
 
 /** Catalog list for the public shop page. Only active products. */
@@ -322,7 +330,7 @@ export async function searchShopProducts(
   filters: ShopFilters = {}
 ): Promise<ShopSearchResult> {
   const page = Math.max(1, Math.floor(filters.page ?? 1))
-  const pageSize = Math.max(1, Math.min(48, Math.floor(filters.pageSize ?? 9)))
+  const pageSize = Math.max(1, Math.min(48, Math.floor(filters.pageSize ?? SHOP_PAGE_SIZE)))
 
   const conditions: Prisma.ProductWhereInput[] = [{ active: true }]
 
@@ -489,7 +497,8 @@ export async function placeOrder(input: PlaceOrderInput): Promise<PlaceOrderResu
         name: input.customer.name.trim(),
         email: input.customer.email?.trim() || null,
         phone: input.customer.phone.trim(),
-        clientType: "Walk-in",
+        clientType: "Regular",
+        source: "Online order",
         orders: {
           create: {
             orderNumber,

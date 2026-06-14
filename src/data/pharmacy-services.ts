@@ -19,7 +19,7 @@ export const pharmacyServices: PharmacyService[] = [
     id: 1,
     title: "Prescription Dispensing",
     iconClass: "fas fa-prescription-bottle-alt",
-    image: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=1400&auto=format&fit=crop&q=85",
+    image: "/photo/d951d5c30f32900ee30d2b1af648eff8.jpg",
     desc: "FDA-compliant dispensing of prescribed medications. We verify, counsel, and dispense — no shortcuts.",
     panelTitle: "Prescription Medication Dispensing",
     panelIntro:
@@ -36,7 +36,7 @@ export const pharmacyServices: PharmacyService[] = [
     id: 2,
     title: "Pharmacist Consultation",
     iconClass: "fas fa-user-md",
-    image: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=1400&auto=format&fit=crop&q=85",
+    image: "/photo/1bc55bfff8467b50276a1b37ddbd24be.jpg",
     desc: "One-on-one consultation with a certified pharmacist. Ask about medications, side effects, drug interactions, and more.",
     panelTitle: "One-on-One Pharmacist Consultation",
     panelIntro:
@@ -53,7 +53,7 @@ export const pharmacyServices: PharmacyService[] = [
     id: 3,
     title: "Home & Office Delivery",
     iconClass: "fas fa-truck",
-    image: "https://images.unsplash.com/photo-1526256262350-7da7584cf5eb?w=1400&auto=format&fit=crop&q=85",
+    image: "/photo/57e2a4bde9f29fabf81d5b628ad9d5f0.jpg",
     desc: "Order from our online shop and get medications delivered quickly — with pharmacist support when you need it.",
     panelTitle: "Medication Delivery",
     panelIntro:
@@ -70,7 +70,7 @@ export const pharmacyServices: PharmacyService[] = [
     id: 4,
     title: "Malaria Rapid Test",
     iconClass: "fas fa-microscope",
-    image: "https://images.unsplash.com/photo-1579154204601-01588f351e67?w=1400&auto=format&fit=crop&q=85",
+    image: "/photo/four.png",
     desc: "Fast, on-site malaria diagnostic using WHO-approved rapid test kits. Results in 15 minutes — no lab visit needed.",
     panelTitle: "Malaria Rapid Diagnostic Test (RDT)",
     panelIntro:
@@ -87,7 +87,7 @@ export const pharmacyServices: PharmacyService[] = [
     id: 5,
     title: "Blood Sugar (Glucose) Test",
     iconClass: "fas fa-tint",
-    image: "https://images.unsplash.com/photo-1631815588090-d4bfec5b1ccb?w=1400&auto=format&fit=crop&q=85",
+    image: "/photo/585b7bac716a76dcd62492308202e152.jpg",
     desc: "Quick blood glucose screening for diabetes monitoring and early detection. Know your numbers in under 5 minutes.",
     panelTitle: "Blood Glucose Screening",
     panelIntro:
@@ -104,17 +104,17 @@ export const pharmacyServices: PharmacyService[] = [
     id: 6,
     title: "Blood Pressure Check",
     iconClass: "fas fa-heartbeat",
-    image: "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=1400&auto=format&fit=crop&q=85",
+    image: "/photo/296a82f5e1a5323268f62cc658111cc5.jpg",
     desc: "Free walk-in blood pressure monitoring. Hypertension often shows no symptoms — check yours today.",
     panelTitle: "Walk-in Blood Pressure Monitoring",
     panelIntro:
-      "Hypertension is called the 'silent killer' because most people feel fine until a crisis hits. We offer free blood pressure checks with a digital sphygmomanometer at both branches.",
+      "Hypertension is called the 'silent killer' because most people feel fine until a crisis hits. We offer free blood pressure checks with a digital sphygmomanometer at all four branches.",
     steps: [
       { label: "Sit and rest", detail: "You rest for 5 minutes in a quiet seat before the reading." },
       { label: "Dual-arm reading", detail: "We take readings on both arms and record the higher value." },
       { label: "Interpretation", detail: "Normal: <120/80 mmHg. Pre-hypertension: 120–139/80–89. Stage 1: ≥140/90." },
       { label: "Follow-up plan", detail: "If elevated, we advise lifestyle changes or refer you to a physician. Anti-hypertensive medications dispensed if prescribed." },
     ],
-    note: "Free service. Available at both branches.",
+    note: "Free service. Available at all four branches.",
   },
 ];

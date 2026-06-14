@@ -3,6 +3,19 @@
 import React from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
+import { PHARMACY_BRANCHES } from "@/data/pharmacy-branches";
+
+const branches = PHARMACY_BRANCHES.map((b) => ({
+  name: b.name,
+  location: b.location,
+  gps: b.gps ?? "",
+  hours: b.hours,
+  phone: b.phone,
+  tel: b.tel,
+  maps: b.maps,
+  accent: b.accent === "#13ec8a" ? "var(--p1-clr)" : b.accent === "#1157ee" ? "var(--p2-clr)" : b.accent,
+  comingSoon: b.comingSoon,
+}));
 
 const Special = () => {
   return (
@@ -140,175 +153,73 @@ const Special = () => {
         </div>
       </div>
 
-      {/* ── Branch locations strip ── */}
-      <div
-        className="mt-5 pt-5"
-        style={{ borderTop: "1px solid rgba(0,0,0,0.08)" }}
-      >
+      {/* ── Branch locations ── */}
+      <div className="mt-5 pt-5" style={{ borderTop: "1px solid rgba(0,0,0,0.08)" }}>
         <div className="container">
-          <p
-            className="mb-4 fw_700"
-            style={{
-              fontSize: "0.75rem",
-              letterSpacing: "0.12em",
-              textTransform: "uppercase",
-              color: "rgba(0,0,0,0.4)",
-            }}
-          >
+          <h2 className="black fw_800 mb-4" style={{ fontSize: "clamp(1.5rem, 2.5vw, 2rem)" }}>
             Find Us
-          </p>
-          <div className="row g-4">
+          </h2>
 
-            {/* Madina */}
-            <motion.div
-              className="col-md-3"
-              initial={{ opacity: 0, y: 16 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-              viewport={{ once: true }}
-            >
-              <div
-                style={{
-                  paddingLeft: "1.25rem",
-                  borderLeft: "3px solid var(--p1-clr)",
-                }}
+          <div className="row g-4 g-xl-5">
+            {branches.map((branch, i) => (
+              <motion.div
+                key={branch.name}
+                className="col-md-6 col-xl-3"
+                initial={{ opacity: 0, y: 12 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: i * 0.08 }}
+                viewport={{ once: true }}
               >
-                <h5 className="black fw_800 mb-1" style={{ fontSize: "1.05rem" }}>Madina Branch</h5>
-                <p className="pra mb-1" style={{ fontSize: "0.85rem" }}>La-Nkwantanang-Madina, Accra</p>
-                <p className="mb-2" style={{ fontSize: "0.8rem", color: "var(--p1-clr)", fontWeight: 700 }}>
-                  Open 24 hours · Every day
-                </p>
-                <div className="d-flex align-items-center gap-3">
-                  <a
-                    href="tel:0554612072"
-                    className="fw_700 text-decoration-none"
-                    style={{ color: "var(--p1-clr)", fontSize: "0.85rem" }}
-                  >
-                    055 461 2072
-                  </a>
-                  <a
-                    href="https://maps.google.com/?q=La-Nkwantanang-Madina,Accra,Ghana"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-decoration-none pra"
-                    style={{ fontSize: "0.8rem" }}
-                  >
-                    Get directions →
-                  </a>
+                <div
+                  style={{
+                    paddingLeft: "1rem",
+                    borderLeft: `3px solid ${branch.accent}`,
+                  }}
+                >
+                  <h3 className="black fw_800 mb-1" style={{ fontSize: "1.1rem" }}>
+                    {branch.name}
+                    {branch.comingSoon && (
+                      <span className="pra fw_500 ms-2" style={{ fontSize: "0.8rem" }}>
+                        (Coming soon)
+                      </span>
+                    )}
+                  </h3>
+                  <p className="pra mb-1" style={{ fontSize: "0.9rem", lineHeight: 1.6 }}>
+                    {branch.location}
+                  </p>
+                  <p className="pra mb-1" style={{ fontSize: "0.78rem", opacity: 0.7 }}>
+                    GhanaPostGPS: {branch.gps}
+                  </p>
+                  <p className="mb-2 fw_700" style={{ fontSize: "0.82rem", color: branch.accent }}>
+                    {branch.hours}
+                  </p>
+                  <div className="d-flex flex-wrap align-items-center gap-3">
+                    {branch.phone && branch.tel ? (
+                      <a
+                        href={`tel:${branch.tel}`}
+                        className="fw_700 text-decoration-none"
+                        style={{ color: branch.accent, fontSize: "0.9rem" }}
+                      >
+                        {branch.phone}
+                      </a>
+                    ) : (
+                      <span className="pra" style={{ fontSize: "0.9rem" }}>
+                        Phone coming soon
+                      </span>
+                    )}
+                    <a
+                      href={branch.maps}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-decoration-none pra"
+                      style={{ fontSize: "0.82rem" }}
+                    >
+                      Get directions →
+                    </a>
+                  </div>
                 </div>
-              </div>
-            </motion.div>
-
-            {/* Odorkor */}
-            <motion.div
-              className="col-md-3"
-              initial={{ opacity: 0, y: 16 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.12 }}
-              viewport={{ once: true }}
-            >
-              <div
-                style={{
-                  paddingLeft: "1.25rem",
-                  borderLeft: "3px solid var(--p2-clr)",
-                }}
-              >
-                <h5 className="black fw_800 mb-1" style={{ fontSize: "1.05rem" }}>Odorkor Branch</h5>
-                <p className="pra mb-1" style={{ fontSize: "0.85rem" }}>Odorkor, Accra</p>
-                <p className="mb-2" style={{ fontSize: "0.8rem", color: "var(--p2-clr)", fontWeight: 700 }}>
-                  Monday – Saturday
-                </p>
-                <div className="d-flex align-items-center gap-3">
-                  <a
-                    href="tel:0599376675"
-                    className="fw_700 text-decoration-none"
-                    style={{ color: "var(--p2-clr)", fontSize: "0.85rem" }}
-                  >
-                    059 937 6675
-                  </a>
-                  <a
-                    href="https://maps.google.com/?q=Odorkor,Accra,Ghana"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-decoration-none pra"
-                    style={{ fontSize: "0.8rem" }}
-                  >
-                    Get directions →
-                  </a>
-                </div>
-              </div>
-            </motion.div>
-
-            {/* Sakumono */}
-            <motion.div
-              className="col-md-3"
-              initial={{ opacity: 0, y: 16 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.24 }}
-              viewport={{ once: true }}
-            >
-              <div
-                style={{
-                  paddingLeft: "1.25rem",
-                  borderLeft: "3px solid #8b5cf6",
-                }}
-              >
-                <h5 className="black fw_800 mb-1" style={{ fontSize: "1.05rem" }}>Sakumono Branch</h5>
-                <p className="pra mb-1" style={{ fontSize: "0.85rem" }}>NHTC Estate, Sakumono, Accra</p>
-                <p className="mb-2" style={{ fontSize: "0.8rem", color: "#8b5cf6", fontWeight: 700 }}>
-                  Monday – Saturday
-                </p>
-                <div className="d-flex align-items-center gap-3">
-                  <a
-                    href="tel:0530883354"
-                    className="fw_700 text-decoration-none"
-                    style={{ color: "#8b5cf6", fontSize: "0.85rem" }}
-                  >
-                    053 088 3354
-                  </a>
-                  <a
-                    href="https://maps.google.com/?q=Sakumono+NHTC+Estate,Accra,Ghana"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-decoration-none pra"
-                    style={{ fontSize: "0.8rem" }}
-                  >
-                    Get directions →
-                  </a>
-                </div>
-              </div>
-            </motion.div>
-
-            {/* Santeo */}
-            <motion.div
-              className="col-md-3"
-              initial={{ opacity: 0, y: 16 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.36 }}
-              viewport={{ once: true }}
-            >
-              <div
-                style={{
-                  paddingLeft: "1.25rem",
-                  borderLeft: "3px solid #f59e0b",
-                }}
-              >
-                <h5 className="black fw_800 mb-1" style={{ fontSize: "1.05rem" }}>Santeo Branch</h5>
-                <p className="pra mb-1" style={{ fontSize: "0.85rem" }}>Santeo, Accra</p>
-                <p className="mb-2" style={{ fontSize: "0.8rem", color: "#f59e0b", fontWeight: 700 }}>
-                  Coming Soon · Monday – Saturday
-                </p>
-                <div className="d-flex align-items-center gap-3">
-                  <span
-                    className="fw_700"
-                    style={{ color: "#f59e0b", fontSize: "0.85rem" }}
-                  >
-                    Phone coming soon
-                  </span>
-                </div>
-              </div>
-            </motion.div>
-
+              </motion.div>
+            ))}
           </div>
         </div>
       </div>

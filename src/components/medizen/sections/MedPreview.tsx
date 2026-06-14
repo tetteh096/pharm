@@ -18,7 +18,7 @@ export default function MedPreview({
   const hasProducts = products.length > 0;
 
   return (
-    <section className="body-bg space-bottom">
+    <section className="med-preview-section">
       <div className="container">
         <div className="d-flex align-items-end justify-content-between gap-3 mb-xxl-5 mb-4 flex-wrap">
           <div>
@@ -33,44 +33,14 @@ export default function MedPreview({
               <button
                 onClick={() => swiperRef.current?.slidePrev()}
                 aria-label="Previous"
-                style={{
-                  width: 44, height: 44, borderRadius: "50%",
-                  border: "1.5px solid rgba(0,0,0,0.15)",
-                  background: "transparent",
-                  cursor: "pointer",
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  transition: "all 0.2s",
-                }}
-                onMouseEnter={e => {
-                  (e.currentTarget as HTMLButtonElement).style.background = "var(--p1-clr)";
-                  (e.currentTarget as HTMLButtonElement).style.borderColor = "var(--p1-clr)";
-                }}
-                onMouseLeave={e => {
-                  (e.currentTarget as HTMLButtonElement).style.background = "transparent";
-                  (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(0,0,0,0.15)";
-                }}
+                className="med-preview-nav-btn"
               >
                 <img src="/assets/img/icon/arrow-left-black.png" alt="" style={{ width: 16 }} />
               </button>
               <button
                 onClick={() => swiperRef.current?.slideNext()}
                 aria-label="Next"
-                style={{
-                  width: 44, height: 44, borderRadius: "50%",
-                  border: "1.5px solid rgba(0,0,0,0.15)",
-                  background: "transparent",
-                  cursor: "pointer",
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  transition: "all 0.2s",
-                }}
-                onMouseEnter={e => {
-                  (e.currentTarget as HTMLButtonElement).style.background = "var(--p1-clr)";
-                  (e.currentTarget as HTMLButtonElement).style.borderColor = "var(--p1-clr)";
-                }}
-                onMouseLeave={e => {
-                  (e.currentTarget as HTMLButtonElement).style.background = "transparent";
-                  (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(0,0,0,0.15)";
-                }}
+                className="med-preview-nav-btn"
               >
                 <img src="/assets/img/icon/arrow-right-black.png" alt="" style={{ width: 16 }} />
               </button>
@@ -89,8 +59,8 @@ export default function MedPreview({
 
         {!hasProducts ? (
           <div
-            className="text-center py-5 px-4 rounded-4"
-            style={{ background: "rgba(19, 236, 138, 0.06)", border: "1px dashed rgba(19, 236, 138, 0.25)" }}
+            className="text-center py-5 px-4 rounded-4 med-preview-card"
+            style={{ borderStyle: "dashed", borderColor: "rgba(19, 236, 138, 0.25)" }}
           >
             <p className="black fw_700 mb-2">Featured products coming soon</p>
             <p className="pra mb-4" style={{ maxWidth: 420, margin: "0 auto 1rem" }}>
@@ -118,8 +88,8 @@ export default function MedPreview({
           >
             {products.map(med => (
               <SwiperSlide key={med.id}>
-                <Link href={`/shop/${med.id}`} className="text-decoration-none d-block">
-                  <div className="product-item">
+                <Link href={`/shop/${med.id}`} className="text-decoration-none d-block h-100">
+                  <div className="product-item med-preview-card">
                     <div
                       className="overflow-hidden rounded-3 mb-3 position-relative"
                       style={{ aspectRatio: "1 / 1", background: "#f4f6f8" }}

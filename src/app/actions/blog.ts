@@ -1,6 +1,6 @@
 "use server"
 
-import { prisma } from "@/lib/prisma"
+import { prisma, prismaQuery } from "@/lib/prisma"
 import { revalidatePath } from "next/cache"
 
 // ─── Read actions ────────────────────────────────────────────────────────────
@@ -79,20 +79,27 @@ export async function getPublicBlogPosts(
 
 /** Latest published posts with full preview data — for the homepage news section. */
 export async function getLatestPublicPosts(limit = 4) {
-  return prisma.blogPost.findMany({
-    where: { status: "Published" },
-    orderBy: { createdAt: "desc" },
-    take: limit,
-    select: {
-      id: true,
-      title: true,
-      excerpt: true,
-      coverImage: true,
-      authorName: true,
-      createdAt: true,
-      category: { select: { name: true } },
-    },
-  })
+  try {
+    return await prismaQuery(() =>
+      prisma.blogPost.findMany({
+        where: { status: "Published" },
+        orderBy: { createdAt: "desc" },
+        take: limit,
+        select: {
+          id: true,
+          title: true,
+          excerpt: true,
+          coverImage: true,
+          authorName: true,
+          createdAt: true,
+          category: { select: { name: true } },
+        },
+      })
+    )
+  } catch (error) {
+    console.error("[blog] getLatestPublicPosts failed", error)
+    return []
+  }
 }
 
 /** Latest published posts — for sidebar "Recent posts". */

@@ -398,3 +398,293 @@ export async function getStaffOptions() {
   })
   return users
 }
+
+// ─── CSV import / export ────────────────────────────────────────────────────
+
+const CHRONIC_CSV_HEADERS = [
+  "Name",
+  "Phone",
+  "Condition",
+  "Medications",
+  "Dosage schedule",
+  "Next check-in",
+  "Notes",
+] as const
+
+const CHRONIC_CSV_EXAMPLE = [
+  "Example patient",
+  "0240000000",
+  "Hypertension",
+  "Lisinopril 10mg, Metformin 500mg",
+  "1 tablet daily after breakfast",
+  "2026-07-14",
+  "Delete this example row before importing your list",
+]
+
+function csvEscape(val: unknown) {
+  const s = String(val ?? "")
+  if (s.includes(",") || s.includes('"') || s.includes("\n")) {
+    return `"${s.replace(/"/g, '""')}"`
+  }
+  return s
+}
+
+function csvRow(values: unknown[]) {
+  return values.map(csvEscape).join(",")
+}
+
+function withExcelBom(csv: string) {
+  return `\uFEFF${csv}`
+}
+
+function normalizePhone(phone: string) {
+  return phone.replace(/[\s\-()]/g, "").trim()
+}
+
+async function findCustomerByPhone(phone: string) {
+  const exact = await prisma.customer.findFirst({
+    where: { phone },
+    include: { chronicRecord: true },
+  })
+  if (exact) return exact
+
+  const alt = phone.startsWith("0") ? phone.slice(1) : `0${phone}`
+  return prisma.customer.findFirst({
+    where: { phone: alt },
+    include: { chronicRecord: true },
+  })
+}
+
+function parseMedications(raw: string) {
+  return raw
+    .split(/[,;]/)
+    .map((m) => m.trim())
+    .filter(Boolean)
+}
+
+function parseDateCell(raw: string): Date | null {
+  const v = raw.trim()
+  if (!v) return null
+  if (/^\d{4}-\d{2}-\d{2}$/.test(v)) {
+    const d = new Date(`${v}T12:00:00`)
+    return isNaN(d.getTime()) ? null : d
+  }
+  const d = new Date(v)
+  return isNaN(d.getTime()) ? null : d
+}
+
+function parseCsv(text: string): string[][] {
+  const rows: string[][] = []
+  let row: string[] = []
+  let cell = ""
+  let inQuotes = false
+
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i]
+    if (inQuotes) {
+      if (ch === '"') {
+        if (text[i + 1] === '"') {
+          cell += '"'
+          i++
+        } else {
+          inQuotes = false
+        }
+      } else {
+        cell += ch
+      }
+    } else if (ch === '"') {
+      inQuotes = true
+    } else if (ch === ",") {
+      row.push(cell)
+      cell = ""
+    } else if (ch === "\n" || ch === "\r") {
+      if (ch === "\r" && text[i + 1] === "\n") i++
+      row.push(cell)
+      cell = ""
+      if (row.some((c) => c.trim())) rows.push(row)
+      row = []
+    } else {
+      cell += ch
+    }
+  }
+
+  row.push(cell)
+  if (row.some((c) => c.trim())) rows.push(row)
+  return rows
+}
+
+function headerIndex(headers: string[], ...aliases: string[]) {
+  const normalized = headers.map((h) =>
+    h.trim().toLowerCase().replace(/\s+/g, " ")
+  )
+  for (const alias of aliases) {
+    const idx = normalized.indexOf(alias.toLowerCase())
+    if (idx >= 0) return idx
+  }
+  return -1
+}
+
+export async function exportChronicImportTemplate(): Promise<string> {
+  await auth()
+  return withExcelBom(
+    [csvRow([...CHRONIC_CSV_HEADERS]), csvRow(CHRONIC_CSV_EXAMPLE)].join("\n")
+  )
+}
+
+export async function exportChronicPatientsCsv(
+  filters: ChronicFilters = {}
+): Promise<string> {
+  await auth()
+  const list = await getChronicPatients(filters)
+  const header = [
+    ...CHRONIC_CSV_HEADERS,
+    "Status",
+    "Assigned to",
+  ]
+  const rows = list.map((c) =>
+    csvRow([
+      c.customer.name,
+      c.customer.phone ?? "",
+      c.condition,
+      c.currentMedications.join(", "),
+      c.dosageSchedule ?? "",
+      c.nextCheckInAt ? c.nextCheckInAt.toISOString().slice(0, 10) : "",
+      c.notes ?? "",
+      c.status,
+      c.assignedToName ?? "",
+    ])
+  )
+  return withExcelBom([csvRow(header), ...rows].join("\n"))
+}
+
+export type ChronicImportResult = {
+  created: number
+  skipped: number
+  errors: { row: number; message: string }[]
+}
+
+export async function importChronicPatientsFromCsv(
+  csvText: string
+): Promise<ChronicImportResult> {
+  const session = await auth()
+  const actor = session?.user
+  if (!actor) throw new Error("You must be signed in to import patients.")
+
+  const parsed = parseCsv(csvText.replace(/^\uFEFF/, ""))
+  if (parsed.length < 2) {
+    throw new Error("The file is empty or has no data rows.")
+  }
+
+  const headers = parsed[0]
+  const nameIdx = headerIndex(headers, "name")
+  const phoneIdx = headerIndex(headers, "phone")
+  const conditionIdx = headerIndex(headers, "condition")
+  const medsIdx = headerIndex(headers, "medications", "current medications")
+  const scheduleIdx = headerIndex(headers, "dosage schedule", "dosage")
+  const nextIdx = headerIndex(headers, "next check-in", "next checkin", "next check in")
+  const notesIdx = headerIndex(headers, "notes")
+
+  if (nameIdx < 0 || phoneIdx < 0 || conditionIdx < 0) {
+    throw new Error(
+      "Missing required columns. Use the template: Name, Phone, Condition, Medications, Dosage schedule, Next check-in, Notes."
+    )
+  }
+
+  const result: ChronicImportResult = { created: 0, skipped: 0, errors: [] }
+
+  for (let i = 1; i < parsed.length; i++) {
+    const row = parsed[i]
+    const rowNum = i + 1
+    const name = (row[nameIdx] ?? "").trim()
+    const phone = normalizePhone(row[phoneIdx] ?? "")
+    const condition = (row[conditionIdx] ?? "").trim()
+
+    if (!name || name.toLowerCase() === "example patient") {
+      result.skipped++
+      continue
+    }
+    if (!phone) {
+      result.errors.push({ row: rowNum, message: `${name}: phone is required.` })
+      continue
+    }
+    if (!condition) {
+      result.errors.push({ row: rowNum, message: `${name}: condition is required.` })
+      continue
+    }
+
+    const medications =
+      medsIdx >= 0 ? parseMedications(row[medsIdx] ?? "") : []
+    const dosageSchedule =
+      scheduleIdx >= 0 ? (row[scheduleIdx] ?? "").trim() || null : null
+    const nextCheckInAt =
+      nextIdx >= 0 ? parseDateCell(row[nextIdx] ?? "") : null
+    const notes = notesIdx >= 0 ? (row[notesIdx] ?? "").trim() || null : null
+
+    if (nextIdx >= 0 && (row[nextIdx] ?? "").trim() && !nextCheckInAt) {
+      result.errors.push({
+        row: rowNum,
+        message: `${name}: next check-in date is not valid (use YYYY-MM-DD).`,
+      })
+      continue
+    }
+
+    try {
+      let customer = await findCustomerByPhone(phone)
+
+      if (customer?.chronicRecord) {
+        result.skipped++
+        continue
+      }
+
+      if (!customer) {
+        customer = await prisma.customer.create({
+          data: {
+            name,
+            phone,
+            clientType: "Chronic Client",
+            condition,
+            source: "CSV import",
+            status: "Active",
+          },
+          include: { chronicRecord: true },
+        })
+      } else {
+        await prisma.customer.update({
+          where: { id: customer.id },
+          data: { condition, clientType: "Chronic Client" },
+        })
+      }
+
+      await prisma.chronicPatient.create({
+        data: {
+          customerId: customer!.id,
+          condition,
+          currentMedications: medications,
+          dosageSchedule,
+          status: "Active",
+          assignedToId: actor.id,
+          assignedToName: actor.name ?? null,
+          nextCheckInAt,
+          notes,
+        },
+      })
+
+      result.created++
+    } catch (err) {
+      result.errors.push({
+        row: rowNum,
+        message:
+          err instanceof Error
+            ? `${name}: ${err.message}`
+            : `${name}: could not import this row.`,
+      })
+    }
+  }
+
+  if (result.created > 0) {
+    revalidatePath("/dashboard/chronic")
+    revalidatePath("/dashboard/customers")
+  }
+
+  return result
+}

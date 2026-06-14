@@ -12,19 +12,18 @@ import "swiper/css/pagination";
 const slides = [
   {
     bg: "/hero1.png",
-    tag: "Trusted Pharmacy Care",
     heading: "Your wellness is our priority",
     sub: "Get expert prescription guidance, reliable medication support, and trusted pharmacy care tailored for your family.",
+    splitWash: true,
+    photoPosition: "72% center",
   },
   {
     bg: "/hero2.webp",
-    tag: "Friendly Local Support",
     heading: "Care that feels close to home",
     sub: "From everyday medicine needs to urgent refill questions, Enviro Pharmacy keeps dependable support within easy reach.",
   },
   {
     bg: "/hero6.png",
-    tag: "Genuine Medications",
     heading: "Confident care every single day",
     sub: "Shop medications and wellness products with confidence, backed by guidance from your local pharmacy team.",
   },
@@ -55,10 +54,17 @@ export default function Banner() {
               {/* photo */}
               <div
                 className="eh-photo"
-                style={{ backgroundImage: `url(${slide.bg})` }}
+                style={{
+                  backgroundImage: `url(${slide.bg})`,
+                  ...(slide.photoPosition
+                    ? { backgroundPosition: slide.photoPosition }
+                    : {}),
+                }}
               />
               {/* dark wash — sits on top of photo, below text */}
-              <div className="eh-wash" />
+              <div
+                className={`eh-wash${slide.splitWash ? " eh-wash--split" : ""}`}
+              />
             </SwiperSlide>
           ))}
         </Swiper>
@@ -74,11 +80,6 @@ export default function Banner() {
                 exit={{ opacity: 0, y: -20 }}
                 transition={{ duration: 0.6, ease: "easeOut" }}
               >
-                <span className="eh-tag">
-                  <i className="fas fa-heartbeat" />&nbsp;
-                  {slides[activeIndex].tag}
-                </span>
-
                 <h1 className="eh-heading">
                   {slides[activeIndex].heading}
                 </h1>

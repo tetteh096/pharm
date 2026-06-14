@@ -6,28 +6,20 @@ import { useRouter, usePathname, useSearchParams } from "next/navigation"
 import { toast } from "sonner"
 import {
   AlertTriangle,
-  Calendar,
   CalendarClock,
   Eye,
   HeartPulse,
   MessageCircle,
   Phone,
   Pill,
-  Search,
-  User,
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
+import { Badge } from "@/components/ui/badge"
 import { CheckInDialog } from "@/components/dashboard/CheckInDialog"
 import { AddChronicPatientDialog } from "@/components/dashboard/AddChronicPatientDialog"
+import { ChronicCsvTools } from "@/components/dashboard/ChronicCsvTools"
+import { DataTable, type DataTableColumn } from "@/components/dashboard/DataTable"
 
 export type ChronicListItem = {
   id: string
@@ -59,19 +51,8 @@ function ageFromDob(iso: string | null): number | null {
   return age
 }
 
-function initials(name: string) {
-  return (
-    name
-      .split(/\s+/)
-      .filter(Boolean)
-      .slice(0, 2)
-      .map((p) => p[0]?.toUpperCase() ?? "")
-      .join("") || "?"
-  )
-}
-
-function fmt(iso: string | null) {
-  if (!iso) return "—"
+function fmtDate(iso: string | null) {
+  if (!iso) return "None"
   return new Date(iso).toLocaleDateString("en-GH", {
     month: "short",
     day: "numeric",
@@ -83,321 +64,322 @@ function dueLabel(iso: string | null): {
   text: string
   tone: "ok" | "soon" | "overdue" | "none"
 } {
-  if (!iso) return { text: "No check-in scheduled", tone: "none" }
+  if (!iso) return { text: "Not scheduled", tone: "none" }
   const now = new Date()
+  now.setHours(0, 0, 0, 0)
   const next = new Date(iso)
-  const diffMs = next.getTime() - now.setHours(0, 0, 0, 0)
+  const diffMs = next.getTime() - now.getTime()
   const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24))
-  if (diffDays < 0) return { text: `Overdue by ${Math.abs(diffDays)}d`, tone: "overdue" }
+  if (diffDays < 0) return { text: `Overdue ${Math.abs(diffDays)}d`, tone: "overdue" }
   if (diffDays === 0) return { text: "Due today", tone: "soon" }
   if (diffDays <= 7) return { text: `Due in ${diffDays}d`, tone: "soon" }
-  return { text: `Due ${fmt(iso)}`, tone: "ok" }
+  return { text: fmtDate(iso), tone: "ok" }
+}
+
+function dueMatchesFilter(iso: string | null, filter: string) {
+  if (filter === "all") return true
+  if (!iso) return false
+  const now = new Date()
+  now.setHours(0, 0, 0, 0)
+  const next = new Date(iso)
+  const diffDays = Math.round((next.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+  if (filter === "overdue") return diffDays < 0
+  if (filter === "thisWeek") return diffDays >= 0 && diffDays <= 7
+  return true
+}
+
+function stopRowClick(e: React.MouseEvent) {
+  e.stopPropagation()
 }
 
 export function ChronicPatientsList({
   initial,
   currentScope,
-  currentStatus,
-  currentDue,
-  currentSearch,
 }: {
   initial: ChronicListItem[]
   currentScope: "mine" | "all"
-  currentStatus: string
-  currentDue: "overdue" | "thisWeek" | "all"
-  currentSearch: string
 }) {
   const router = useRouter()
   const pathname = usePathname()
   const params = useSearchParams()
 
-  const [searchDraft, setSearchDraft] = React.useState(currentSearch)
-  const [checkInTarget, setCheckInTarget] = React.useState<
-    ChronicListItem | null
-  >(null)
-
-  const navigate = (next: URLSearchParams) => {
-    const qs = next.toString()
-    router.push(qs ? `${pathname}?${qs}` : pathname)
-  }
+  const [checkInTarget, setCheckInTarget] = React.useState<ChronicListItem | null>(
+    null
+  )
 
   const setScope = (scope: "mine" | "all") => {
     const next = new URLSearchParams(params.toString())
     next.set("scope", scope)
-    navigate(next)
+    next.delete("status")
+    next.delete("due")
+    next.delete("search")
+    const qs = next.toString()
+    router.push(qs ? `${pathname}?${qs}` : pathname)
+    router.refresh()
   }
 
-  const setStatus = (status: string) => {
-    const next = new URLSearchParams(params.toString())
-    if (status === "all") next.delete("status")
-    else next.set("status", status)
-    navigate(next)
-  }
+  const openCheckIn = React.useCallback((row: ChronicListItem) => {
+    if (!row.customer.phone) {
+      toast.info("No phone number on file. Open the patient and add one first.")
+      return
+    }
+    setCheckInTarget(row)
+  }, [])
 
-  const setDue = (due: string) => {
-    const next = new URLSearchParams(params.toString())
-    if (due === "all") next.delete("due")
-    else next.set("due", due)
-    navigate(next)
-  }
+  const columns = React.useMemo<DataTableColumn<ChronicListItem>[]>(
+    () => [
+      {
+        id: "patient",
+        header: "Patient",
+        cell: (row) => {
+          const age = ageFromDob(row.customer.dateOfBirth)
+          return (
+            <div className="min-w-[140px]">
+              <Link
+                href={`/dashboard/chronic/${row.id}`}
+                onClick={stopRowClick}
+                className="font-medium hover:text-primary"
+              >
+                {row.customer.name}
+              </Link>
+              {age != null ? (
+                <p className="text-xs text-muted-foreground">
+                  {age}y{row.customer.gender ? ` · ${row.customer.gender}` : ""}
+                </p>
+              ) : null}
+            </div>
+          )
+        },
+      },
+      {
+        id: "contact",
+        header: "Contact",
+        hideBelow: "md",
+        cell: (row) =>
+          row.customer.phone ? (
+            <a
+              href={`tel:${row.customer.phone}`}
+              onClick={stopRowClick}
+              className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
+            >
+              <Phone className="h-3 w-3" />
+              {row.customer.phone}
+            </a>
+          ) : (
+            <span className="text-xs text-muted-foreground">No phone</span>
+          ),
+      },
+      {
+        id: "condition",
+        header: "Condition",
+        cell: (row) => (
+          <div className="flex items-center gap-1.5 text-sm">
+            <HeartPulse className="h-3.5 w-3.5 shrink-0 text-primary" />
+            <span>{row.condition}</span>
+          </div>
+        ),
+      },
+      {
+        id: "medications",
+        header: "Medications",
+        hideBelow: "lg",
+        cell: (row) =>
+          row.currentMedications.length > 0 ? (
+            <div className="flex max-w-[220px] flex-wrap gap-1">
+              {row.currentMedications.slice(0, 2).map((med) => (
+                <Badge key={med} variant="outline" className="gap-1 text-[10px] font-normal">
+                  <Pill className="h-2.5 w-2.5" />
+                  {med}
+                </Badge>
+              ))}
+              {row.currentMedications.length > 2 ? (
+                <span className="text-[10px] text-muted-foreground">
+                  +{row.currentMedications.length - 2}
+                </span>
+              ) : null}
+            </div>
+          ) : (
+            <span className="text-xs text-muted-foreground">None listed</span>
+          ),
+      },
+      {
+        id: "checkin",
+        header: "Next check-in",
+        cell: (row) => {
+          const due = dueLabel(row.nextCheckInAt)
+          return (
+            <Badge
+              variant="outline"
+              className={
+                due.tone === "overdue"
+                  ? "border-red-500/30 bg-red-500/10 text-red-600"
+                  : due.tone === "soon"
+                    ? "border-yellow-500/30 bg-yellow-500/10 text-yellow-700"
+                    : due.tone === "ok"
+                      ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-700"
+                      : ""
+              }
+            >
+              {due.tone === "overdue" ? (
+                <AlertTriangle className="mr-1 h-3 w-3" />
+              ) : (
+                <CalendarClock className="mr-1 h-3 w-3" />
+              )}
+              {due.text}
+            </Badge>
+          )
+        },
+      },
+      {
+        id: "lastContact",
+        header: "Last contact",
+        hideBelow: "xl",
+        className: "text-xs text-muted-foreground",
+        cell: (row) => (
+          <div>
+            <div>{fmtDate(row.lastContactAt)}</div>
+            <div>
+              {row.checkInCount} log{row.checkInCount === 1 ? "" : "s"}
+            </div>
+          </div>
+        ),
+      },
+      {
+        id: "assigned",
+        header: "Assigned to",
+        hideBelow: "lg",
+        className: "text-xs text-muted-foreground",
+        cell: (row) => row.assignedToName ?? "Unassigned",
+      },
+      {
+        id: "status",
+        header: "Status",
+        cell: (row) => (
+          <Badge
+            variant="outline"
+            className={
+              row.status === "Active"
+                ? "border-emerald-500/30 text-emerald-700"
+                : row.status === "Inactive"
+                  ? "border-yellow-500/30 text-yellow-700"
+                  : "border-red-500/30 text-red-600"
+            }
+          >
+            {row.status}
+          </Badge>
+        ),
+      },
+      {
+        id: "actions",
+        header: "Actions",
+        headerClassName: "text-right",
+        className: "text-right",
+        cell: (row) => (
+          <div className="flex justify-end gap-1">
+            <Button
+              size="sm"
+              variant="outline"
+              className="h-8 gap-1 px-2"
+              onClick={(e) => {
+                e.stopPropagation()
+                openCheckIn(row)
+              }}
+            >
+              <MessageCircle className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">Log</span>
+            </Button>
+            <Button size="sm" variant="ghost" className="h-8 gap-1 px-2" asChild>
+              <Link href={`/dashboard/chronic/${row.id}`} onClick={stopRowClick}>
+                <Eye className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">View</span>
+              </Link>
+            </Button>
+          </div>
+        ),
+      },
+    ],
+    [openCheckIn]
+  )
 
-  const applySearch = (e?: React.FormEvent) => {
-    if (e) e.preventDefault()
-    const next = new URLSearchParams(params.toString())
-    if (searchDraft.trim()) next.set("search", searchDraft.trim())
-    else next.delete("search")
-    navigate(next)
+  if (initial.length === 0) {
+    return (
+      <div className="space-y-4">
+        <ScopeToggle currentScope={currentScope} onScopeChange={setScope} />
+        <div className="dashboard-card rounded-xl border border-border/70 bg-card p-10 text-center">
+          <div
+            className="mx-auto mb-3 inline-flex h-14 w-14 items-center justify-center rounded-full"
+            style={{ background: "rgba(19, 236, 138, 0.1)" }}
+          >
+            <HeartPulse className="h-6 w-6 text-primary" />
+          </div>
+          <p className="font-semibold">No chronic patients yet</p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {currentScope === "mine"
+              ? "No patients are assigned to you. Switch to all chronic or add a new patient."
+              : "Pick an existing patient and start their chronic care plan."}
+          </p>
+          <div className="mt-4 flex flex-col items-center gap-3">
+            <ChronicCsvTools scope={currentScope} />
+            <AddChronicPatientDialog />
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (
     <div className="space-y-4">
-      <div className="dashboard-card rounded-lg border bg-card p-4 space-y-3">
-        <div className="flex flex-wrap items-center gap-2">
-          <div className="rounded-md border bg-muted/40 p-0.5 flex">
-            {(["mine", "all"] as const).map((s) => (
-              <button
-                key={s}
-                type="button"
-                onClick={() => setScope(s)}
-                className={`px-3 py-1.5 text-xs font-semibold rounded transition-colors ${
-                  currentScope === s
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:bg-muted"
-                }`}
-              >
-                {s === "mine" ? "My patients" : "All chronic"}
-              </button>
-            ))}
-          </div>
-          <span className="text-xs text-muted-foreground">
-            {currentScope === "mine"
-              ? "Patients assigned to you"
-              : "Every chronic patient across staff"}
-          </span>
-        </div>
+      <ScopeToggle currentScope={currentScope} onScopeChange={setScope} />
 
-        <div className="grid gap-3 grid-cols-1 lg:grid-cols-[1fr_auto_auto] items-end">
-          <form onSubmit={applySearch} className="space-y-1">
-            <label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              Search
-            </label>
-            <div className="relative">
-              <Search
-                size={16}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
-              />
-              <Input
-                value={searchDraft}
-                onChange={(e) => setSearchDraft(e.target.value)}
-                onBlur={applySearch}
-                placeholder="Name, phone, or condition…"
-                className="pl-9"
-              />
-            </div>
-          </form>
-          <div className="space-y-1">
-            <label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              Status
-            </label>
-            <Select value={currentStatus} onValueChange={setStatus}>
-              <SelectTrigger className="w-40">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All statuses</SelectItem>
-                <SelectItem value="Active">Active</SelectItem>
-                <SelectItem value="Inactive">Inactive</SelectItem>
-                <SelectItem value="Lost">Lost</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-1">
-            <label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              Check-in
-            </label>
-            <Select value={currentDue} onValueChange={setDue}>
-              <SelectTrigger className="w-40">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All</SelectItem>
-                <SelectItem value="overdue">Overdue</SelectItem>
-                <SelectItem value="thisWeek">Due this week</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-      </div>
+      <DataTable
+        data={initial}
+        columns={columns}
+        getRowId={(row) => row.id}
+        itemLabel="patients"
+        pageSize={10}
+        searchPlaceholder="Search name, phone, condition, medications…"
+        searchFn={(row, query) => {
+          const haystack = [
+            row.customer.name,
+            row.customer.phone,
+            row.customer.email,
+            row.condition,
+            row.assignedToName,
+            ...row.currentMedications,
+          ]
+            .filter(Boolean)
+            .join(" ")
+            .toLowerCase()
+          return haystack.includes(query)
+        }}
+        filters={[
+          {
+            id: "status",
+            label: "Status",
+            options: [
+              { value: "all", label: "All statuses" },
+              { value: "Active", label: "Active" },
+              { value: "Inactive", label: "Inactive" },
+              { value: "Lost", label: "Lost" },
+            ],
+            predicate: (row, value) => row.status === value,
+          },
+          {
+            id: "due",
+            label: "Check-in",
+            options: [
+              { value: "all", label: "All check-ins" },
+              { value: "overdue", label: "Overdue" },
+              { value: "thisWeek", label: "Due this week" },
+            ],
+            predicate: (row, value) => dueMatchesFilter(row.nextCheckInAt, value),
+          },
+        ]}
+        onRowClick={(row) => router.push(`/dashboard/chronic/${row.id}`)}
+        emptyFilteredMessage="No chronic patients match your search or filters."
+      />
 
-      {initial.length === 0 ? (
-        <div className="dashboard-card rounded-lg border bg-card p-10 text-center">
-          <div
-            className="mx-auto mb-3 inline-flex items-center justify-center rounded-full"
-            style={{
-              width: 56,
-              height: 56,
-              background: "rgba(19, 236, 138, 0.1)",
-            }}
-          >
-            <HeartPulse className="h-6 w-6 text-primary" />
-          </div>
-          <p className="font-semibold">No chronic patients match these filters</p>
-          <p className="text-sm text-muted-foreground mt-1 mb-4">
-            Pick an existing patient and start their chronic care plan.
-          </p>
-          <div className="flex justify-center">
-            <AddChronicPatientDialog />
-          </div>
-        </div>
-      ) : (
-        <div className="grid gap-3">
-          {initial.map((c) => {
-            const due = dueLabel(c.nextCheckInAt)
-            const age = ageFromDob(c.customer.dateOfBirth)
-            return (
-              <div
-                key={c.id}
-                className="dashboard-card rounded-lg border bg-card p-4 flex flex-col lg:flex-row gap-4"
-              >
-                <div className="flex items-start gap-3 flex-grow min-w-0">
-                  <div
-                    className="rounded-full flex items-center justify-center flex-shrink-0 text-white font-bold text-sm"
-                    style={{
-                      width: 44,
-                      height: 44,
-                      background:
-                        "linear-gradient(135deg, var(--p1-clr, #13ec8a), var(--p2-clr, #1157ee))",
-                    }}
-                  >
-                    {initials(c.customer.name)}
-                  </div>
-                  <div className="min-w-0 flex-grow">
-                    <div className="flex flex-wrap items-center gap-2 mb-1">
-                      <Link
-                        href={`/dashboard/chronic/${c.id}`}
-                        className="font-semibold hover:text-primary"
-                      >
-                        {c.customer.name}
-                      </Link>
-                      <span
-                        className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ring-1 ring-inset ${
-                          c.status === "Active"
-                            ? "bg-emerald-400/10 text-emerald-500 ring-emerald-400/20"
-                            : c.status === "Inactive"
-                              ? "bg-yellow-400/10 text-yellow-600 ring-yellow-400/20"
-                              : "bg-red-400/10 text-red-500 ring-red-400/20"
-                        }`}
-                      >
-                        {c.status}
-                      </span>
-                    </div>
-                    <div className="text-sm text-foreground font-medium flex items-center gap-2">
-                      <HeartPulse size={13} className="text-primary" />
-                      {c.condition}
-                    </div>
-                    <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground mt-1.5">
-                      {c.customer.phone && (
-                        <a
-                          href={`tel:${c.customer.phone}`}
-                          onClick={(e) => e.stopPropagation()}
-                          className="flex items-center gap-1 hover:text-primary"
-                        >
-                          <Phone size={11} />
-                          {c.customer.phone}
-                        </a>
-                      )}
-                      {age != null && (
-                        <span className="flex items-center gap-1">
-                          <User size={11} />
-                          {age}y
-                          {c.customer.gender ? ` · ${c.customer.gender}` : ""}
-                        </span>
-                      )}
-                      {c.assignedToName && (
-                        <span className="flex items-center gap-1">
-                          Managed by {c.assignedToName}
-                        </span>
-                      )}
-                    </div>
-                    {c.currentMedications.length > 0 && (
-                      <div className="flex flex-wrap gap-1.5 mt-2">
-                        {c.currentMedications.slice(0, 4).map((m) => (
-                          <span
-                            key={m}
-                            className="inline-flex items-center gap-1 rounded-full bg-primary/10 text-primary px-2 py-0.5 text-[11px] font-medium"
-                          >
-                            <Pill size={10} />
-                            {m}
-                          </span>
-                        ))}
-                        {c.currentMedications.length > 4 && (
-                          <span className="text-[11px] text-muted-foreground">
-                            +{c.currentMedications.length - 4} more
-                          </span>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                <div className="flex flex-col gap-2 flex-shrink-0 lg:items-end lg:min-w-[220px]">
-                  <div
-                    className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold w-fit ${
-                      due.tone === "overdue"
-                        ? "bg-red-500/10 text-red-500"
-                        : due.tone === "soon"
-                          ? "bg-yellow-500/10 text-yellow-600"
-                          : due.tone === "ok"
-                            ? "bg-emerald-500/10 text-emerald-600"
-                            : "bg-muted text-muted-foreground"
-                    }`}
-                  >
-                    {due.tone === "overdue" ? (
-                      <AlertTriangle size={12} />
-                    ) : (
-                      <CalendarClock size={12} />
-                    )}
-                    {due.text}
-                  </div>
-                  <div className="text-[11px] text-muted-foreground">
-                    <Calendar size={10} className="inline mr-1" />
-                    Last contact: {fmt(c.lastContactAt)}
-                    {" · "}
-                    {c.checkInCount} log{c.checkInCount === 1 ? "" : "s"}
-                  </div>
-                  <div className="flex gap-2 w-full lg:justify-end">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => {
-                        if (!c.customer.phone) {
-                          toast.info(
-                            "No phone number on file — open the patient and add one first."
-                          )
-                          return
-                        }
-                        setCheckInTarget(c)
-                      }}
-                      className="gap-1"
-                    >
-                      <MessageCircle size={12} />
-                      Log check-in
-                    </Button>
-                    <Button size="sm" asChild className="gap-1">
-                      <Link href={`/dashboard/chronic/${c.id}`}>
-                        <Eye size={12} />
-                        View
-                      </Link>
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            )
-          })}
-        </div>
-      )}
-
-      {checkInTarget && (
+      {checkInTarget ? (
         <CheckInDialog
           chronicPatientId={checkInTarget.id}
           patientName={checkInTarget.customer.name}
@@ -407,7 +389,41 @@ export function ChronicPatientsList({
           }}
           onSuccess={() => router.refresh()}
         />
-      )}
+      ) : null}
+    </div>
+  )
+}
+
+function ScopeToggle({
+  currentScope,
+  onScopeChange,
+}: {
+  currentScope: "mine" | "all"
+  onScopeChange: (scope: "mine" | "all") => void
+}) {
+  return (
+    <div className="flex flex-wrap items-center gap-2">
+      <div className="flex rounded-md border bg-muted/40 p-0.5">
+        {(["mine", "all"] as const).map((scope) => (
+          <button
+            key={scope}
+            type="button"
+            onClick={() => onScopeChange(scope)}
+            className={`rounded px-3 py-1.5 text-xs font-semibold transition-colors ${
+              currentScope === scope
+                ? "bg-primary text-primary-foreground"
+                : "text-muted-foreground hover:bg-muted"
+            }`}
+          >
+            {scope === "mine" ? "My patients" : "All chronic"}
+          </button>
+        ))}
+      </div>
+      <span className="text-xs text-muted-foreground">
+        {currentScope === "mine"
+          ? "Patients assigned to you"
+          : "Every chronic patient across staff"}
+      </span>
     </div>
   )
 }

@@ -1,6 +1,13 @@
 "use server"
 
-import { prisma, hasOrderModels } from "@/lib/prisma"
+import {
+  prisma,
+  hasOrderModels,
+  countNewContactMessages,
+  countNewConsultations,
+  findNewConsultationsForInbox,
+  findNewContactMessagesForInbox,
+} from "@/lib/prisma"
 import { formatGhs, formatOrderNumber } from "@/lib/format"
 import { sendOrderDeliveredEmail, sendOrderConfirmationEmail } from "@/lib/email"
 import { revalidatePath } from "next/cache"
@@ -48,42 +55,24 @@ type OrderWithCustomer = {
   items: { productName: string }[]
 }
 
+export type DashboardOverviewData = Awaited<ReturnType<typeof getDashboardOverview>>
+
 export async function getDashboardOverview() {
   const now = new Date()
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
-  const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1)
-  const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59)
+  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+  const inSevenDays = new Date(startOfToday)
+  inSevenDays.setDate(inSevenDays.getDate() + 7)
 
-  let revenueAgg = { _sum: { total: null as number | null } }
-  let thisMonthRevenueAgg = { _sum: { total: null as number | null } }
-  let lastMonthRevenueAgg = { _sum: { total: null as number | null } }
   let activeOrders = 0
   let customerCount = 0
   let newCustomersThisMonth = 0
   let recentOrdersRaw: OrderWithCustomer[] = []
-  let monthlyOrders: { total: number; createdAt: Date }[] = []
+  let ordersByStatus: { status: string; count: number }[] = []
 
   if (hasOrderModels()) {
     try {
       const orderResults = await Promise.all([
-        prisma.order.aggregate({
-          _sum: { total: true },
-          where: { status: ORDER_STATUS.DELIVERED },
-        }),
-        prisma.order.aggregate({
-          _sum: { total: true },
-          where: {
-            status: ORDER_STATUS.DELIVERED,
-            createdAt: { gte: startOfMonth },
-          },
-        }),
-        prisma.order.aggregate({
-          _sum: { total: true },
-          where: {
-            status: ORDER_STATUS.DELIVERED,
-            createdAt: { gte: startOfLastMonth, lte: endOfLastMonth },
-          },
-        }),
         prisma.order.count({ where: { status: { in: ACTIVE_STATUSES } } }),
         prisma.customer.count(),
         prisma.customer.count({ where: { createdAt: { gte: startOfMonth } } }),
@@ -95,100 +84,111 @@ export async function getDashboardOverview() {
             items: { take: 1 },
           },
         }),
-        prisma.order.findMany({
-          where: {
-            status: ORDER_STATUS.DELIVERED,
-            createdAt: {
-              gte: new Date(now.getFullYear(), now.getMonth() - 6, 1),
-            },
-          },
-          select: { total: true, createdAt: true },
+        prisma.order.groupBy({
+          by: ["status"],
+          _count: { id: true },
+          orderBy: { status: "asc" },
         }),
       ])
 
-      revenueAgg = orderResults[0]
-      thisMonthRevenueAgg = orderResults[1]
-      lastMonthRevenueAgg = orderResults[2]
-      activeOrders = orderResults[3]
-      customerCount = orderResults[4]
-      newCustomersThisMonth = orderResults[5]
-      recentOrdersRaw = orderResults[6] as OrderWithCustomer[]
-      monthlyOrders = orderResults[7]
+      activeOrders = orderResults[0]
+      customerCount = orderResults[1]
+      newCustomersThisMonth = orderResults[2]
+      recentOrdersRaw = orderResults[3] as OrderWithCustomer[]
+      ordersByStatus = orderResults[4].map((row) => ({
+        status: row.status,
+        count: row._count.id,
+      }))
     } catch (error) {
       if (!isMissingTableError(error)) throw error
     }
   }
 
-  const [lowStockCount, productCount, publishedPosts, categoryGroups, newConsultations] =
-    await Promise.all([
-      prisma.product.count({ where: { stock: { lt: 10 } } }),
-      prisma.product.count(),
-      prisma.blogPost.count({ where: { status: "Published" } }),
-      prisma.product.groupBy({
-        by: ["categoryId"],
-        _count: { id: true },
-        orderBy: { _count: { id: "desc" } },
-        take: 5,
-      }),
-      prisma.consultationRequest.count({ where: { status: "New" } }),
-    ])
+  const [
+    lowStockCount,
+    productCount,
+    publishedPosts,
+    newConsultations,
+    newContactMessages,
+    lowStockProducts,
+    recentConsultations,
+    recentContactMessages,
+    chronicDueRaw,
+    chronicDueCount,
+  ] = await Promise.all([
+    prisma.product.count({ where: { stock: { lt: 10 }, active: true } }),
+    prisma.product.count(),
+    prisma.blogPost.count({ where: { status: "Published" } }),
+    countNewConsultations(),
+    countNewContactMessages(),
+    prisma.product.findMany({
+      where: { stock: { lt: 10 }, active: true },
+      orderBy: { stock: "asc" },
+      take: 5,
+      select: { id: true, name: true, stock: true, sku: true },
+    }),
+    findNewConsultationsForInbox(4),
+    findNewContactMessagesForInbox(4),
+    prisma.chronicPatient.findMany({
+      where: {
+        status: "Active",
+        nextCheckInAt: { lte: inSevenDays },
+      },
+      orderBy: { nextCheckInAt: "asc" },
+      take: 6,
+      include: {
+        customer: { select: { name: true } },
+      },
+    }),
+    prisma.chronicPatient.count({
+      where: {
+        status: "Active",
+        nextCheckInAt: { lte: inSevenDays },
+      },
+    }),
+  ])
 
-  const totalRevenue = revenueAgg._sum.total ?? 0
-  const thisMonthRevenue = thisMonthRevenueAgg._sum.total ?? 0
-  const lastMonthRevenue = lastMonthRevenueAgg._sum.total ?? 0
-  const revenueChange =
-    lastMonthRevenue > 0
-      ? ((thisMonthRevenue - lastMonthRevenue) / lastMonthRevenue) * 100
-      : null
+  const inbox = [
+    ...recentConsultations.map((item) => ({
+      type: "consultation" as const,
+      id: item.id,
+      name: item.fullName,
+      summary: item.medicationInterest?.trim() || item.message.trim().slice(0, 80),
+      createdAt: item.createdAt.toISOString(),
+      href: "/dashboard/consultations",
+    })),
+    ...recentContactMessages.map((item) => ({
+      type: "contact" as const,
+      id: item.id,
+      name: item.fullName,
+      summary: `${item.subject} · ${item.branchName}`,
+      createdAt: item.createdAt.toISOString(),
+      href: "/dashboard/contact-messages",
+    })),
+  ]
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    .slice(0, 6)
 
-  const categoryIds = categoryGroups.map((g) => g.categoryId)
-  const categories = await prisma.category.findMany({
-    where: { id: { in: categoryIds } },
-  })
-  const categoryMap = Object.fromEntries(categories.map((c) => [c.id, c.name]))
-  const maxCategoryCount = Math.max(...categoryGroups.map((g) => g._count.id), 1)
-
-  const topCategories = categoryGroups.map((g) => ({
-    name: categoryMap[g.categoryId] ?? "Uncategorized",
-    count: g._count.id,
-    percentage: Math.round((g._count.id / maxCategoryCount) * 100),
-  }))
-
-  const monthLabels = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
-  const revenueByMonth = Array.from({ length: 7 }, (_, i) => {
-    const d = new Date(now.getFullYear(), now.getMonth() - (6 - i), 1)
-    const key = `${d.getFullYear()}-${d.getMonth()}`
-    return {
-      month: monthLabels[d.getMonth()],
-      revenue: 0,
-      key,
-    }
-  })
-
-  for (const order of monthlyOrders) {
-    const key = `${order.createdAt.getFullYear()}-${order.createdAt.getMonth()}`
-    const bucket = revenueByMonth.find((b) => b.key === key)
-    if (bucket) bucket.revenue += order.total
-  }
-
-  const revenueChart = revenueByMonth.map(({ month, revenue }) => ({
-    month,
-    revenue: Math.round(revenue * 100) / 100,
+  const chronicDue = chronicDueRaw.map((patient) => ({
+    id: patient.id,
+    patientName: patient.customer.name,
+    condition: patient.condition,
+    nextCheckInAt: patient.nextCheckInAt?.toISOString() ?? null,
+    isOverdue: Boolean(
+      patient.nextCheckInAt && patient.nextCheckInAt.getTime() < startOfToday.getTime()
+    ),
   }))
 
   const recentOrders = recentOrdersRaw.map((order) => ({
     id: order.orderNumber || formatOrderNumber(order.id, order.createdAt),
     customer: order.customer.name,
     product: order.items[0]?.productName ?? "—",
-    amount: formatGhs(order.total),
     status: order.status,
     date: order.createdAt.toISOString(),
   }))
 
   return {
     stats: {
-      totalRevenue: formatGhs(totalRevenue),
-      revenueChange,
       activeOrders,
       customerCount,
       newCustomersThisMonth,
@@ -196,10 +196,14 @@ export async function getDashboardOverview() {
       productCount,
       publishedPosts,
       newConsultations,
+      newContactMessages,
+      chronicDueCount,
     },
     recentOrders,
-    topCategories,
-    revenueChart,
+    lowStockProducts,
+    inbox,
+    chronicDue,
+    ordersByStatus,
     hasOrders: recentOrdersRaw.length > 0,
     ordersReady: hasOrderModels(),
   }
@@ -220,15 +224,16 @@ export async function getOrdersList() {
       customer: order.customer.name,
       customerEmail: order.customer.email ?? null,
       phone: order.customer.phone ?? null,
-      email: order.customer.email ?? "—",
+      email: order.customer.email ?? "",
       date: order.createdAt.toLocaleDateString("en-GH", {
         month: "short",
         day: "numeric",
         year: "numeric",
       }),
       total: formatGhs(order.total),
+      totalValue: order.total,
       status: order.status,
-      method: order.paymentMethod ?? "—",
+      method: order.paymentMethod ?? "",
       fulfillmentType: order.fulfillmentType ?? null,
       branchName: order.branchName ?? null,
       deliveryAddress: order.deliveryAddress ?? null,

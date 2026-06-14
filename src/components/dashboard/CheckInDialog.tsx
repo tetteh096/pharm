@@ -2,17 +2,9 @@
 
 import * as React from "react"
 import { toast } from "sonner"
-import { Loader2, MessageCircle, Send } from "lucide-react"
+import { CalendarClock, Loader2, MessageCircle, Send } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import {
@@ -22,6 +14,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet"
+import { cn } from "@/lib/utils"
 import { logCheckIn } from "@/app/dashboard/chronic/actions"
 
 const METHOD_OPTIONS = [
@@ -33,16 +33,22 @@ const METHOD_OPTIONS = [
 ]
 
 const OUTCOME_OPTIONS = [
-  { value: "REACHED", label: "Reached — patient is doing okay" },
+  { value: "REACHED", label: "Reached: patient is doing okay" },
   { value: "NEEDS_REFILL", label: "Needs a refill / pickup" },
   { value: "REFILLED", label: "Refill completed today" },
-  { value: "NO_ANSWER", label: "No answer — will try again" },
+  { value: "NO_ANSWER", label: "No answer: will try again" },
   { value: "RESCHEDULED", label: "Rescheduled the check-in" },
   { value: "OTHER", label: "Other (see notes)" },
 ]
 
 const TEXTAREA_CLASS =
-  "flex min-h-[90px] w-full rounded-md border border-input bg-white px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring dark:bg-[oklch(0.28_0.03_260)] dark:text-foreground"
+  "flex min-h-[120px] w-full rounded-lg border border-input bg-background px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground transition-colors outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+
+function defaultNextCheckIn() {
+  const d = new Date()
+  d.setDate(d.getDate() + 30)
+  return d.toISOString().slice(0, 10)
+}
 
 export function CheckInDialog({
   chronicPatientId,
@@ -61,12 +67,18 @@ export function CheckInDialog({
   const [outcome, setOutcome] = React.useState("REACHED")
   const [needsRefill, setNeedsRefill] = React.useState(false)
   const [notes, setNotes] = React.useState("")
-  const [nextCheckIn, setNextCheckIn] = React.useState(() => {
-    const d = new Date()
-    d.setDate(d.getDate() + 30)
-    return d.toISOString().slice(0, 10)
-  })
+  const [nextCheckIn, setNextCheckIn] = React.useState(defaultNextCheckIn)
   const [submitting, setSubmitting] = React.useState(false)
+
+  React.useEffect(() => {
+    if (!open) {
+      setMethod("PHONE")
+      setOutcome("REACHED")
+      setNeedsRefill(false)
+      setNotes("")
+      setNextCheckIn(defaultNextCheckIn())
+    }
+  }, [open])
 
   React.useEffect(() => {
     if (outcome === "NEEDS_REFILL") setNeedsRefill(true)
@@ -86,7 +98,6 @@ export function CheckInDialog({
       toast.success(`Check-in logged for ${patientName}`)
       onSuccess?.()
       onOpenChange(false)
-      setNotes("")
     } catch (err) {
       console.error(err)
       toast.error(
@@ -98,99 +109,131 @@ export function CheckInDialog({
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <MessageCircle size={18} className="text-primary" />
-            Log check-in for {patientName}
-          </DialogTitle>
-          <DialogDescription>
-            Record how the contact went so the team has a full history.
-          </DialogDescription>
-        </DialogHeader>
-
-        <div className="space-y-4">
-          <div className="grid gap-3 grid-cols-2">
-            <div className="space-y-1.5">
-              <Label htmlFor="method">Contact method</Label>
-              <Select value={method} onValueChange={setMethod}>
-                <SelectTrigger id="method">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {METHOD_OPTIONS.map((o) => (
-                    <SelectItem key={o.value} value={o.value}>
-                      {o.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent
+        side="right"
+        className="flex w-full flex-col gap-0 p-0 sm:max-w-2xl"
+      >
+        <SheetHeader className="sticky top-0 z-10 border-b bg-background px-6 py-5">
+          <div className="flex items-start gap-3 pr-8">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+              <MessageCircle size={20} />
             </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="outcome">Outcome</Label>
-              <Select value={outcome} onValueChange={setOutcome}>
-                <SelectTrigger id="outcome">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {OUTCOME_OPTIONS.map((o) => (
-                    <SelectItem key={o.value} value={o.value}>
-                      {o.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            <div className="min-w-0 flex-1">
+              <SheetTitle className="text-lg leading-tight">
+                Log check-in
+              </SheetTitle>
+              <SheetDescription className="mt-1 text-sm">
+                Record how the contact went for{" "}
+                <span className="font-medium text-foreground">{patientName}</span>.
+                This is saved to the patient history for the whole team.
+              </SheetDescription>
             </div>
           </div>
+        </SheetHeader>
 
-          <label className="flex items-start gap-2 cursor-pointer text-sm">
-            <input
-              type="checkbox"
-              checked={needsRefill}
-              onChange={(e) => setNeedsRefill(e.target.checked)}
-              className="mt-1"
-            />
-            <div>
-              <div className="font-medium">Patient needs a refill</div>
-              <div className="text-xs text-muted-foreground">
-                Flags this on the patient&apos;s history so any staff member
-                can see it at a glance.
+        <div className="flex-1 overflow-y-auto px-6 py-5">
+          <div className="mx-auto flex w-full max-w-xl flex-col gap-5">
+            <section className="rounded-xl border border-border/70 bg-card p-4 shadow-sm">
+              <h3 className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                Contact details
+              </h3>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-1.5">
+                  <Label htmlFor="method">Contact method</Label>
+                  <Select value={method} onValueChange={setMethod}>
+                    <SelectTrigger id="method" className="h-10 w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {METHOD_OPTIONS.map((o) => (
+                        <SelectItem key={o.value} value={o.value}>
+                          {o.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1.5 sm:col-span-2">
+                  <Label htmlFor="outcome">Outcome</Label>
+                  <Select value={outcome} onValueChange={setOutcome}>
+                    <SelectTrigger id="outcome" className="h-10 w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {OUTCOME_OPTIONS.map((o) => (
+                        <SelectItem key={o.value} value={o.value}>
+                          {o.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
-            </div>
-          </label>
+            </section>
 
-          <div className="space-y-1.5">
-            <Label htmlFor="notes">What happened?</Label>
-            <textarea
-              id="notes"
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              rows={3}
-              placeholder="Patient mentioned shortness of breath, scheduled clinic visit for next Tuesday…"
-              className={TEXTAREA_CLASS}
-            />
-          </div>
+            <label
+              className={cn(
+                "flex cursor-pointer items-start gap-3 rounded-xl border p-4 transition-colors",
+                needsRefill
+                  ? "border-primary/40 bg-primary/5"
+                  : "border-border/70 bg-card hover:bg-muted/30"
+              )}
+            >
+              <input
+                type="checkbox"
+                checked={needsRefill}
+                onChange={(e) => setNeedsRefill(e.target.checked)}
+                className="mt-0.5 h-4 w-4 rounded border-input accent-primary"
+              />
+              <div>
+                <div className="text-sm font-medium">Patient needs a refill</div>
+                <div className="mt-0.5 text-xs text-muted-foreground">
+                  Flags this on the patient history so any staff member can see
+                  it at a glance.
+                </div>
+              </div>
+            </label>
 
-          <div className="space-y-1.5">
-            <Label htmlFor="next">Schedule next check-in</Label>
-            <Input
-              id="next"
-              type="date"
-              value={nextCheckIn}
-              onChange={(e) => setNextCheckIn(e.target.value)}
-            />
-            <p className="text-xs text-muted-foreground">
-              Updates the patient&apos;s next contact date. Leave blank to
-              clear it.
-            </p>
+            <section className="space-y-1.5">
+              <Label htmlFor="notes">What happened?</Label>
+              <textarea
+                id="notes"
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                rows={5}
+                placeholder="Patient mentioned shortness of breath, scheduled clinic visit for next Tuesday…"
+                className={TEXTAREA_CLASS}
+              />
+            </section>
+
+            <section className="rounded-xl border border-border/70 bg-muted/20 p-4">
+              <div className="mb-3 flex items-center gap-2 text-sm font-medium">
+                <CalendarClock className="h-4 w-4 text-primary" />
+                Follow-up
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="next">Schedule next check-in</Label>
+                <Input
+                  id="next"
+                  type="date"
+                  value={nextCheckIn}
+                  onChange={(e) => setNextCheckIn(e.target.value)}
+                  className="h-10 max-w-xs bg-background"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Updates the patient&apos;s next contact date. Leave blank to
+                  clear it.
+                </p>
+              </div>
+            </section>
           </div>
         </div>
 
-        <DialogFooter>
+        <div className="flex items-center justify-end gap-2 border-t bg-background px-6 py-4">
           <Button
             type="button"
-            variant="ghost"
+            variant="outline"
             onClick={() => onOpenChange(false)}
             disabled={submitting}
           >
@@ -200,17 +243,17 @@ export function CheckInDialog({
             type="button"
             onClick={submit}
             disabled={submitting}
-            className="gap-2"
+            className="min-w-[140px] gap-2"
           >
             {submitting ? (
-              <Loader2 size={14} className="animate-spin" />
+              <Loader2 size={16} className="animate-spin" />
             ) : (
-              <Send size={14} />
+              <Send size={16} />
             )}
             Save check-in
           </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        </div>
+      </SheetContent>
+    </Sheet>
   )
 }

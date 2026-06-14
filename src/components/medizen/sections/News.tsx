@@ -247,31 +247,6 @@ const News = ({ posts = [] }: { posts?: NewsPost[] }) => {
         )}
       </div>
 
-      <style jsx>{`
-        .featured-title {
-          font-size: clamp(1.5rem, 4vw, 2.5rem);
-          line-height: 1.2;
-        }
-        .image-overlay {
-          pointer-events: none;
-        }
-        .line-clamp-2 {
-          display: -webkit-box;
-          -webkit-line-clamp: 2;
-          -webkit-box-orient: vertical;
-          overflow: hidden;
-        }
-        .news-list-card {
-          transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-        .news-list-card:hover {
-          transform: translateX(10px);
-          border-color: var(--p1-clr) !important;
-        }
-        .hover-p1:hover {
-          color: var(--p1-clr) !important;
-        }
-      `}</style>
     </section>
   );
 };

@@ -36,6 +36,11 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import RichTextEditor from "@/components/dashboard/RichTextEditor"
+import {
+  formatImageSize,
+  processUploadImage,
+  type ImageOrientation,
+} from "@/lib/client-image"
 
 const TEXTAREA_CLASSES =
   "flex min-h-[100px] w-full rounded-md border border-input bg-white px-3 py-2 text-sm text-[#09162a] placeholder:text-[#6b7280] ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring dark:bg-[oklch(0.28_0.03_260)] dark:text-[#f1f5f9] dark:placeholder:text-[#94a3b8]"
@@ -74,6 +79,13 @@ export function BlogEditorForm({
   const [submitting, setSubmitting] = React.useState<null | "draft" | "publish">(
     null
   )
+  const [coverMeta, setCoverMeta] = React.useState<{
+    width: number
+    height: number
+    orientation: ImageOrientation
+    sizeLabel: string
+  } | null>(null)
+  const [coverUploading, setCoverUploading] = React.useState(false)
 
   const [form, setForm] = React.useState({
     title: post?.title ?? "",
@@ -90,18 +102,35 @@ export function BlogEditorForm({
   const setField = (key: keyof typeof form, value: string) =>
     setForm((prev) => ({ ...prev, [key]: value }))
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
+    e.target.value = ""
     if (!file) return
-    if (file.size > 2 * 1024 * 1024) {
-      toast.error("Cover image must be 2MB or smaller")
+    if (file.size > 8 * 1024 * 1024) {
+      toast.error("Choose a cover image under 8 MB")
       return
     }
-    const reader = new FileReader()
-    reader.onloadend = () => {
-      setField("coverImage", reader.result as string)
+
+    setCoverUploading(true)
+    try {
+      const processed = await processUploadImage(file, {
+        maxWidth: 1920,
+        maxHeight: 1920,
+        quality: 0.85,
+      })
+      setField("coverImage", processed.dataUrl)
+      setCoverMeta({
+        width: processed.width,
+        height: processed.height,
+        orientation: processed.orientation,
+        sizeLabel: formatImageSize(processed.bytesApprox),
+      })
+      toast.success("Cover image ready")
+    } catch {
+      toast.error("Could not process that image. Try JPG, PNG, or WEBP.")
+    } finally {
+      setCoverUploading(false)
     }
-    reader.readAsDataURL(file)
   }
 
   const handleAddCategory = async () => {
@@ -395,61 +424,121 @@ export function BlogEditorForm({
 
           <Card className="dashboard-card">
             <CardHeader>
-              <CardTitle>Cover image</CardTitle>
+              <CardTitle>Featured image</CardTitle>
               <CardDescription>
-                Shown on the blog list and at the top of the article.
+                Used on the blog list, homepage, and article header. Landscape or portrait
+                both work. The site crops to a wide frame (like WordPress), centered on
+                your photo.
               </CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="space-y-4">
               <label
                 htmlFor="cover-upload"
-                className="group relative block w-full overflow-hidden rounded-lg border-2 border-dashed border-muted-foreground/25 bg-muted/20 cursor-pointer hover:bg-muted/40 transition-colors"
+                className="group relative block w-full cursor-pointer overflow-hidden rounded-lg border-2 border-dashed border-muted-foreground/25 bg-muted/20 transition-colors hover:bg-muted/40"
                 style={{ aspectRatio: "16 / 9" }}
               >
                 <input
                   id="cover-upload"
                   type="file"
-                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                  className="absolute inset-0 z-10 h-full w-full cursor-pointer opacity-0"
                   accept="image/*"
+                  disabled={coverUploading}
                   onChange={handleImageUpload}
                 />
-                {form.coverImage ? (
+                {coverUploading ? (
+                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
+                    <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                    <p className="text-sm text-muted-foreground">Optimizing image…</p>
+                  </div>
+                ) : form.coverImage ? (
                   <>
                     <img
                       src={form.coverImage}
                       alt="Cover preview"
-                      className="absolute inset-0 w-full h-full object-cover"
+                      className="absolute inset-0 h-full w-full object-cover object-center"
                     />
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
-                      <div className="text-white text-sm font-medium flex items-center gap-2">
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/0 opacity-0 transition-colors group-hover:bg-black/40 group-hover:opacity-100">
+                      <div className="flex items-center gap-2 text-sm font-medium text-white">
                         <ImageIcon size={16} /> Change image
                       </div>
                     </div>
                   </>
                 ) : (
-                  <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-4">
-                    <div className="p-3 bg-primary/10 rounded-full mb-3">
-                      <ImageIcon className="w-6 h-6 text-primary" />
+                  <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center">
+                    <div className="mb-3 rounded-full bg-primary/10 p-3">
+                      <ImageIcon className="h-6 w-6 text-primary" />
                     </div>
-                    <p className="text-sm font-medium">Click to upload image</p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      JPG, PNG, WEBP — max 2MB
+                    <p className="text-sm font-medium">Click to upload featured image</p>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      JPG, PNG, WEBP. Resized automatically for the site.
                     </p>
                   </div>
                 )}
               </label>
-              {form.coverImage && (
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className="w-full mt-3 text-destructive gap-1"
-                  onClick={() => setField("coverImage", "")}
-                >
-                  <X size={14} />
-                  Remove image
-                </Button>
-              )}
+
+              {form.coverImage ? (
+                <>
+                  {coverMeta ? (
+                    <p className="text-xs text-muted-foreground">
+                      {coverMeta.width} x {coverMeta.height}px ·{" "}
+                      {coverMeta.orientation} · {coverMeta.sizeLabel}
+                    </p>
+                  ) : null}
+
+                  <div className="space-y-3 rounded-lg border bg-muted/20 p-3">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                      How it appears on the website
+                    </p>
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <div>
+                        <p className="mb-1.5 text-xs text-muted-foreground">Blog list card</p>
+                        <div
+                          className="overflow-hidden rounded-md border"
+                          style={{ height: 96, background: "#f4f6f8" }}
+                        >
+                          <img
+                            src={form.coverImage}
+                            alt=""
+                            className="h-full w-full object-cover object-center"
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <p className="mb-1.5 text-xs text-muted-foreground">Article header</p>
+                        <div
+                          className="overflow-hidden rounded-md border"
+                          style={{ aspectRatio: "16 / 9", background: "#f4f6f8" }}
+                        >
+                          <img
+                            src={form.coverImage}
+                            alt=""
+                            className="h-full w-full object-cover object-center"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Portrait photos keep the full image in storage. Wide areas crop the
+                      sides on cards and headers. Photos inside the article keep their
+                      natural shape.
+                    </p>
+                  </div>
+
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="w-full gap-1 text-destructive"
+                    onClick={() => {
+                      setField("coverImage", "")
+                      setCoverMeta(null)
+                    }}
+                  >
+                    <X size={14} />
+                    Remove featured image
+                  </Button>
+                </>
+              ) : null}
             </CardContent>
           </Card>
         </div>

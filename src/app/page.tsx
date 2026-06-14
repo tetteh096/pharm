@@ -13,6 +13,7 @@ import Choose from "@/components/medizen/sections/Choose";
 import Care from "@/components/medizen/sections/Care";
 import Special from "@/components/medizen/sections/Special";
 import News from "@/components/medizen/sections/News";
+import HomeHelpSection from "@/components/medizen/sections/HomeHelpSection";
 
 export default async function Home() {
   const [featuredProducts, latestPosts] = await Promise.all([
@@ -35,6 +36,7 @@ export default async function Home() {
         <Care />
         <Special />
         <News posts={latestPosts} />
+        <HomeHelpSection />
       </main>
       <Footer />
     </>

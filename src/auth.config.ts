@@ -1,9 +1,15 @@
 import type { NextAuthConfig } from "next-auth"
 import type { Role } from "@prisma/client"
+import { canAccessDashboardRoute } from "@/lib/dashboard-rbac"
 
 // Edge-safe config: NO bcrypt, NO Prisma, NO pg
 // Used by middleware (Edge runtime)
 export const authConfig: NextAuthConfig = {
+  // trustHost lets NextAuth5 derive the base URL from the incoming request
+  // instead of relying on the hardcoded NEXTAUTH_URL env var.
+  // This means redirects always use the actual host/port (localhost:3002,
+  // your-domain.com, etc.) with zero config changes between environments.
+  trustHost: true,
   pages: {
     signIn: "/signin",
     error: "/signin",
@@ -19,16 +25,7 @@ export const authConfig: NextAuthConfig = {
       if (path.startsWith("/dashboard")) {
         if (!isLoggedIn) return false // redirects to signIn page
 
-        // ADMIN-only routes
-        if (path.startsWith("/dashboard/users") && role !== "ADMIN") {
-          return Response.redirect(new URL("/dashboard", nextUrl))
-        }
-
-        // ADMIN + PHARMACIST routes
-        if (
-          path.startsWith("/dashboard/blog") &&
-          !["ADMIN", "PHARMACIST"].includes(role ?? "")
-        ) {
+        if (!canAccessDashboardRoute(role, path)) {
           return Response.redirect(new URL("/dashboard", nextUrl))
         }
 

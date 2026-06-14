@@ -12,8 +12,55 @@ import {
   getPostComments,
 } from "@/app/actions/blog";
 import { BlogComments } from "@/components/medizen/BlogComments";
+import { BlogCoverDisplay } from "@/components/medizen/BlogCoverDisplay";
+import type { Metadata } from "next";
+import { OG_IMAGE } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
+
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<{ id?: string }>;
+}): Promise<Metadata> {
+  const { id } = await searchParams;
+  if (!id) return { title: "Blog", robots: { index: false, follow: false } };
+
+  const post = await prisma.blogPost.findUnique({
+    where: { id },
+    select: { title: true, excerpt: true, coverImage: true, status: true, tags: true },
+  });
+
+  if (!post || post.status !== "Published") {
+    return { title: "Article not found", robots: { index: false, follow: false } };
+  }
+
+  const description =
+    post.excerpt?.trim()?.slice(0, 160) ??
+    `${post.title} — health and pharmacy insights from Enviro Pharmacy, Accra.`;
+  const ogImage =
+    post.coverImage && /^(https?:|\/)/.test(post.coverImage) ? post.coverImage : OG_IMAGE;
+
+  return {
+    title: post.title,
+    description,
+    keywords: post.tags,
+    alternates: { canonical: `/blog-details?id=${id}` },
+    openGraph: {
+      type: "article",
+      title: post.title,
+      description,
+      url: `/blog-details?id=${id}`,
+      images: [{ url: ogImage, alt: post.title }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: post.title,
+      description,
+      images: [ogImage],
+    },
+  };
+}
 
 export default async function BlogDetailsPage({ searchParams }: { searchParams: Promise<{ id?: string }> }) {
   const params = await searchParams;
@@ -80,9 +127,12 @@ export default async function BlogDetailsPage({ searchParams }: { searchParams: 
                     )}
                   </div>
                   {post.coverImage && (
-                    <div className="thumb w-100 rounded-4 mb-4">
-                      <img src={post.coverImage} alt="Cover" className="w-100 rounded-4" />
-                    </div>
+                    <BlogCoverDisplay
+                      src={post.coverImage}
+                      alt={post.title}
+                      className="mb-4"
+                      maxHeight={520}
+                    />
                   )}
                   
                   {/* Rich Text Content */}

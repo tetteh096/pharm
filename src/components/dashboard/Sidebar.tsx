@@ -2,25 +2,17 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { useSession } from "next-auth/react"
 import {
-  LayoutDashboard,
-  ShoppingBag,
-  FileText,
-  UserCog,
   PlusCircle,
-  HeartPulse,
-  Pill,
   ExternalLink,
-  Building2,
-  Calculator,
-  Users,
   ChevronsLeft,
   ChevronsRight,
-  MessageSquare,
 } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import { BrandLogo } from "@/components/brand/BrandLogo"
+import { canWriteInventory, navItemsForRole } from "@/lib/dashboard-rbac"
 import {
   Sidebar,
   SidebarContent,
@@ -48,27 +40,17 @@ function collapsedNavTooltip(label: string) {
   }
 }
 
-const navMain = [
-  { title: "Overview", url: "/dashboard", icon: LayoutDashboard },
-  { title: "Orders", url: "/dashboard/orders", icon: ShoppingBag },
-  { title: "Accounting", url: "/dashboard/accounting", icon: Calculator },
-  { title: "Inventory", url: "/dashboard/products", icon: Pill },
-  { title: "Branches", url: "/dashboard/branches", icon: Building2 },
-  { title: "Patients", url: "/dashboard/customers", icon: Users },
-  { title: "Chronic care", url: "/dashboard/chronic", icon: HeartPulse },
-  { title: "Consultations", url: "/dashboard/consultations", icon: MessageSquare },
-  { title: "Health blog", url: "/dashboard/blog", icon: FileText },
-  { title: "Staff", url: "/dashboard/users", icon: UserCog },
-]
-
 export function DashboardSidebar() {
   const pathname = usePathname()
+  const { data: session } = useSession()
   const { toggleSidebar, state, isMobile } = useSidebar()
   const isCollapsed = state === "collapsed"
+  const role = session?.user?.role
+  const navMain = navItemsForRole(role)
+  const showAddProduct = canWriteInventory(role)
 
   return (
     <Sidebar collapsible="icon" className="text-slate-200">
-      {/* Header */}
       <SidebarHeader className="overflow-hidden px-3 py-4 group-data-[collapsible=icon]:px-2 group-data-[collapsible=icon]:py-3">
         <Link
           href="/dashboard"
@@ -88,7 +70,6 @@ export function DashboardSidebar() {
         </Link>
       </SidebarHeader>
 
-      {/* Main nav */}
       <SidebarContent className="px-2 py-3 group-data-[collapsible=icon]:px-2.5">
         <SidebarGroup>
           <SidebarGroupLabel className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
@@ -124,30 +105,31 @@ export function DashboardSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        <SidebarGroup className="mt-4">
-          <SidebarGroupLabel className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
-            Quick actions
-          </SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu className="group-data-[collapsible=icon]:gap-1.5">
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  asChild
-                  tooltip={collapsedNavTooltip("Add product")}
-                  className={collapsedIconBtn}
-                >
-                  <Link href="/dashboard/products/new">
-                    <PlusCircle className="text-emerald-400" />
-                    <span className="font-medium text-emerald-400">Add product</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        {showAddProduct ? (
+          <SidebarGroup className="mt-4">
+            <SidebarGroupLabel className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+              Quick actions
+            </SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu className="group-data-[collapsible=icon]:gap-1.5">
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    asChild
+                    tooltip={collapsedNavTooltip("Add product")}
+                    className={collapsedIconBtn}
+                  >
+                    <Link href="/dashboard/products/new">
+                      <PlusCircle className="text-emerald-400" />
+                      <span className="font-medium text-emerald-400">Add product</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        ) : null}
       </SidebarContent>
 
-      {/* Footer */}
       <SidebarFooter className="px-2 py-3 group-data-[collapsible=icon]:px-2.5">
         <SidebarMenu className="group-data-[collapsible=icon]:gap-1.5">
           <SidebarMenuItem>

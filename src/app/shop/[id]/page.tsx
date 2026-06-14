@@ -6,8 +6,49 @@ import PageTitle from "@/components/medizen/PageTitle"
 import ProductCard from "@/components/medizen/ProductCard"
 import ProductDetailsClient from "@/components/medizen/shop/ProductDetailsClient"
 import { getShopProduct, getShopProducts } from "@/app/actions/storefront"
+import type { Metadata } from "next"
+import { OG_IMAGE } from "@/lib/seo"
 
 export const dynamic = "force-dynamic"
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>
+}): Promise<Metadata> {
+  const { id } = await params
+  const product = await getShopProduct(id)
+  if (!product) {
+    return { title: "Product not found", robots: { index: false, follow: false } }
+  }
+
+  const description = product.description?.trim()
+    ? product.description.slice(0, 160)
+    : `Buy ${product.name} (${product.category}) from Enviro Pharmacy — pickup or delivery across Madina, Odorkor, Sakumono and Santeo in Accra, Ghana.`
+
+  // Only use the product image for OG if it's a real URL/path (skip data-URI fallbacks).
+  const ogImage =
+    product.image && /^(https?:|\/)/.test(product.image) ? product.image : OG_IMAGE
+
+  return {
+    title: product.name,
+    description,
+    alternates: { canonical: `/shop/${product.id}` },
+    openGraph: {
+      type: "website",
+      title: product.name,
+      description,
+      url: `/shop/${product.id}`,
+      images: [{ url: ogImage, alt: product.name }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: product.name,
+      description,
+      images: [ogImage],
+    },
+  }
+}
 
 export default async function ProductDetailsPage({
   params,
@@ -51,7 +92,7 @@ export default async function ProductDetailsPage({
                 <h3 className="black mb-4 fw_800 text-center">You may also like</h3>
                 <div className="row g-4">
                   {related.map((p) => (
-                    <div key={p.id} className="col-lg-3 col-md-6">
+                    <div key={p.id} className="col-6 col-sm-4 col-md-6 col-lg-3">
                       <ProductCard product={p} />
                     </div>
                   ))}

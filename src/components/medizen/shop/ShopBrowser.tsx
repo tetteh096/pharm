@@ -1,6 +1,7 @@
 "use client"
 
 import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react"
+import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import {
   Search,
   SlidersHorizontal,
@@ -10,6 +11,8 @@ import {
   Filter as FilterIcon,
   CheckCircle2,
   Sparkles,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import ProductCard from "@/components/medizen/ProductCard"
@@ -22,6 +25,7 @@ import {
   type ShopSearchResult,
   type ShopSort,
 } from "@/app/actions/storefront"
+import { SHOP_PAGE_SIZE } from "@/lib/shop-constants"
 import { formatGhs } from "@/lib/format"
 
 type Props = {
@@ -29,6 +33,8 @@ type Props = {
   meta: ShopFilterMeta
   /** From URL `?q=` (e.g. header search) */
   initialQuery?: string
+  /** From URL `?page=` */
+  initialPage?: number
 }
 
 type FilterState = {
@@ -42,10 +48,19 @@ type FilterState = {
   page: number
 }
 
-const PAGE_SIZE = 9
+const PAGE_SIZE = SHOP_PAGE_SIZE
 const SEARCH_DEBOUNCE_MS = 350
 
-export default function ShopBrowser({ initialResult, meta, initialQuery = "" }: Props) {
+export default function ShopBrowser({
+  initialResult,
+  meta,
+  initialQuery = "",
+  initialPage = 1,
+}: Props) {
+  const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
+
   const initialFilters: FilterState = {
     query: initialQuery,
     categories: [],
@@ -54,7 +69,7 @@ export default function ShopBrowser({ initialResult, meta, initialQuery = "" }: 
     inStockOnly: false,
     featuredOnly: false,
     sort: "latest",
-    page: 1,
+    page: initialPage,
   }
 
   const [filters, setFilters] = useState<FilterState>(initialFilters)
@@ -140,12 +155,24 @@ export default function ShopBrowser({ initialResult, meta, initialQuery = "" }: 
     [fetchProducts]
   )
 
+  const syncPageToUrl = useCallback(
+    (page: number) => {
+      const params = new URLSearchParams(searchParams.toString())
+      if (page <= 1) params.delete("page")
+      else params.set("page", String(page))
+      const qs = params.toString()
+      router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false })
+    },
+    [pathname, router, searchParams]
+  )
+
   const resetFilters = useCallback(() => {
-    filtersRef.current = initialFilters
-    setFilters(initialFilters)
-    fetchProducts(initialFilters)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fetchProducts])
+    const reset: FilterState = { ...initialFilters, page: 1 }
+    filtersRef.current = reset
+    setFilters(reset)
+    fetchProducts(reset)
+    syncPageToUrl(1)
+  }, [fetchProducts, initialFilters, syncPageToUrl])
 
   const activeFilterChips = useMemo(() => {
     const chips: Array<{ label: string; clear: () => void }> = []
@@ -195,6 +222,28 @@ export default function ShopBrowser({ initialResult, meta, initialQuery = "" }: 
   const showingFrom =
     result.total === 0 ? 0 : (result.page - 1) * result.pageSize + 1
   const showingTo = Math.min(result.page * result.pageSize, result.total)
+
+  const goToPage = useCallback(
+    (page: number) => {
+      const nextPage = Math.max(1, Math.min(page, result.totalPages))
+      applyFilter({ page: nextPage })
+      syncPageToUrl(nextPage)
+      requestAnimationFrame(() => {
+        document.getElementById("all-products")?.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        })
+      })
+    },
+    [applyFilter, result.totalPages, syncPageToUrl]
+  )
+
+  const paginationProps = {
+    page: result.page,
+    totalPages: result.totalPages,
+    total: result.total,
+    onPage: goToPage,
+  }
 
   const SidebarContent = (
     <FilterSidebar
@@ -303,10 +352,17 @@ export default function ShopBrowser({ initialResult, meta, initialQuery = "" }: 
             <EmptyState onReset={resetFilters} />
           ) : (
             <>
-              <div className="row g-4" style={{ opacity: isPending ? 0.55 : 1, transition: "opacity 0.15s" }}>
+              {result.totalPages > 1 && (
+                <Pagination key="shop-pagination-top" {...paginationProps} />
+              )}
+
+              <div
+                className="row shop-product-grid g-2 g-sm-3 g-md-4"
+                style={{ opacity: isPending ? 0.55 : 1, transition: "opacity 0.15s" }}
+              >
                 {result.products.map((product, idx) => (
                   <motion.div
-                    className="col-xl-4 col-lg-6 col-md-6"
+                    className="col-6 col-sm-4 col-md-6 col-lg-6 col-xl-4"
                     key={product.id}
                     initial={{ opacity: 0, y: 18 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -318,11 +374,7 @@ export default function ShopBrowser({ initialResult, meta, initialQuery = "" }: 
               </div>
 
               {result.totalPages > 1 && (
-                <Pagination
-                  page={result.page}
-                  totalPages={result.totalPages}
-                  onPage={(num) => applyFilter({ page: num })}
-                />
+                <Pagination key="shop-pagination-bottom" {...paginationProps} />
               )}
             </>
           )}
@@ -467,29 +519,6 @@ function FilterSidebar({
         </a>
       </div>
 
-      <style jsx>{`
-        :global(.shop-search-input) {
-          background: #ffffff !important;
-          border: 1px solid rgba(0, 0, 0, 0.08) !important;
-          color: #09162a !important;
-          font-weight: 600;
-        }
-        :global(.shop-search-input::placeholder) {
-          color: rgba(0, 0, 0, 0.4) !important;
-          font-weight: 500;
-        }
-        :global(.shop-search-input:focus) {
-          border-color: var(--p1-clr) !important;
-          color: #09162a !important;
-          box-shadow: 0 0 0 3px rgba(19, 236, 138, 0.12) !important;
-        }
-        :global(.check-row:hover) {
-          background: rgba(0, 0, 0, 0.03) !important;
-        }
-        :global(.check-row[aria-pressed="true"]:hover) {
-          background: rgba(19, 236, 138, 0.14) !important;
-        }
-      `}</style>
     </div>
   )
 }
@@ -722,60 +751,85 @@ function EmptyState({ onReset }: { onReset: () => void }) {
 function Pagination({
   page,
   totalPages,
+  total,
   onPage,
 }: {
   page: number
   totalPages: number
+  total: number
   onPage: (n: number) => void
 }) {
-  // Show up to 5 page numbers, centered on the current page.
-  const start = Math.max(1, page - 2)
-  const end = Math.min(totalPages, start + 4)
-  const realStart = Math.max(1, end - 4)
-  const nums: number[] = []
-  for (let i = realStart; i <= end; i++) nums.push(i)
+  const pageItems = useMemo(() => {
+    if (totalPages <= 7) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1) as Array<number | "ellipsis">
+    }
+
+    const items: Array<number | "ellipsis"> = [1]
+    const left = Math.max(2, page - 1)
+    const right = Math.min(totalPages - 1, page + 1)
+
+    if (left > 2) items.push("ellipsis")
+    for (let i = left; i <= right; i++) items.push(i)
+    if (right < totalPages - 1) items.push("ellipsis")
+    items.push(totalPages)
+    return items
+  }, [page, totalPages])
 
   return (
-    <div className="pagination-wrapper mt-60">
-      <ul className="blog-pagination d-flex gap-2 list-unstyled justify-content-center mb-0 flex-wrap">
-        <li>
-          <button
-            type="button"
-            onClick={() => onPage(Math.max(1, page - 1))}
-            disabled={page <= 1}
-            className="d-center rounded-circle border-0 fw_700 glass-card black"
-            style={{ width: 45, height: 45, opacity: page <= 1 ? 0.4 : 1 }}
-          >
-            ‹
-          </button>
-        </li>
-        {nums.map((num) => {
-          const active = num === page
-          return (
-            <li key={num}>
-              <button
-                type="button"
-                onClick={() => onPage(num)}
-                className={`d-center rounded-circle border-0 fw_700 ${active ? "p1-bg text-white" : "glass-card black"}`}
-                style={{ width: 45, height: 45 }}
-              >
-                {num}
-              </button>
-            </li>
-          )
-        })}
-        <li>
-          <button
-            type="button"
-            onClick={() => onPage(Math.min(totalPages, page + 1))}
-            disabled={page >= totalPages}
-            className="d-center rounded-circle border-0 fw_700 glass-card black"
-            style={{ width: 45, height: 45, opacity: page >= totalPages ? 0.4 : 1 }}
-          >
-            ›
-          </button>
-        </li>
-      </ul>
+    <div className="shop-pagination mt-4 mb-2">
+      <p
+        className="text-center pra"
+        style={{ fontSize: "0.82rem", fontWeight: 600, marginBottom: "0.75rem" }}
+      >
+        Page {page} of {totalPages} · {total} product{total === 1 ? "" : "s"}
+      </p>
+      <div className="pagination-wrapper">
+        <ul className="blog-pagination d-flex gap-2 list-unstyled justify-content-center mb-0 flex-wrap align-items-center">
+          <li>
+            <button
+              type="button"
+              onClick={() => onPage(page - 1)}
+              disabled={page <= 1}
+              className="d-center rounded-circle border-0 fw_700 glass-card black"
+              style={{ width: 45, height: 45, opacity: page <= 1 ? 0.4 : 1 }}
+              aria-label="Previous page"
+            >
+              <ChevronLeft size={18} />
+            </button>
+          </li>
+          {pageItems.map((item, idx) =>
+            item === "ellipsis" ? (
+              <li key={`ellipsis-${idx}`} className="px-1 pra" style={{ fontWeight: 700 }}>
+                …
+              </li>
+            ) : (
+              <li key={item}>
+                <button
+                  type="button"
+                  onClick={() => onPage(item)}
+                  className={`d-center rounded-circle border-0 fw_700 ${item === page ? "p1-bg text-white" : "glass-card black"}`}
+                  style={{ width: 45, height: 45 }}
+                  aria-current={item === page ? "page" : undefined}
+                >
+                  {item}
+                </button>
+              </li>
+            )
+          )}
+          <li>
+            <button
+              type="button"
+              onClick={() => onPage(page + 1)}
+              disabled={page >= totalPages}
+              className="d-center rounded-circle border-0 fw_700 glass-card black"
+              style={{ width: 45, height: 45, opacity: page >= totalPages ? 0.4 : 1 }}
+              aria-label="Next page"
+            >
+              <ChevronRight size={18} />
+            </button>
+          </li>
+        </ul>
+      </div>
     </div>
   )
 }

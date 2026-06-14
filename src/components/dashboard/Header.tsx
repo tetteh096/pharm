@@ -8,6 +8,8 @@ import { LogOut, ChevronDown, Moon, Sun, UserCog } from "lucide-react"
 import { useTheme } from "@/context/ThemeContext"
 
 import { getMyProfileSnapshot } from "@/app/actions/profile"
+import { resolveDashboardPage } from "@/data/dashboard-nav"
+import { canAccessAccountSettings } from "@/lib/dashboard-rbac"
 import { DashboardHeaderSearch } from "@/components/dashboard/DashboardHeaderSearch"
 import {
   Breadcrumb,
@@ -37,22 +39,6 @@ const ROLE_LABELS: Record<string, string> = {
   STAFF: "Staff",
 }
 
-const PAGE_TITLES: Record<string, string> = {
-  "/dashboard": "Overview",
-  "/dashboard/orders": "Orders",
-  "/dashboard/accounting": "Accounting",
-  "/dashboard/products": "Inventory",
-  "/dashboard/products/new": "Add product",
-  "/dashboard/products/categories": "Categories",
-  "/dashboard/branches": "Branches",
-  "/dashboard/customers": "Patients",
-  "/dashboard/customers/new": "New patient",
-  "/dashboard/chronic": "Chronic care",
-  "/dashboard/blog": "Health blog",
-  "/dashboard/users": "Staff",
-  "/dashboard/account": "Account settings",
-}
-
 function initialsFromName(name: string) {
   return name
     .split(" ")
@@ -73,15 +59,9 @@ export function DashboardHeader() {
   const user = session?.user
   const displayName = user?.name ?? "User"
   const role = user?.role ?? "STAFF"
+  const showAccountSettings = canAccessAccountSettings(role)
   const avatarSrc = profileImage ?? user?.image ?? null
-
-  const pageTitle =
-    PAGE_TITLES[pathname] ??
-    (pathname.startsWith("/dashboard/products/") && pathname.endsWith("/edit")
-      ? "Edit product"
-      : pathname.startsWith("/dashboard/blog")
-        ? "Health blog"
-        : "Dashboard")
+  const page = resolveDashboardPage(pathname)
 
   React.useEffect(() => {
     let cancelled = false
@@ -102,13 +82,13 @@ export function DashboardHeader() {
   }, [pathname, session?.user?.image, update])
 
   return (
-    <header className="dashboard-header sticky top-0 z-30 flex h-16 shrink-0 items-center gap-3 border-b border-border/60 bg-background/90 px-3 backdrop-blur-md supports-backdrop-filter:bg-background/75 md:px-5">
+    <header className="dashboard-header sticky top-0 z-30 flex h-14 shrink-0 items-center gap-3 border-b border-border/60 bg-background/90 px-3 backdrop-blur-md supports-backdrop-filter:bg-background/75 md:px-5">
       <div className="flex min-w-0 items-center gap-2">
         <SidebarTrigger className="h-9 w-9 shrink-0" />
         <Separator orientation="vertical" className="hidden h-5 sm:block" />
         <div className="min-w-0">
           <p className="truncate text-sm font-semibold leading-tight md:hidden">
-            {pageTitle}
+            {page.title}
           </p>
           <Breadcrumb className="hidden md:block">
             <BreadcrumbList>
@@ -119,7 +99,7 @@ export function DashboardHeader() {
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
-                <BreadcrumbPage className="text-sm font-semibold">{pageTitle}</BreadcrumbPage>
+                <BreadcrumbPage className="text-sm font-semibold">{page.title}</BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
@@ -156,12 +136,8 @@ export function DashboardHeader() {
               )}
             >
               <Avatar size="lg" className="ring-2 ring-border">
-                {avatarSrc ? (
-                  <AvatarImage src={avatarSrc} alt={displayName} />
-                ) : null}
-                <AvatarFallback
-                  className="bg-gradient-to-br from-emerald-400 to-blue-600 text-xs font-bold text-white"
-                >
+                {avatarSrc ? <AvatarImage src={avatarSrc} alt={displayName} /> : null}
+                <AvatarFallback className="bg-gradient-to-br from-emerald-400 to-blue-600 text-xs font-bold text-white">
                   {initialsFromName(displayName)}
                 </AvatarFallback>
               </Avatar>
@@ -178,9 +154,7 @@ export function DashboardHeader() {
             <DropdownMenuLabel className="font-normal">
               <div className="flex items-center gap-3">
                 <Avatar size="lg" className="ring-2 ring-border">
-                  {avatarSrc ? (
-                    <AvatarImage src={avatarSrc} alt={displayName} />
-                  ) : null}
+                  {avatarSrc ? <AvatarImage src={avatarSrc} alt={displayName} /> : null}
                   <AvatarFallback className="bg-gradient-to-br from-emerald-400 to-blue-600 text-xs font-bold text-white">
                     {initialsFromName(displayName)}
                   </AvatarFallback>
@@ -193,13 +167,17 @@ export function DashboardHeader() {
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem asChild className="cursor-pointer">
-              <Link href="/dashboard/account">
-                <UserCog className="mr-2 h-4 w-4" />
-                Account settings
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
+            {showAccountSettings ? (
+              <>
+                <DropdownMenuItem asChild className="cursor-pointer">
+                  <Link href="/dashboard/account">
+                    <UserCog className="mr-2 h-4 w-4" />
+                    Account settings
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+              </>
+            ) : null}
             <DropdownMenuItem
               className="cursor-pointer text-destructive focus:text-destructive"
               onClick={() => signOut({ callbackUrl: "/signin" })}

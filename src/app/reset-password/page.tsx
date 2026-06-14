@@ -3,7 +3,6 @@
 import { Suspense, useState, useEffect } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
 import Header from "@/components/medizen/Header"
-import Footer from "@/components/medizen/Footer"
 import PageTitle from "@/components/medizen/PageTitle"
 import { motion } from "framer-motion"
 import Link from "next/link"
@@ -131,7 +130,6 @@ function ResetPasswordContent() {
           </div>
         </section>
       </main>
-      <Footer />
     </>
   )
 }

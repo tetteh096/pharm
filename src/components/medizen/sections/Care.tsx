@@ -4,6 +4,8 @@ import React, { useEffect, useState, useRef } from "react";
 import { motion, useMotionValue, animate } from "framer-motion";
 import { useInView } from "framer-motion";
 
+import { pharmacyStats } from "@/data/pharmacy-stats";
+
 const CounterItem = ({ target, label, delay, suffix = "" }: { target: number, label: string, delay: number, suffix?: string }) => {
   const count = useMotionValue(0);
   const [displayValue, setDisplayValue] = useState(0);
@@ -51,9 +53,15 @@ const Care = () => {
             </div>
             <div className="col-lg-7">
               <div className="care-counter">
-                <CounterItem target={50} label="Expert Pharmacists" delay={0.4} />
-                <CounterItem target={150} label="Medicine Varieties" delay={0.5} suffix="k" />
-                <CounterItem target={99} label="Customer Satisfaction" delay={0.6} suffix="%" />
+                {pharmacyStats.map((stat, i) => (
+                  <CounterItem
+                    key={stat.label}
+                    target={stat.value}
+                    label={stat.label}
+                    delay={0.4 + i * 0.1}
+                    suffix={stat.suffix}
+                  />
+                ))}
               </div>
             </div>
           </div>

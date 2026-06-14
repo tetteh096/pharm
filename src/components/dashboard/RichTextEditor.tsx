@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useEffect, useRef } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { LexicalComposer } from "@lexical/react/LexicalComposer"
 import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin"
 import { ContentEditable } from "@lexical/react/LexicalContentEditable"
@@ -16,33 +16,70 @@ import { ListItemNode, ListNode } from "@lexical/list"
 import { LinkNode } from "@lexical/link"
 import { CodeNode } from "@lexical/code"
 import { $generateHtmlFromNodes, $generateNodesFromDOM } from "@lexical/html"
-import { $getRoot, $insertNodes, EditorState, FORMAT_TEXT_COMMAND, FORMAT_ELEMENT_COMMAND } from "lexical"
+import {
+  $getRoot,
+  $insertNodes,
+  EditorState,
+  FORMAT_TEXT_COMMAND,
+} from "lexical"
 import { $createHeadingNode, $createQuoteNode } from "@lexical/rich-text"
 import { $createListNode, $createListItemNode } from "@lexical/list"
 import { $setBlocksType } from "@lexical/selection"
 import { $getSelection, $isRangeSelection, UNDO_COMMAND, REDO_COMMAND } from "lexical"
 import {
-  Bold, Italic, Underline, List, ListOrdered,
-  Heading1, Heading2, Heading3, Quote, Undo2, Redo2, Image
+  Bold,
+  Italic,
+  Underline,
+  List,
+  ListOrdered,
+  Heading1,
+  Heading2,
+  Heading3,
+  Quote,
+  Undo2,
+  Redo2,
+  Image,
+  Loader2,
 } from "lucide-react"
 
-// ─── Toolbar ────────────────────────────────────────────────────────────────
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import { $createImageNode, ImageNode } from "@/components/dashboard/lexical/ImageNode"
+import { processUploadImage } from "@/lib/client-image"
+import { toast } from "sonner"
 
 function ToolbarButton({
-  onClick, title, children, active,
+  onClick,
+  title,
+  children,
+  active,
+  disabled,
 }: {
-  onClick: () => void; title: string; children: React.ReactNode; active?: boolean
+  onClick: () => void
+  title: string
+  children: React.ReactNode
+  active?: boolean
+  disabled?: boolean
 }) {
   return (
     <button
       type="button"
       title={title}
+      disabled={disabled}
       onClick={onClick}
-      className={`p-2 rounded-md transition-colors text-sm ${
+      className={`rounded-md p-2 text-sm transition-colors ${
         active
           ? "bg-primary text-primary-foreground"
           : "text-muted-foreground hover:bg-muted hover:text-foreground"
-      }`}
+      } disabled:opacity-50`}
     >
       {children}
     </button>
@@ -50,10 +87,16 @@ function ToolbarButton({
 }
 
 function Divider() {
-  return <div className="w-px h-6 bg-border mx-1" />
+  return <div className="mx-1 h-6 w-px bg-border" />
 }
 
-function Toolbar({ onImageInsert }: { onImageInsert: () => void }) {
+function Toolbar({
+  onImageInsert,
+  insertingImage,
+}: {
+  onImageInsert: () => void
+  insertingImage: boolean
+}) {
   const [editor] = useLexicalComposerContext()
 
   const formatText = (format: "bold" | "italic" | "underline" | "strikethrough") => {
@@ -92,7 +135,7 @@ function Toolbar({ onImageInsert }: { onImageInsert: () => void }) {
   }
 
   return (
-    <div className="flex flex-wrap items-center gap-0.5 px-3 py-2 border-b border-border bg-muted/40 rounded-t-md">
+    <div className="flex flex-wrap items-center gap-0.5 rounded-t-md border-b border-border bg-muted/40 px-3 py-2">
       <ToolbarButton onClick={() => editor.dispatchCommand(UNDO_COMMAND, undefined)} title="Undo">
         <Undo2 size={15} />
       </ToolbarButton>
@@ -130,15 +173,16 @@ function Toolbar({ onImageInsert }: { onImageInsert: () => void }) {
         <Quote size={15} />
       </ToolbarButton>
       <Divider />
-      <ToolbarButton onClick={onImageInsert} title="Insert Image">
-        <Image size={15} />
+      <ToolbarButton
+        onClick={onImageInsert}
+        title="Insert image into article"
+        disabled={insertingImage}
+      >
+        {insertingImage ? <Loader2 size={15} className="animate-spin" /> : <Image size={15} />}
       </ToolbarButton>
     </div>
   )
 }
-
-// ─── HTML Sync Plugin ────────────────────────────────────────────────────────
-// Converts editor state → HTML string on every change
 
 function HtmlPlugin({ onChange }: { onChange: (html: string) => void }) {
   const [editor] = useLexicalComposerContext()
@@ -155,9 +199,6 @@ function HtmlPlugin({ onChange }: { onChange: (html: string) => void }) {
 
   return <OnChangePlugin onChange={handleChange} />
 }
-
-// ─── Initial HTML Plugin ─────────────────────────────────────────────────────
-// Seeds the editor with an existing HTML string ONCE on mount.
 
 function InitialHtmlPlugin({ html }: { html: string }) {
   const [editor] = useLexicalComposerContext()
@@ -183,59 +224,143 @@ function InitialHtmlPlugin({ html }: { html: string }) {
   return null
 }
 
-// ─── Image Insert Plugin ─────────────────────────────────────────────────────
-
-function ImageInsertPlugin({ triggerRef }: { triggerRef: React.MutableRefObject<(() => void) | null> }) {
+function ImageInsertPlugin({
+  triggerRef,
+  onBusyChange,
+}: {
+  triggerRef: React.MutableRefObject<(() => void) | null>
+  onBusyChange: (busy: boolean) => void
+}) {
   const [editor] = useLexicalComposerContext()
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [pendingFile, setPendingFile] = useState<File | null>(null)
+  const [pendingSrc, setPendingSrc] = useState("")
+  const [altText, setAltText] = useState("")
+  const [dialogOpen, setDialogOpen] = useState(false)
+
+  const insertImage = useCallback(
+    (src: string, alt: string) => {
+      editor.update(() => {
+        const selection = $getSelection()
+        if ($isRangeSelection(selection)) {
+          $insertNodes([$createImageNode(src, alt)])
+        } else {
+          $insertNodes([$createImageNode(src, alt)])
+        }
+      })
+    },
+    [editor]
+  )
 
   useEffect(() => {
-    triggerRef.current = () => {
-      const input = document.createElement("input")
-      input.type = "file"
-      input.accept = "image/*"
-      input.onchange = () => {
-        const file = input.files?.[0]
-        if (!file) return
-        const reader = new FileReader()
-        reader.onloadend = () => {
-          const src = reader.result as string
-          editor.update(() => {
-            const selection = $getSelection()
-            if ($isRangeSelection(selection)) {
-              // Insert as HTML img tag via a paragraph
-              selection.insertText(`[image: ${file.name}]`)
-            }
-          })
-          // Insert actual image by modifying HTML
-          editor.update(() => {
-            const root = $getRoot()
-            const lastChild = root.getLastChild()
-            if (lastChild) {
-              lastChild.selectEnd()
-            }
-          })
-          // Append image HTML
-          const imgHtml = `<img src="${src}" alt="${file.name}" style="max-width:100%;border-radius:8px;margin:12px 0;" />`
-          editor.update(() => {
-            const parser = new DOMParser()
-            const doc = parser.parseFromString(`<p>${imgHtml}</p>`, "text/html")
-            const nodes = $generateNodesFromDOM(editor, doc)
-            const selection = $getSelection()
-            if ($isRangeSelection(selection)) {
-              $insertNodes(nodes)
-            }
-          })
-        }
-        reader.readAsDataURL(file)
-      }
-      input.click()
+    triggerRef.current = () => fileInputRef.current?.click()
+  }, [triggerRef])
+
+  async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    e.target.value = ""
+    if (!file) return
+
+    if (file.size > 8 * 1024 * 1024) {
+      toast.error("Choose an image under 8 MB")
+      return
     }
-  }, [editor, triggerRef])
 
-  return null
+    onBusyChange(true)
+    try {
+      const processed = await processUploadImage(file, {
+        maxWidth: 1200,
+        maxHeight: 1200,
+        quality: 0.82,
+      })
+      setPendingFile(file)
+      setPendingSrc(processed.dataUrl)
+      setAltText(file.name.replace(/\.[^.]+$/, "").replace(/[-_]+/g, " "))
+      setDialogOpen(true)
+    } catch {
+      toast.error("Could not add that image. Try JPG, PNG, or WEBP.")
+    } finally {
+      onBusyChange(false)
+    }
+  }
+
+  function confirmInsert() {
+    if (!pendingSrc) return
+    insertImage(pendingSrc, altText.trim())
+    setDialogOpen(false)
+    setPendingFile(null)
+    setPendingSrc("")
+    setAltText("")
+    toast.success("Image added to article")
+  }
+
+  return (
+    <>
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={handleFileChange}
+      />
+
+      <Dialog
+        open={dialogOpen}
+        onOpenChange={(open) => {
+          setDialogOpen(open)
+          if (!open) {
+            setPendingFile(null)
+            setPendingSrc("")
+            setAltText("")
+          }
+        }}
+      >
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Insert image</DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            {pendingSrc ? (
+              <div className="overflow-hidden rounded-lg border bg-muted/30">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={pendingSrc}
+                  alt="Preview"
+                  className="max-h-56 w-full object-contain"
+                />
+              </div>
+            ) : null}
+
+            <div className="space-y-2">
+              <Label htmlFor="blog-image-alt">Alt text (for accessibility)</Label>
+              <Input
+                id="blog-image-alt"
+                value={altText}
+                onChange={(e) => setAltText(e.target.value)}
+                placeholder="Describe what the image shows"
+              />
+              {pendingFile ? (
+                <p className="text-xs text-muted-foreground">
+                  Resized automatically for the website. Original: {pendingFile.name}
+                </p>
+              ) : null}
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button type="button" onClick={confirmInsert}>
+              Insert image
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
+  )
 }
-
-// ─── Main Export ─────────────────────────────────────────────────────────────
 
 const theme = {
   heading: {
@@ -267,29 +392,34 @@ interface RichTextEditorProps {
 
 export default function RichTextEditor({ value, onChange }: RichTextEditorProps) {
   const imageInsertRef = useRef<(() => void) | null>(null)
+  const [insertingImage, setInsertingImage] = useState(false)
 
   const initialConfig = {
     namespace: "MedizenBlogEditor",
     theme,
-    nodes: [HeadingNode, QuoteNode, ListNode, ListItemNode, LinkNode, CodeNode],
+    nodes: [HeadingNode, QuoteNode, ListNode, ListItemNode, LinkNode, CodeNode, ImageNode],
     onError: (error: Error) => console.error("Lexical error:", error),
   }
 
   return (
-    <div className="bg-background rounded-md border border-input overflow-hidden">
+    <div className="overflow-hidden rounded-md border border-input bg-background">
       <LexicalComposer initialConfig={initialConfig}>
-        <Toolbar onImageInsert={() => imageInsertRef.current?.()} />
+        <Toolbar
+          onImageInsert={() => imageInsertRef.current?.()}
+          insertingImage={insertingImage}
+        />
         <div className="relative min-h-[400px]">
           <RichTextPlugin
             contentEditable={
               <ContentEditable
-                className="min-h-[400px] p-4 outline-none text-foreground text-base leading-relaxed focus:ring-0"
+                className="min-h-[400px] p-4 text-base leading-relaxed text-foreground outline-none focus:ring-0"
                 aria-label="Blog content editor"
               />
             }
             placeholder={
-              <div className="absolute top-4 left-4 text-muted-foreground/50 pointer-events-none select-none text-base">
-                Start writing your article here...
+              <div className="pointer-events-none absolute left-4 top-4 select-none text-base text-muted-foreground/50">
+                Start writing your article here. Use the image button to add photos inside the
+                article.
               </div>
             }
             ErrorBoundary={LexicalErrorBoundary}
@@ -300,7 +430,10 @@ export default function RichTextEditor({ value, onChange }: RichTextEditorProps)
           <LinkPlugin />
           <InitialHtmlPlugin html={value} />
           <HtmlPlugin onChange={onChange} />
-          <ImageInsertPlugin triggerRef={imageInsertRef} />
+          <ImageInsertPlugin
+            triggerRef={imageInsertRef}
+            onBusyChange={setInsertingImage}
+          />
         </div>
       </LexicalComposer>
     </div>

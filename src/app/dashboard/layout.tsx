@@ -6,6 +6,13 @@ import { DashboardHeader } from "@/components/dashboard/Header"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { AuthProvider } from "@/components/providers/AuthProvider"
 import { Toaster } from "@/components/ui/sonner"
+import type { Metadata } from "next"
+
+// Private staff area — never index any dashboard route.
+export const metadata: Metadata = {
+  title: "Dashboard",
+  robots: { index: false, follow: false },
+}
 
 export default function DashboardLayout({
   children,

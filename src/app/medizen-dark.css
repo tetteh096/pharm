@@ -35,8 +35,14 @@ body.dark-mode h2,
 body.dark-mode h3, 
 body.dark-mode h4, 
 body.dark-mode h5, 
-body.dark-mode h6, 
-body.dark-mode a {
+body.dark-mode h6 {
+  color: var(--header) !important;
+}
+
+/* Content links keep accent/muted colors unless explicitly styled */
+body.dark-mode .medizen-wrapper .footer-section a,
+body.dark-mode .medizen-wrapper .submenu li a,
+body.dark-mode .medizen-wrapper .header-1 .main-menu a {
   color: var(--header) !important;
 }
 
@@ -468,4 +474,472 @@ body.dark-mode ::-webkit-scrollbar-track {
 .cursor-outline,
 .cursor-dot {
   z-index: 99999999 !important;
+}
+
+/* ─── Storefront dark mode: section & surface fixes ─── */
+body.dark-mode .medizen-wrapper {
+  background-color: var(--body);
+  color: var(--text);
+}
+
+body.dark-mode .text-muted {
+  color: var(--pra) !important;
+}
+
+body.dark-mode .bg-white {
+  background-color: #1a1a1f !important;
+}
+
+body.dark-mode .cmn-border {
+  border-color: rgba(255, 255, 255, 0.14) !important;
+}
+
+/* Category / service cards */
+body.dark-mode .svc-card {
+  background-color: #1a1a1f !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+body.dark-mode .svc-card-illus--boxed,
+body.dark-mode .svc-drawer-illus--boxed {
+  background: #fff !important;
+  border-color: rgba(0, 0, 0, 0.08) !important;
+}
+body.dark-mode .svc-panel,
+body.dark-mode .svc-drawer {
+  background: #161616 !important;
+  color: #e5e5e5 !important;
+}
+body.dark-mode .svc-panel-header {
+  background: linear-gradient(135deg, #040a12 0%, #0a1628 100%) !important;
+}
+body.dark-mode .svc-panel-close:hover {
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Special / pharmacy care section */
+body.dark-mode .special-care-section .special-tag {
+  background: #1a1a1f !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  color: #fff !important;
+}
+body.dark-mode .special-care-section .special-tag:hover {
+  color: #000 !important;
+}
+body.dark-mode .special-care-section > div[style*="borderTop"] {
+  border-top-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Features section */
+body.dark-mode .feature-section .featue-wrapper {
+  background-color: #1a1a1f !important;
+}
+body.dark-mode .feat-li {
+  color: rgba(255, 255, 255, 0.78) !important;
+}
+body.dark-mode .feature-section .feature-inner .feature-items .feature-left .feature-list li::before {
+  background: #666 !important;
+}
+
+/* Sponsor marquee */
+body.dark-mode .sponsor-text-slide.white-bg {
+  background-color: #141414 !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+body.dark-mode .text-slide-item {
+  color: #f0f0f0 !important;
+}
+
+/* Choose section glass cards */
+body.dark-mode .choose-feature-pill {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border-color: rgba(255, 255, 255, 0.18) !important;
+  color: #fff !important;
+  box-shadow: none !important;
+}
+body.dark-mode .choose-copy-card,
+body.dark-mode .choose-photo-copy {
+  background: rgba(16, 20, 28, 0.94) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  color: #ececec !important;
+}
+body.dark-mode .choose-copy-card h4,
+body.dark-mode .choose-photo-copy h4 {
+  color: #fff !important;
+}
+body.dark-mode .choose-copy-card p,
+body.dark-mode .choose-photo-copy p {
+  color: rgba(255, 255, 255, 0.72) !important;
+}
+body.dark-mode .choose-mini-item {
+  background: rgba(255, 255, 255, 0.06) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+body.dark-mode .choose-mini-item span {
+  color: rgba(255, 255, 255, 0.62) !important;
+}
+body.dark-mode .choose-side-badge {
+  background: rgba(16, 20, 28, 0.92) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  color: #fff !important;
+}
+body.dark-mode .choose-inline-link {
+  color: #6ea8ff !important;
+}
+
+/* About floating stat cards */
+body.dark-mode .about-section .bg-white,
+body.dark-mode .about-section .shadow-lg {
+  background-color: #1e1e24 !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Care counters — green band keeps dark text */
+body.dark-mode .care-counter-wrap .care-counter-text h3.black {
+  color: #090a0b !important;
+}
+body.dark-mode .counter-items h2,
+body.dark-mode .counter-items h2 span {
+  color: #fff !important;
+}
+
+/* Product cards */
+body.dark-mode .product-card-link {
+  color: inherit !important;
+}
+body.dark-mode .product-card-link .border-black\/5,
+body.dark-mode .product-card-link [class*="border-black"] {
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+body.dark-mode .product-card-link .text-decoration-line-through {
+  color: rgba(255, 255, 255, 0.45) !important;
+}
+
+/* News sidebar cards */
+body.dark-mode .news-section .side-news-item,
+body.dark-mode .news-section .rounded-4[style*="background: #ffffff"],
+body.dark-mode .news-section .rounded-4[style*="background:#ffffff"] {
+  background: #1a1a1f !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+body.dark-mode .news-section .news-image[style*="background: #f4f6f8"] {
+  background: #252528 !important;
+}
+
+/* Buttons with black text / dark arrows */
+body.dark-mode .common-btn.black,
+body.dark-mode .common-btn.cmn-border.black {
+  color: #fff !important;
+}
+body.dark-mode .common-btn.black img[src*="arrow-right-black"],
+body.dark-mode .special-care-section .special-tag img[src*="arrow-right-black"] {
+  filter: invert(1);
+}
+body.dark-mode .common-btn.black:hover {
+  color: var(--n700-clr) !important;
+}
+body.dark-mode .common-btn.black:hover img[src*="arrow-right-black"] {
+  filter: none;
+}
+
+/* Appointment inputs stay light for readability */
+body.dark-mode .appt-parallax .appt-input {
+  background: rgba(255, 255, 255, 0.96) !important;
+  color: #0c1524 !important;
+}
+body.dark-mode .appt-parallax .appt-input::placeholder {
+  color: rgba(12, 21, 36, 0.58) !important;
+}
+
+body.dark-mode .news-section .news-thumb[style*="background: #f4f6f8"],
+body.dark-mode .news-section .news-thumb[style*="background:#f4f6f8"] {
+  background: #252528 !important;
+}
+body.dark-mode .news-list-card .black.hover-p1 {
+  color: #fff !important;
+}
+
+/* SSFS scroll showcase + services page */
+body.dark-mode .ssfs-section {
+  background: #121218 !important;
+}
+body.dark-mode .ssfs-img-card {
+  background: #1a1a1f !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.35) !important;
+}
+body.dark-mode .ssfs-step-circle {
+  background: #252528 !important;
+  color: rgba(255, 255, 255, 0.55) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+body.dark-mode .ssfs-step--active .ssfs-step-circle {
+  background: var(--p1-clr) !important;
+  color: #000 !important;
+  border-color: var(--p1-clr) !important;
+}
+body.dark-mode .ssfs-step--done .ssfs-step-circle {
+  background: rgba(19, 236, 138, 0.15) !important;
+  color: var(--p1-clr) !important;
+  border-color: rgba(19, 236, 138, 0.3) !important;
+}
+body.dark-mode .ssfs-step-line {
+  background: rgba(255, 255, 255, 0.1) !important;
+}
+body.dark-mode .ssfs-step-line--done {
+  background: var(--p1-clr) !important;
+}
+body.dark-mode .ssfs-step-label,
+body.dark-mode .ssfs-title,
+body.dark-mode .ssfs-active-step-mobile {
+  color: #fff !important;
+}
+body.dark-mode .ssfs-desc {
+  color: rgba(255, 255, 255, 0.72) !important;
+}
+body.dark-mode .ssfs-cta {
+  background: var(--p1-clr) !important;
+  color: #000 !important;
+}
+body.dark-mode .ssfs-cta:hover {
+  color: #000 !important;
+  box-shadow: 0 12px 32px rgba(19, 236, 138, 0.25) !important;
+}
+body.dark-mode .ssfs-cta-icon {
+  background: rgba(0, 0, 0, 0.12) !important;
+}
+
+/* Service cards grid */
+body.dark-mode .services-section.main-style .svc-card-v2 {
+  background: #1a1a1f !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+body.dark-mode .services-section.main-style .svc-card-v2:hover {
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.42) !important;
+}
+body.dark-mode .services-section.main-style .svc-card-v2-title {
+  color: #fff !important;
+}
+body.dark-mode .services-section.main-style .svc-card-v2-desc {
+  color: rgba(255, 255, 255, 0.65) !important;
+}
+body.dark-mode .services-section.main-style .svc-card-v2-btn {
+  background: var(--p1-clr) !important;
+  color: #000 !important;
+}
+body.dark-mode .services-section.main-style .svc-card-v2-btn-icon {
+  background: rgba(0, 0, 0, 0.12) !important;
+  border-left-color: rgba(0, 0, 0, 0.1) !important;
+}
+body.dark-mode .svc-eyebrow {
+  background: rgba(19, 236, 138, 0.12) !important;
+  color: var(--p1-clr) !important;
+}
+
+/* Services trust section */
+body.dark-mode .svc-trust-section {
+  border-top-color: rgba(255, 255, 255, 0.08) !important;
+}
+body.dark-mode .svc-trust-item {
+  background: #1a1a1f !important;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.28) !important;
+}
+body.dark-mode .svc-trust-title {
+  color: #fff !important;
+}
+body.dark-mode .svc-trust-text,
+body.dark-mode .svc-trust-cta-lead {
+  color: rgba(255, 255, 255, 0.68) !important;
+}
+body.dark-mode .svc-trust-icon {
+  background: rgba(19, 236, 138, 0.14) !important;
+  color: var(--p1-clr) !important;
+}
+
+/* Popular Products section */
+body.dark-mode .med-preview-section {
+  background: linear-gradient(
+    165deg,
+    #1a2233 0%,
+    #151b28 48%,
+    #0f1420 100%
+  ) !important;
+  border-top-color: rgba(142, 162, 204, 0.2) !important;
+  border-bottom-color: rgba(255, 255, 255, 0.06) !important;
+}
+body.dark-mode .med-preview-section::before {
+  background: rgba(142, 162, 204, 0.1) !important;
+}
+body.dark-mode .med-preview-section::after {
+  background: rgba(255, 255, 255, 0.03) !important;
+}
+body.dark-mode .med-preview-section .pra {
+  color: rgba(255, 255, 255, 0.68) !important;
+}
+body.dark-mode .med-preview-card {
+  background: #1a1a1f !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 10px 36px rgba(0, 0, 0, 0.28) !important;
+}
+body.dark-mode .med-preview-card:hover {
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.38) !important;
+}
+body.dark-mode .med-preview-nav-btn {
+  background: rgba(255, 255, 255, 0.06) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  box-shadow: none !important;
+}
+body.dark-mode .med-preview-nav-btn:hover {
+  background: var(--p1-clr) !important;
+  border-color: var(--p1-clr) !important;
+}
+
+/* FAQ + Testimonials */
+body.dark-mode .home-help-section {
+  background: linear-gradient(180deg, #121218 0%, #141820 100%) !important;
+  border-top-color: rgba(255, 255, 255, 0.06) !important;
+}
+body.dark-mode .home-help-divider {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.1) 20%,
+    rgba(255, 255, 255, 0.1) 80%,
+    transparent
+  ) !important;
+}
+body.dark-mode .home-faq-item {
+  background: #1a1a1f !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+body.dark-mode .home-faq-trigger {
+  color: #fff !important;
+}
+body.dark-mode .home-faq-body p {
+  color: rgba(255, 255, 255, 0.68) !important;
+}
+body.dark-mode .home-testimonial-card {
+  background: #1a1a1f !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+body.dark-mode .home-testimonial-quote {
+  color: rgba(255, 255, 255, 0.72) !important;
+}
+body.dark-mode .home-testimonial-name {
+  color: #fff !important;
+}
+body.dark-mode .home-testimonial-area {
+  color: rgba(255, 255, 255, 0.5) !important;
+}
+body.dark-mode .home-testimonial-author {
+  border-top-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Slide-in service panel */
+body.dark-mode .svc-panel-header {
+  background: linear-gradient(135deg, #040a12 0%, #0a1628 100%) !important;
+  border-bottom-color: rgba(255, 255, 255, 0.08) !important;
+}
+body.dark-mode .svc-panel-title,
+body.dark-mode .svc-panel-intro,
+body.dark-mode .svc-step-label {
+  color: #fff !important;
+}
+body.dark-mode .svc-panel-steps-heading {
+  color: rgba(255, 255, 255, 0.45) !important;
+}
+body.dark-mode .svc-step-detail {
+  color: rgba(255, 255, 255, 0.62) !important;
+}
+body.dark-mode .svc-panel-step {
+  border-bottom-color: rgba(255, 255, 255, 0.08) !important;
+}
+body.dark-mode .svc-panel-note {
+  background: rgba(19, 236, 138, 0.1) !important;
+  color: rgba(255, 255, 255, 0.78) !important;
+}
+body.dark-mode .svc-panel-close {
+  border-color: rgba(255, 255, 255, 0.16) !important;
+  color: #fff !important;
+}
+body.dark-mode .svc-panel-close:hover {
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Footer newsletter input area */
+body.dark-mode .footer-section .footer-newsletter input {
+  background: #2a2a2a !important;
+  border-color: #444 !important;
+  color: #fff !important;
+}
+
+/* Team page */
+body.dark-mode .team-ceo-section {
+  border-bottom-color: rgba(255, 255, 255, 0.08) !important;
+}
+body.dark-mode .team-ceo-photo {
+  background: #0c0f14 !important;
+}
+body.dark-mode .team-ceo-message,
+body.dark-mode .team-muted-text {
+  color: rgba(255, 255, 255, 0.74) !important;
+}
+body.dark-mode .team-ceo-message {
+  color: rgba(255, 255, 255, 0.82) !important;
+}
+body.dark-mode .team-ceo-signature {
+  border-top-color: rgba(255, 255, 255, 0.1) !important;
+}
+body.dark-mode .team-ceo-sign-title {
+  color: rgba(255, 255, 255, 0.55) !important;
+}
+body.dark-mode .team-staff-section {
+  background: linear-gradient(135deg, #121218 0%, #141820 100%) !important;
+}
+body.dark-mode .team-staff-card {
+  background: #1a1a1f !important;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.35) !important;
+}
+body.dark-mode .team-staff-card--simple {
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+body.dark-mode .team-staff-name {
+  color: #fff !important;
+}
+body.dark-mode .team-staff-role {
+  color: #8eb4ff !important;
+}
+body.dark-mode .team-staff-social a {
+  background: rgba(255, 255, 255, 0.04) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  color: rgba(255, 255, 255, 0.72) !important;
+}
+body.dark-mode .team-staff-social a:hover {
+  background: var(--p1-clr) !important;
+  border-color: var(--p1-clr) !important;
+  color: #000 !important;
+}
+body.dark-mode .team-branch-pill,
+body.dark-mode .team-specialty-pill {
+  background: rgba(255, 255, 255, 0.06) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  color: rgba(255, 255, 255, 0.72) !important;
+}
+body.dark-mode .team-specialty-label {
+  color: rgba(255, 255, 255, 0.45) !important;
+}
+body.dark-mode .team-slider-btn--prev {
+  background: #1a1a1f !important;
+  border-color: rgba(17, 87, 238, 0.35) !important;
+  color: #8eb4ff !important;
+}
+body.dark-mode .team-slider-btn--prev:hover {
+  background: var(--p2-clr) !important;
+  color: #fff !important;
+}
+body.dark-mode .team-slider-btn--next {
+  color: #000 !important;
+}
+body.dark-mode .team-slider-btn--next:hover {
+  color: #fff !important;
 }

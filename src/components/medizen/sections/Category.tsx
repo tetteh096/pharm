@@ -8,6 +8,7 @@ const services = [
   {
     id: 1,
     icon: "fas fa-prescription-bottle-alt",
+    image: "/photo/presciptionmg.jpg",
     title: "Prescription Management",
     summary: "Expert prescription handling and fast, accurate dispensing with full pharmacist consultation.",
     accent: "var(--p1-clr)",
@@ -25,6 +26,7 @@ const services = [
   {
     id: 2,
     icon: "fas fa-heartbeat",
+    image: "/photo/healthandwellness.jpg",
     title: "Wellness & Health",
     summary: "High-quality medications, vitamins, and health supplements to keep you at your best.",
     accent: "var(--p2-clr)",
@@ -43,6 +45,7 @@ const services = [
   {
     id: 3,
     icon: "fas fa-mortar-pestle",
+    image: "/photo/Personalcare.jpg",
     title: "Personal Care",
     summary: "A wide range of personal care and wellness essentials for your everyday routine.",
     accent: "var(--p1-clr)",
@@ -60,19 +63,21 @@ const services = [
   },
   {
     id: 4,
-    icon: "fas fa-clock",
-    title: "24-Hour Pharmacy",
-    summary: "Our Madina branch is open round the clock so help is always there when you need it.",
+    icon: "fas fa-truck",
+    image: "/delviery.jpg",
+    title: "Medication Delivery",
+    boxedIllus: true,
+    summary: "Order from our shop with pharmacist support when you need it.",
     accent: "var(--p2-clr)",
     details: {
-      tagline: "Always open. Always ready.",
-      body: "Health emergencies don't keep office hours. Our Madina branch operates 24 hours a day, 7 days a week — so whether it's 2am or a public holiday, a qualified pharmacist is on hand to assist you with medications, advice, and urgent care needs.",
+      tagline: "Delivered when you need it.",
+      body: "Can't make it to the branch? Order through our online shop and we'll arrange delivery for eligible items in our branch delivery areas. Our team confirms your order and counsels you on safe use before dispatch.",
       points: [
-        "Open 24/7 at Madina branch",
-        "Night-time emergency dispensing",
-        "On-call pharmacist consultations",
-        "Urgent medication availability",
-        "Safe, well-lit and accessible location",
+        "Browse and order from our online shop",
+        "Pharmacist review before dispatch",
+        "Home and office delivery options",
+        "Call any branch for same-day availability",
+        "WhatsApp support after your order",
       ],
     },
   },
@@ -111,29 +116,26 @@ export default function Category() {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.55, delay: i * 0.12 }}
                 viewport={{ once: true }}
-                whileHover={{ y: -8 }}
-                className="svc-card h-100 d-flex flex-column p-4 rounded-4 bg-white text-center"
+                className="svc-card h-100 d-flex flex-column rounded-4 bg-white text-center overflow-hidden"
               >
                 <div
-                  className="svc-icon mx-auto mb-4"
-                  style={{
-                    background: `linear-gradient(135deg, ${svc.accent}22, ${svc.accent}44)`,
-                    border: `2px solid ${svc.accent}44`,
-                  }}
+                  className={`svc-card-illus${svc.boxedIllus ? " svc-card-illus--boxed" : ""}`}
                 >
-                  <i className={svc.icon} style={{ color: svc.accent }} />
+                  <img src={svc.image} alt={svc.title} />
                 </div>
 
+                <div className={`d-flex flex-column flex-grow-1 px-4 pb-4${svc.boxedIllus ? " pt-3" : ""}`}>
                 <h5 className="fw_700 black mb-2">{svc.title}</h5>
                 <p className="pra fs-seven mb-4 flex-grow-1">{svc.summary}</p>
 
                 <button
                   onClick={() => setActive(svc)}
-                  className="svc-btn mt-auto"
+                  className="svc-btn mt-auto mx-auto"
                   style={{ borderColor: svc.accent, color: svc.accent }}
                 >
                   Learn More <i className="fas fa-arrow-right ms-1" />
                 </button>
+                </div>
               </motion.div>
             </div>
           ))}
@@ -180,15 +182,11 @@ export default function Category() {
                 <i className="fas fa-times" />
               </button>
 
-              {/* Icon */}
+              {/* Illustration */}
               <div
-                className="svc-drawer-icon mb-4"
-                style={{
-                  background: `linear-gradient(135deg, ${active.accent}22, ${active.accent}44)`,
-                  border: `2px solid ${active.accent}55`,
-                }}
+                className={`svc-drawer-illus mb-4${active.boxedIllus ? " svc-drawer-illus--boxed" : ""}`}
               >
-                <i className={active.icon} style={{ color: active.accent, fontSize: "2rem" }} />
+                <img src={active.image} alt={active.title} />
               </div>
 
               {/* Tagline */}

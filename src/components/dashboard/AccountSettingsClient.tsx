@@ -199,20 +199,19 @@ export function AccountSettingsClient({
   }
 
   return (
-    <div className="space-y-6 max-w-4xl">
-      <div>
+    <div className="mx-auto w-full max-w-2xl space-y-6">
+      <div className="text-center">
         <h1 className="text-2xl font-bold tracking-tight">Account settings</h1>
-        <p className="text-muted-foreground text-sm mt-1">
+        <p className="mt-1 text-sm text-muted-foreground">
           Manage your profile, picture, and password.
         </p>
       </div>
 
-      {/* Header card with avatar */}
-      <Card className="border-none shadow-md shadow-primary/5">
-        <CardContent className="p-5 flex flex-col sm:flex-row sm:items-center gap-5">
-          <div className="relative flex-shrink-0">
+      <Card className="dashboard-card overflow-hidden">
+        <CardContent className="flex flex-col items-center px-6 py-8 text-center">
+          <div className="relative mb-4">
             <div
-              className="h-24 w-24 rounded-full overflow-hidden flex items-center justify-center text-white text-xl font-bold ring-2 ring-background shadow-sm"
+              className="flex h-28 w-28 items-center justify-center overflow-hidden rounded-full text-2xl font-bold text-white shadow-md ring-4 ring-background"
               style={{
                 background: profile.image
                   ? undefined
@@ -234,13 +233,13 @@ export function AccountSettingsClient({
               type="button"
               onClick={() => fileInputRef.current?.click()}
               disabled={avatarBusy}
-              className="absolute -bottom-1 -right-1 h-8 w-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow ring-2 ring-background disabled:opacity-60"
+              className="absolute -bottom-1 -right-1 flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground shadow ring-2 ring-background disabled:opacity-60"
               aria-label="Change profile picture"
             >
               {avatarBusy ? (
-                <Loader2 size={14} className="animate-spin" />
+                <Loader2 size={15} className="animate-spin" />
               ) : (
-                <Camera size={14} />
+                <Camera size={15} />
               )}
             </button>
             <input
@@ -252,67 +251,65 @@ export function AccountSettingsClient({
             />
           </div>
 
-          <div className="min-w-0 flex-1">
-            <div className="text-lg font-semibold truncate">{profile.name}</div>
-            <div className="text-sm text-muted-foreground truncate">
-              {profile.email}
-            </div>
-            <div className="flex flex-wrap items-center gap-2 mt-2">
-              <span
-                className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium border ${ROLE_PILLS[profile.role]}`}
-              >
-                <Shield size={10} />
-                {ROLE_LABELS[profile.role]}
+          <div className="text-xl font-semibold">{profile.name}</div>
+          <div className="mt-1 text-sm text-muted-foreground">{profile.email}</div>
+
+          <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
+            <span
+              className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[11px] font-medium ${ROLE_PILLS[profile.role]}`}
+            >
+              <Shield size={10} />
+              {ROLE_LABELS[profile.role]}
+            </span>
+            {profile.department ? (
+              <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2.5 py-0.5 text-[11px] font-medium text-muted-foreground">
+                <Building2 size={10} />
+                {profile.department}
               </span>
-              {profile.department && (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-muted text-muted-foreground">
-                  <Building2 size={10} />
-                  {profile.department}
-                </span>
-              )}
-              <span className="text-[11px] text-muted-foreground">
-                Member since{" "}
-                {new Date(profile.createdAt).toLocaleDateString("en-GB", {
-                  day: "2-digit",
-                  month: "short",
-                  year: "numeric",
-                })}
-              </span>
-            </div>
-            <div className="flex items-center gap-2 mt-3">
+            ) : null}
+          </div>
+
+          <p className="mt-2 text-xs text-muted-foreground">
+            Member since{" "}
+            {new Date(profile.createdAt).toLocaleDateString("en-GB", {
+              day: "2-digit",
+              month: "short",
+              year: "numeric",
+            })}
+          </p>
+
+          <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
+            <Button
+              size="sm"
+              variant="outline"
+              className="gap-1.5"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={avatarBusy}
+            >
+              <Camera size={14} />
+              {profile.image ? "Change picture" : "Upload picture"}
+            </Button>
+            {profile.image ? (
               <Button
                 size="sm"
-                variant="outline"
-                className="gap-1.5"
-                onClick={() => fileInputRef.current?.click()}
+                variant="ghost"
+                className="gap-1.5 text-destructive hover:text-destructive"
+                onClick={removeAvatar}
                 disabled={avatarBusy}
               >
-                <Camera size={14} />
-                {profile.image ? "Change picture" : "Upload picture"}
+                <Trash2 size={14} />
+                Remove
               </Button>
-              {profile.image && (
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  className="gap-1.5 text-destructive hover:text-destructive"
-                  onClick={removeAvatar}
-                  disabled={avatarBusy}
-                >
-                  <Trash2 size={14} />
-                  Remove
-                </Button>
-              )}
-            </div>
-            <p className="text-[11px] text-muted-foreground mt-2">
-              PNG or JPG, max 1 MB. Stored privately on your account.
-            </p>
+            ) : null}
           </div>
+          <p className="mt-3 max-w-sm text-xs text-muted-foreground">
+            PNG or JPG, max 1 MB. Stored privately on your account.
+          </p>
         </CardContent>
       </Card>
 
-      <div className="grid gap-6 md:grid-cols-2">
-        {/* Profile details */}
-        <Card className="border-none shadow-md shadow-primary/5">
+      <div className="space-y-6">
+        <Card className="dashboard-card">
           <CardHeader className="pb-3">
             <CardTitle className="text-base flex items-center gap-2">
               <UserIcon size={16} className="text-primary" />
@@ -342,7 +339,7 @@ export function AccountSettingsClient({
                 className="h-10"
               />
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid gap-3 sm:grid-cols-2">
               <div className="space-y-1.5">
                 <Label htmlFor="phone" className="flex items-center gap-1.5">
                   <Phone size={12} className="text-muted-foreground" />
@@ -373,7 +370,7 @@ export function AccountSettingsClient({
                 />
               </div>
             </div>
-            <div className="pt-1 flex items-center justify-end gap-2">
+            <div className="flex items-center justify-end gap-2 pt-2">
               {dirty && (
                 <Button
                   variant="ghost"
@@ -406,8 +403,7 @@ export function AccountSettingsClient({
           </CardContent>
         </Card>
 
-        {/* Password */}
-        <Card className="border-none shadow-md shadow-primary/5">
+        <Card className="dashboard-card">
           <CardHeader className="pb-3">
             <CardTitle className="text-base flex items-center gap-2">
               <KeyRound size={16} className="text-primary" />
@@ -482,7 +478,7 @@ export function AccountSettingsClient({
                 </p>
               )}
             </div>
-            <div className="pt-1 flex items-center justify-end">
+            <div className="flex items-center justify-end pt-2">
               <Button
                 onClick={submitPassword}
                 disabled={
@@ -492,7 +488,6 @@ export function AccountSettingsClient({
                   newPw !== confirmPw
                 }
                 className="gap-2"
-                size="sm"
               >
                 {changingPw ? (
                   <Loader2 size={14} className="animate-spin" />

@@ -20,8 +20,9 @@ const compactGhs = (value: number) => {
 }
 
 const formatDateShort = (iso: string) => {
-  const d = new Date(iso)
-  return d.toLocaleDateString("en-GH", { month: "short", day: "numeric" })
+  const [y, m, d] = iso.split("-").map(Number)
+  const date = new Date(y, (m ?? 1) - 1, d ?? 1)
+  return date.toLocaleDateString("en-GH", { month: "short", day: "numeric" })
 }
 
 export function RevenueTrendChart({ data }: { data: Point[] }) {
@@ -69,13 +70,8 @@ export function RevenueTrendChart({ data }: { data: Point[] }) {
               const p = payload[0].payload as Point
               return (
                 <div className="rounded-md border bg-popover px-3 py-2 text-xs shadow-md">
-                  <div className="font-semibold mb-1">
-                    {new Date(p.date).toLocaleDateString("en-GH", {
-                      weekday: "short",
-                      month: "short",
-                      day: "numeric",
-                      year: "numeric",
-                    })}
+                  <div className="mb-1 font-semibold">
+                    {formatDateShort(p.date)}
                   </div>
                   <div className="text-muted-foreground">
                     Revenue:{" "}

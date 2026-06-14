@@ -4,6 +4,20 @@ import { revalidatePath } from "next/cache"
 import { prisma } from "@/lib/prisma"
 import { auth } from "@/auth"
 
+/** Online checkout used to save Walk-in without a source. Repair once per load. */
+async function repairMislabeledOnlinePatients() {
+  await prisma.customer.updateMany({
+    where: {
+      clientType: "Walk-in",
+      source: null,
+    },
+    data: {
+      clientType: "Regular",
+      source: "Online order",
+    },
+  })
+}
+
 // ─── Types ──────────────────────────────────────────────────────────────────
 
 export type PatientInput = {
@@ -35,6 +49,8 @@ export type PatientFilters = {
 // ─── Read ───────────────────────────────────────────────────────────────────
 
 export async function getPatients(filters: PatientFilters = {}) {
+  await repairMislabeledOnlinePatients()
+
   const where: Record<string, unknown> = {}
 
   if (filters.search?.trim()) {
@@ -47,7 +63,11 @@ export async function getPatients(filters: PatientFilters = {}) {
     ]
   }
   if (filters.clientType && filters.clientType !== "all") {
-    where.clientType = filters.clientType
+    if (filters.clientType === "Online") {
+      where.source = "Online order"
+    } else {
+      where.clientType = filters.clientType
+    }
   }
   if (filters.status && filters.status !== "all") {
     where.status = filters.status

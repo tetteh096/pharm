@@ -26,7 +26,7 @@ import {
 import { addChronicCare } from "@/app/dashboard/chronic/actions"
 
 const TEXTAREA_CLASS =
-  "flex min-h-[72px] w-full rounded-lg border border-input bg-transparent px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground transition-colors outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30"
+  "flex min-h-[72px] w-full rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground transition-colors outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
 
 export function AddToChronicButton({
   customerId,

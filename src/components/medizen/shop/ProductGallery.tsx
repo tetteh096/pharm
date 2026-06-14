@@ -198,42 +198,6 @@ export default function ProductGallery({ images, name, badges }: ProductGalleryP
         </div>
       )}
 
-      <style jsx>{`
-        :global(.product-gallery .pg-main-swiper) {
-          aspect-ratio: 1 / 1;
-        }
-        :global(.product-gallery .pg-thumbs-swiper .swiper-slide) {
-          opacity: 0.55;
-          transition: opacity 0.2s ease, outline-color 0.2s ease;
-          border-radius: 12px;
-          outline: 2px solid transparent;
-        }
-        :global(.product-gallery .pg-thumbs-swiper .swiper-slide:hover) {
-          opacity: 0.9;
-        }
-        :global(
-            .product-gallery
-              .pg-thumbs-swiper
-              .swiper-slide-thumb-active
-          ) {
-          opacity: 1;
-          outline-color: var(--p1-clr);
-        }
-        :global(.product-gallery .pg-prev),
-        :global(.product-gallery .pg-next) {
-          transition: transform 0.18s ease, background 0.18s ease;
-        }
-        :global(.product-gallery .pg-prev:hover),
-        :global(.product-gallery .pg-next:hover) {
-          background: #ffffff !important;
-          transform: translateY(-50%) scale(1.06);
-        }
-        :global(.product-gallery .pg-prev.swiper-button-disabled),
-        :global(.product-gallery .pg-next.swiper-button-disabled) {
-          opacity: 0.45;
-          cursor: not-allowed;
-        }
-      `}</style>
     </div>
   )
 }

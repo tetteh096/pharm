@@ -99,16 +99,17 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose }) => {
                     >
                       <Link 
                         href={link.href} 
-                        className="d-flex justify-content-between align-items-center py-2 fs-six fw_700 black transition-all hover-p1"
+                        className={`d-flex justify-content-between align-items-center py-2 fs-six fw_700 black transition-all hover-p1${isActive ? " is-active" : ""}`}
                         style={{
-                          color: isActive ? "var(--p2-clr)" : undefined,
-                          borderBottom: isActive ? "1px solid rgba(17, 87, 238, 0.18)" : "1px solid transparent",
+                          color: isActive ? "var(--p1-clr)" : undefined,
+                          borderBottom: isActive ? "2px solid var(--p1-clr)" : "1px solid transparent",
+                          paddingLeft: isActive ? "8px" : undefined,
                         }}
                         aria-current={isActive ? "page" : undefined}
                         onClick={onClose}
                       >
                         {link.label}
-                        <ChevronRight size={16} className="opacity-50" style={{ color: isActive ? "var(--p2-clr)" : undefined }} />
+                        <ChevronRight size={16} className="opacity-50" style={{ color: isActive ? "var(--p1-clr)" : undefined }} />
                       </Link>
                     </motion.li>
                     );
@@ -181,15 +182,6 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose }) => {
         </>
       )}
 
-      <style jsx>{`
-        .hover-p1:hover {
-          color: var(--p1-clr) !important;
-          padding-left: 10px;
-        }
-        .letter-spacing-2 {
-          letter-spacing: 2px;
-        }
-      `}</style>
     </AnimatePresence>
   );
 };

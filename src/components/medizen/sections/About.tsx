@@ -207,23 +207,6 @@ const About = () => {
                 <p className="pra mb-0" style={{ fontSize: "0.72rem" }}>Happy Patients</p>
               </motion.div>
 
-              {/* Floating mid-left years badge */}
-              <motion.div
-                animate={{ y: [0, 12, 0] }}
-                transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-                className="position-absolute bg-white rounded-4 shadow-lg p-3 text-center"
-                style={{ top: "40%", left: "-20px", minWidth: "118px", border: "1.5px solid rgba(17,87,238,0.2)", zIndex: 3 }}
-              >
-                <div
-                  className="mx-auto mb-2 d-flex align-items-center justify-content-center rounded-circle"
-                  style={{ width: 44, height: 44, background: "rgba(17,87,238,0.12)" }}
-                >
-                  <i className="fas fa-certificate" style={{ color: "var(--p2-clr)", fontSize: "1.1rem" }} />
-                </div>
-                <p className="fw_800 black mb-0" style={{ fontSize: "1.25rem" }}>10+</p>
-                <p className="pra mb-0" style={{ fontSize: "0.72rem" }}>Years Serving</p>
-              </motion.div>
-
               {/* Green accent ring behind image */}
               <div
                 className="position-absolute rounded-4"

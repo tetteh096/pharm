@@ -51,6 +51,10 @@ const heroCopy: Record<string, { eyebrow: string; description: string }> = {
     eyebrow: "Review your order",
     description: "Check your selected items, update quantities, and continue to a smoother checkout flow.",
   },
+  "Your Cart": {
+    eyebrow: "Review your order",
+    description: "Check your selected items, update quantities, and continue to a smoother checkout flow.",
+  },
   Checkout: {
     eyebrow: "Secure checkout",
     description: "Complete your order details and prepare your pharmacy request for pickup or delivery.",
@@ -74,17 +78,24 @@ const heroImages: Record<string, string> = {
   "Health Insights & News": "https://images.unsplash.com/photo-1505751172876-fa1923c5c528?auto=format&fit=crop&w=1600&q=80",
   "Blog Details":           "https://images.unsplash.com/photo-1498837167922-ddd27525d352?auto=format&fit=crop&w=1600&q=80",
   "Pharmacy Shop":          "https://images.unsplash.com/photo-1587854692152-cbe660dbde88?auto=format&fit=crop&w=1600&q=80",
-  "Contact Us":             "/jhfhj.jpg",
-  "Services":               "/jhfhj.jpg",
-  "Service":                "/jhfhj.jpg",
-  "Service Details":        "/jhfhj.jpg",
+  "Contact Us":             "/photo/43b0ac4ca1cba7ec8ce5b1d878f89a45.jpg",
+  "Services":               "/photo/15e95618a2a142e412902a71f1419cca.jpg",
+  "Service":                "/photo/15e95618a2a142e412902a71f1419cca.jpg",
+  "Service Details":        "/photo/15e95618a2a142e412902a71f1419cca.jpg",
   "Product Details":        "https://images.unsplash.com/photo-1587854692152-cbe660dbde88?auto=format&fit=crop&w=1600&q=80",
+  Cart:                       "/photo/e056638a5edb1bb8196ec842a2f0361a.jpg",
+  "Your Cart":                "/photo/e056638a5edb1bb8196ec842a2f0361a.jpg",
+  Checkout:                   "/photo/0b26056a910e18ee87790705e40f79df.jpg",
   "Our Team":               "/hero1.png",
   "Meet the Team":          "/hero1.png",
 };
 
+/** Pages where the branch/locations sidebar card should not appear in the hero. */
+const pagesWithoutInfoCard = new Set(["Checkout"]);
+
 const PageTitle: React.FC<PageTitleProps> = ({ title }) => {
   const bgImage = heroImages[title] ?? null;
+  const showInfoCard = !pagesWithoutInfoCard.has(title);
   const content = heroCopy[title] ?? {
     eyebrow: "Enviro Pharmacy",
     description: "Clear information, fast branch access, and a better pharmacy experience across every page.",
@@ -145,7 +156,7 @@ const PageTitle: React.FC<PageTitleProps> = ({ title }) => {
 
       <div className="container position-relative" style={{ zIndex: 2 }}>
         <div className="row g-4 align-items-center">
-          <div className="col-lg-8">
+          <div className={showInfoCard ? "col-lg-8" : "col-lg-10"}>
             <div className="page-title-content">
               <span
                 className="d-inline-flex align-items-center gap-2 mb-4"
@@ -214,6 +225,7 @@ const PageTitle: React.FC<PageTitleProps> = ({ title }) => {
             </div>
           </div>
 
+          {showInfoCard && (
           <div className="col-lg-4">
             <div
               className="ms-lg-auto"
@@ -268,6 +280,7 @@ const PageTitle: React.FC<PageTitleProps> = ({ title }) => {
               </div>
             </div>
           </div>
+          )}
         </div>
       </div>
     </section>

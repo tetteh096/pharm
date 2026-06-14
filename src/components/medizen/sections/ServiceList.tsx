@@ -55,7 +55,7 @@ const ServiceList = () => {
 
           <div className="row g-2 g-md-3">
             {pharmacyServices.map((item, index) => (
-              <div className="col-4 d-flex" key={item.id}>
+              <div className="col-6 col-lg-4 d-flex" key={item.id}>
                 <motion.div
                   initial={{ opacity: 0, y: 28 }}
                   whileInView={{ opacity: 1, y: 0 }}

@@ -126,12 +126,13 @@ export default function FeaturedCarousel({
             setIsEnd(s.isEnd)
           }}
           modules={[Navigation, Autoplay]}
-          spaceBetween={16}
-          slidesPerView={1.2}
+          spaceBetween={12}
+          slidesPerView={2.15}
           breakpoints={{
-            520: { slidesPerView: 2.2 },
-            768: { slidesPerView: 3 },
-            1200: { slidesPerView: 4 },
+            520: { slidesPerView: 2.5, spaceBetween: 14 },
+            640: { slidesPerView: 3, spaceBetween: 16 },
+            768: { slidesPerView: 3, spaceBetween: 16 },
+            1200: { slidesPerView: 4, spaceBetween: 16 },
           }}
           autoplay={products.length > 4 ? { delay: 4500, disableOnInteraction: true } : false}
           loop={false}
@@ -287,16 +288,6 @@ function FeaturedSlide({ product }: { product: ShopProduct }) {
         </div>
       </div>
 
-      <style jsx>{`
-        :global(.featured-slide:hover) {
-          transform: translateY(-4px);
-          border-color: var(--p1-clr) !important;
-          box-shadow: 0 14px 30px rgba(9, 22, 42, 0.1) !important;
-        }
-        :global(.featured-slide:hover img) {
-          transform: scale(1.06);
-        }
-      `}</style>
     </Link>
   )
 }

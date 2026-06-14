@@ -19,21 +19,26 @@ const BRAND_EMAIL = "enviropharmacyltd@gmail.com"
 const BRAND_LOCATIONS = "Madina, Odorkor & Sakumono, Accra"
 
 function getAppBaseUrl(): string {
+  // Priority: explicit config → Vercel auto-vars → dynamic fallback
   const configured =
     process.env.NEXTAUTH_URL ??
     process.env.AUTH_URL ??
     process.env.VERCEL_PROJECT_PRODUCTION_URL ??
     process.env.VERCEL_URL
 
-  if (!configured) {
-    return "http://localhost:3000"
+  if (configured) {
+    // Already a full URL
+    if (configured.startsWith("http://") || configured.startsWith("https://")) {
+      return configured.replace(/\/$/, "") // strip trailing slash
+    }
+    // Vercel gives bare hostname — assume https in production
+    return `https://${configured}`
   }
 
-  if (configured.startsWith("http://") || configured.startsWith("https://")) {
-    return configured
-  }
-
-  return `https://${configured}`
+  // Local dev fallback — respects PORT env var so it matches whichever port
+  // Next.js actually started on (3000, 3001, 3002, etc.)
+  const port = process.env.PORT ?? "3000"
+  return `http://localhost:${port}`
 }
 
 /**
@@ -554,6 +559,95 @@ export async function sendConsultationNotificationEmail(
       preheader: `New consultation from ${payload.fullName} · ${payload.phone}`,
       bodyHtml: body,
       accent: "#f59e0b",
+    }),
+  })
+}
+
+// ─── Contact form emails ──────────────────────────────────────────────────────
+
+export type ContactEmailPayload = {
+  fullName: string
+  email: string
+  phone: string
+  branch: string
+  subject: string
+  message: string
+  submittedAt: Date
+}
+
+export async function sendContactConfirmationEmail(payload: ContactEmailPayload) {
+  const submittedAt = payload.submittedAt.toLocaleString("en-GH", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  })
+
+  const body = `
+    <p style="color:#0f172a;font-size:15px;margin:0 0 6px 0;">
+      Hi <strong>${escape(payload.fullName)}</strong>,
+    </p>
+    <p style="color:#475569;line-height:1.65;margin:0 0 18px 0;">
+      Thank you for contacting ${escape(BRAND_NAME)}. Our team has received your message
+      and will respond as soon as possible.
+    </p>
+    <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:16px 18px;margin:0 0 20px 0;">
+      <div style="color:#15803d;font-size:11px;text-transform:uppercase;letter-spacing:0.08em;font-weight:700;margin-bottom:10px;">Your message summary</div>
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="font-size:13px;color:#0f172a;">
+        <tr><td style="padding:4px 0;color:#475569;width:38%;">Subject</td><td style="padding:4px 0;font-weight:600;">${escape(payload.subject)}</td></tr>
+        <tr><td style="padding:4px 0;color:#475569;">Branch</td><td style="padding:4px 0;font-weight:600;">${escape(payload.branch)}</td></tr>
+        <tr><td style="padding:4px 0;color:#475569;">Submitted</td><td style="padding:4px 0;">${escape(submittedAt)}</td></tr>
+      </table>
+    </div>
+    <div style="background:#f8fafc;border-left:4px solid #13EC8A;border-radius:4px;padding:14px 16px;color:#475569;font-size:13px;line-height:1.7;">
+      ${escape(payload.message)}
+    </div>
+  `
+
+  return safeSend({
+    to: payload.email,
+    subject: `${BRAND_NAME} — We received your message`,
+    html: emailLayout({
+      title: "Message received",
+      subtitle: "We'll get back to you shortly",
+      preheader: "Your contact message was received by Enviro Pharmacy",
+      bodyHtml: body,
+      accent: "#13EC8A",
+    }),
+  })
+}
+
+export async function sendContactNotificationEmail(payload: ContactEmailPayload) {
+  const submittedAt = payload.submittedAt.toLocaleString("en-GH", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  })
+
+  const body = `
+    <p style="color:#475569;line-height:1.65;margin:0 0 18px 0;">
+      A new contact form message was submitted on the website.
+    </p>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="font-size:13px;color:#0f172a;">
+      <tr><td style="padding:4px 0;color:#475569;width:38%;">Name</td><td style="padding:4px 0;font-weight:600;">${escape(payload.fullName)}</td></tr>
+      <tr><td style="padding:4px 0;color:#475569;">Email</td><td style="padding:4px 0;font-weight:600;">${escape(payload.email)}</td></tr>
+      <tr><td style="padding:4px 0;color:#475569;">Phone</td><td style="padding:4px 0;font-weight:600;">${escape(payload.phone)}</td></tr>
+      <tr><td style="padding:4px 0;color:#475569;">Branch</td><td style="padding:4px 0;font-weight:600;">${escape(payload.branch)}</td></tr>
+      <tr><td style="padding:4px 0;color:#475569;">Subject</td><td style="padding:4px 0;font-weight:600;">${escape(payload.subject)}</td></tr>
+      <tr><td style="padding:4px 0;color:#475569;">Submitted</td><td style="padding:4px 0;">${escape(submittedAt)}</td></tr>
+    </table>
+    <div style="background:#f8fafc;border-left:4px solid #1157EE;border-radius:4px;padding:14px 16px;margin:18px 0 0 0;color:#475569;font-size:13px;line-height:1.7;">
+      <strong style="color:#0f172a;">Message:</strong><br/>
+      ${escape(payload.message)}
+    </div>
+  `
+
+  return safeSend({
+    to: BRAND_EMAIL,
+    subject: `[Contact] ${payload.subject} — ${payload.fullName}`,
+    html: emailLayout({
+      title: "New contact message",
+      subtitle: payload.subject,
+      preheader: `Contact from ${payload.fullName} · ${payload.phone}`,
+      bodyHtml: body,
+      accent: "#1157EE",
     }),
   })
 }

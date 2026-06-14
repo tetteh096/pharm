@@ -1,7 +1,17 @@
 "use server"
 
+import { auth } from "@/auth"
 import { prisma, hasOrderModels } from "@/lib/prisma"
 import { formatGhs } from "@/lib/format"
+import { canManageStaff } from "@/lib/dashboard-rbac"
+
+async function requireAdmin() {
+  const session = await auth()
+  if (!canManageStaff(session?.user?.role)) {
+    throw new Error("Unauthorized")
+  }
+  return session!
+}
 
 const REVENUE_STATUSES = ["PROCESSING", "SHIPPED", "DELIVERED"] as const
 const COMPLETED_STATUSES = ["DELIVERED"] as const
@@ -93,12 +103,17 @@ export type AccountingOverview = {
   ledger: LedgerRow[]
 }
 
+function parseLocalDate(iso: string): Date {
+  const [y, m, d] = iso.split("-").map(Number)
+  return new Date(y, (m ?? 1) - 1, d ?? 1)
+}
+
 function parseRangeWithDefault(filters: AccountingFilters): { from: Date; to: Date } {
-  const to = filters.to ? new Date(filters.to) : new Date()
+  const to = filters.to ? parseLocalDate(filters.to) : new Date()
   to.setHours(23, 59, 59, 999)
   let from: Date
   if (filters.from) {
-    from = new Date(filters.from)
+    from = parseLocalDate(filters.from)
   } else {
     from = new Date(to)
     from.setDate(from.getDate() - 29)
@@ -121,6 +136,7 @@ function formatPct(value: number): number {
 export async function getAccountingOverview(
   filters: AccountingFilters = {}
 ): Promise<AccountingOverview> {
+  await requireAdmin()
   const empty: AccountingOverview = {
     filters: {
       from: filters.from ?? "",
@@ -431,6 +447,7 @@ export async function getAccountingOverview(
 export async function exportAccountingCsv(
   filters: AccountingFilters = {}
 ): Promise<string> {
+  await requireAdmin()
   const data = await getAccountingOverview(filters)
   const header = [
     "Order Number",

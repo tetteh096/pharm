@@ -10,9 +10,7 @@ import {
 import { pharmacyServices, type PharmacyService } from "@/data/pharmacy-services";
 
 /**
- * Pharmacy services showcase.
- * Desktop: scroll-driven sticky split-screen.
- * Mobile (≤860px): 3×2 tap grid — no scroll hijacking.
+ * Pharmacy services showcase — scroll-driven split layout on all screen sizes.
  */
 export default function PharmacyServicesShowcase() {
   const [activeService, setActiveService] = useState<PharmacyService | null>(null);
@@ -23,6 +21,7 @@ export default function PharmacyServicesShowcase() {
       pharmacyServices.map((s) => ({
         id: s.id,
         title: s.panelTitle,
+        stepLabel: s.title,
         description: s.panelIntro,
         image: s.image,
         imageAlt: s.title,
@@ -36,44 +35,13 @@ export default function PharmacyServicesShowcase() {
 
   return (
     <>
-      {/* ── Desktop: sticky scroll showcase ── */}
-      <div className="ssfs-desktop-only">
-        <ScrollStickyFeatureShowcase
-          features={features}
-          eyebrow="Enviro Pharmacy · Services"
-          scrollVhPerStep={120}
-        />
-      </div>
+      <ScrollStickyFeatureShowcase
+        features={features}
+        eyebrow="Enviro Pharmacy · Services"
+        scrollVhPerStep={120}
+        mobileScrollVhPerStep={88}
+      />
 
-      {/* ── Mobile: 3×2 tap grid ── */}
-      <section className="ssfs-mobile-grid-section">
-        <div className="ssfs-mobile-eyebrow">Enviro Pharmacy · Services</div>
-        <div className="ssfs-mobile-grid">
-          {pharmacyServices.map((s, i) => (
-            <motion.button
-              key={s.id}
-              type="button"
-              onClick={() => setActiveService(s)}
-              className="ssfs-mg-card"
-              initial={{ opacity: 0, y: 18 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.4, delay: i * 0.06 }}
-            >
-              <div className="ssfs-mg-img-wrap">
-                <img src={s.image} alt={s.title} className="ssfs-mg-img" />
-                <div className="ssfs-mg-overlay" />
-                <span className="ssfs-mg-icon">
-                  <i className={s.iconClass} aria-hidden />
-                </span>
-              </div>
-              <div className="ssfs-mg-label">{s.title}</div>
-            </motion.button>
-          ))}
-        </div>
-      </section>
-
-      {/* ── Shared slide-in panel ── */}
       <AnimatePresence>
         {activeService && (
           <motion.div

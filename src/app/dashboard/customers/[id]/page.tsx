@@ -16,6 +16,7 @@ import {
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
+import { getPatientTypeLabel } from "@/lib/patient-labels"
 import {
   Card,
   CardContent,
@@ -95,10 +96,10 @@ export default async function PatientDetailPage({
                 {patient.name}
               </h1>
               <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground mt-1">
-                <Badge variant="outline">{patient.clientType}</Badge>
-                {patient.source && (
+                <Badge variant="outline">{getPatientTypeLabel(patient.clientType, patient.source)}</Badge>
+                {patient.source && patient.source !== "Online order" ? (
                   <span className="text-xs">via {patient.source}</span>
-                )}
+                ) : null}
                 <span>·</span>
                 <span>Registered {fmt(patient.createdAt)}</span>
                 {patient.createdByName && (

@@ -4,12 +4,13 @@ import React, { useState } from "react";
 import { motion } from "framer-motion";
 import CommonButton from "../CommonButton";
 import { submitConsultationRequest } from "@/app/actions/consultation";
+import { useIdempotentFormSubmit } from "@/hooks/useIdempotentFormSubmit";
 
 const trusts = [
   { icon: "fas fa-user-md",        label: "Expert Staff",       sub: "Qualified Pharmacists"   },
   { icon: "fas fa-clock",          label: "Available 24 / 7",   sub: "Madina Branch Always Open" },
   { icon: "fas fa-shield-alt",     label: "Safe & Reliable",    sub: "FDA-Compliant Dispensing"  },
-  { icon: "fas fa-map-marker-alt", label: "Two Branches",       sub: "Madina & Odorkor"          },
+  { icon: "fas fa-map-marker-alt", label: "Four Branches", sub: "Madina · Odorkor · Sakumono · Santeo" },
 ];
 
 const Appointment = () => {
@@ -22,6 +23,7 @@ const Appointment = () => {
   });
   const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState("");
+  const { beginSubmit, endSubmit, resetForNewSubmission } = useIdempotentFormSubmit();
 
   const set = (field: keyof typeof form) => (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -29,15 +31,26 @@ const Appointment = () => {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    const idempotencyKey = beginSubmit();
+    if (!idempotencyKey) return;
+
     setStatus("submitting");
     setErrorMsg("");
-    const result = await submitConsultationRequest(form);
-    if (result.success) {
-      setStatus("success");
-      setForm({ fullName: "", email: "", phone: "", medicationInterest: "", message: "" });
-    } else {
+    try {
+      const result = await submitConsultationRequest({ ...form, idempotencyKey });
+      if (result.success) {
+        setStatus("success");
+        setForm({ fullName: "", email: "", phone: "", medicationInterest: "", message: "" });
+        resetForNewSubmission();
+      } else {
+        setStatus("error");
+        setErrorMsg(result.error);
+        endSubmit();
+      }
+    } catch {
       setStatus("error");
-      setErrorMsg(result.error);
+      setErrorMsg("Something went wrong. Please try again.");
+      endSubmit();
     }
   }
   return (
@@ -59,8 +72,8 @@ const Appointment = () => {
       />
 
       {/* Content */}
-      <div className="container position-relative py-5" style={{ zIndex: 2 }}>
-        <div className="row g-5 align-items-center py-lg-4">
+      <div className="container position-relative py-4" style={{ zIndex: 2 }}>
+        <div className="row g-4 align-items-center">
 
           {/* ── LEFT: headline + trust badges ── */}
           <div className="col-lg-6">
@@ -171,7 +184,10 @@ const Appointment = () => {
                     One of our pharmacists will reach out to you shortly.
                   </p>
                   <button
-                    onClick={() => setStatus("idle")}
+                    onClick={() => {
+                      resetForNewSubmission();
+                      setStatus("idle");
+                    }}
                     className="btn mt-3 px-4 py-2 rounded-4 fw_700"
                     style={{ background: "var(--p1-clr)", color: "#0a0a0a", border: "none", fontSize: "0.85rem" }}
                   >
@@ -292,49 +308,6 @@ const Appointment = () => {
         </div>
       </div>
 
-      <style jsx global>{`
-        .appt-parallax {
-          min-height: 100vh;
-        }
-        .appt-input {
-          background: rgba(255, 255, 255, 0.10);
-          border: 1.5px solid rgba(255, 255, 255, 0.18);
-          color: #fff;
-          font-size: 0.9rem;
-          transition: border-color 0.2s, background 0.2s;
-          outline: none;
-        }
-        .appt-input::placeholder {
-          color: rgba(255, 255, 255, 0.45);
-        }
-        .appt-input:focus {
-          background: rgba(255, 255, 255, 0.16);
-          border-color: var(--p1-clr);
-          box-shadow: 0 0 0 3px rgba(19, 236, 138, 0.18);
-          color: #fff;
-        }
-        .appt-submit {
-          background: var(--p1-clr);
-          color: #0a0a0a;
-          border: none;
-          font-weight: 700;
-          transition: transform 0.2s, box-shadow 0.2s;
-        }
-        .appt-submit:hover:not(:disabled) {
-          transform: translateY(-4px);
-          box-shadow: 0 12px 32px rgba(19, 236, 138, 0.35);
-        }
-        .appt-submit:disabled {
-          opacity: 0.7;
-          cursor: not-allowed;
-        }
-        @media (max-width: 767px) {
-          .appt-parallax {
-            background-attachment: scroll;
-          }
-          .col-6 { flex: 0 0 100%; max-width: 100%; }
-        }
-      `}</style>
     </section>
   );
 };

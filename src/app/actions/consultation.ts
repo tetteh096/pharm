@@ -5,6 +5,10 @@ import {
   sendConsultationConfirmationEmail,
   sendConsultationNotificationEmail,
 } from "@/lib/email"
+import {
+  isUniqueConstraintError,
+  normalizeIdempotencyKey,
+} from "@/lib/server-idempotency"
 import { revalidatePath } from "next/cache"
 
 export type ConsultationFormData = {
@@ -13,6 +17,7 @@ export type ConsultationFormData = {
   phone: string
   medicationInterest?: string
   message: string
+  idempotencyKey?: string
 }
 
 export type ConsultationResult =
@@ -29,14 +34,31 @@ export async function submitConsultationRequest(
   if (!data.phone?.trim()) return { success: false, error: "Phone number is required." }
   if (!data.message?.trim()) return { success: false, error: "Please include a message." }
 
+  const idempotencyKey = normalizeIdempotencyKey(data.idempotencyKey)
+  if (!idempotencyKey) {
+    return { success: false, error: "Invalid submission. Please refresh and try again." }
+  }
+
+  const normalized = {
+    fullName: data.fullName.trim(),
+    email: data.email.trim().toLowerCase(),
+    phone: data.phone.trim(),
+    medicationInterest: data.medicationInterest?.trim() || null,
+    message: data.message.trim(),
+  }
+
   try {
+    const existing = await prisma.consultationRequest.findUnique({
+      where: { idempotencyKey },
+    })
+    if (existing) {
+      return { success: true }
+    }
+
     const record = await prisma.consultationRequest.create({
       data: {
-        fullName: data.fullName.trim(),
-        email: data.email.trim().toLowerCase(),
-        phone: data.phone.trim(),
-        medicationInterest: data.medicationInterest?.trim() || null,
-        message: data.message.trim(),
+        ...normalized,
+        idempotencyKey,
         status: "New",
       },
     })
@@ -57,9 +79,13 @@ export async function submitConsultationRequest(
     ])
 
     revalidatePath("/dashboard/consultations")
+    revalidatePath("/dashboard")
 
     return { success: true }
   } catch (err) {
+    if (isUniqueConstraintError(err)) {
+      return { success: true }
+    }
     console.error("[consultation] failed to save request", err)
     return {
       success: false,
@@ -83,19 +109,37 @@ export async function getConsultations(page = 1, pageSize = 20) {
   return { items, total, page, pageSize }
 }
 
+export async function getConsultationStaffOptions() {
+  return prisma.user.findMany({
+    where: { active: true },
+    select: { id: true, name: true, role: true },
+    orderBy: { name: "asc" },
+  })
+}
+
 export async function updateConsultationStatus(
   id: string,
   status: string,
-  handledByName: string,
+  handledById: string | null,
   notes?: string
 ): Promise<{ success: boolean }> {
   try {
+    let handledByName: string | null = null
+    if (handledById) {
+      const user = await prisma.user.findUnique({
+        where: { id: handledById },
+        select: { name: true },
+      })
+      handledByName = user?.name ?? null
+    }
+
     await prisma.consultationRequest.update({
       where: { id },
       data: {
         status,
+        handledById,
         handledByName,
-        handledAt: new Date(),
+        handledAt: handledById ? new Date() : null,
         notes: notes ?? null,
       },
     })

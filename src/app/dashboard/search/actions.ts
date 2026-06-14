@@ -4,6 +4,11 @@ import type { Role } from "@prisma/client"
 import { auth } from "@/auth"
 import { formatOrderNumber } from "@/lib/format"
 import { hasOrderModels, prisma } from "@/lib/prisma"
+import {
+  canAccessAccountSettings,
+  canManageStaff,
+  canWriteInventory,
+} from "@/lib/dashboard-rbac"
 
 export type DashboardSearchHit = {
   id: string
@@ -26,6 +31,7 @@ const NAV_PAGES: {
     title: "Accounting",
     href: "/dashboard/accounting",
     keywords: ["accounting", "finance", "revenue"],
+    roles: ["ADMIN"],
   },
   {
     title: "Inventory",
@@ -36,11 +42,13 @@ const NAV_PAGES: {
     title: "Add product",
     href: "/dashboard/products/new",
     keywords: ["new product", "add product"],
+    roles: ["ADMIN", "PHARMACIST"],
   },
   {
     title: "Categories",
     href: "/dashboard/products/categories",
     keywords: ["categories", "product categories"],
+    roles: ["ADMIN", "PHARMACIST"],
   },
   { title: "Branches", href: "/dashboard/branches", keywords: ["branches", "locations"] },
   {
@@ -59,6 +67,16 @@ const NAV_PAGES: {
     keywords: ["chronic", "refill", "care"],
   },
   {
+    title: "Consultations",
+    href: "/dashboard/consultations",
+    keywords: ["consultations", "requests", "messages"],
+  },
+  {
+    title: "Contact messages",
+    href: "/dashboard/contact-messages",
+    keywords: ["contact", "messages", "website form", "inbox"],
+  },
+  {
     title: "Health blog",
     href: "/dashboard/blog",
     keywords: ["blog", "articles", "posts"],
@@ -74,6 +92,7 @@ const NAV_PAGES: {
     title: "Account settings",
     href: "/dashboard/account",
     keywords: ["account", "profile", "password", "settings"],
+    roles: ["ADMIN", "PHARMACIST"],
   },
 ]
 
@@ -93,6 +112,15 @@ export async function dashboardGlobalSearch(query: string): Promise<DashboardSea
 
   for (const page of NAV_PAGES) {
     if (page.roles && !page.roles.includes(role)) continue
+    if (page.href === "/dashboard/account" && !canAccessAccountSettings(role)) continue
+    if (page.href === "/dashboard/accounting" && !canManageStaff(role)) continue
+    if (
+      (page.href === "/dashboard/products/new" ||
+        page.href === "/dashboard/products/categories") &&
+      !canWriteInventory(role)
+    ) {
+      continue
+    }
     const matchTitle = matchesQuery(page.title, q)
     const matchKeyword = page.keywords.some((k) => matchesQuery(k, q))
     if (!matchTitle && !matchKeyword) continue

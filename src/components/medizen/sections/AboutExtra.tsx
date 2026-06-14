@@ -2,6 +2,7 @@
 
 import React, { useRef, useEffect, useState } from "react";
 import { motion, useInView, animate, useMotionValue } from "framer-motion";
+import { pharmacyStats } from "@/data/pharmacy-stats";
 
 /* ── Animated counter ───────────────────────────────────────── */
 function Counter({ target, suffix = "" }: { target: number; suffix?: string }) {
@@ -23,14 +24,6 @@ function Counter({ target, suffix = "" }: { target: number; suffix?: string }) {
   return <span ref={ref}>{display}{suffix}+</span>;
 }
 
-/* ── Data ───────────────────────────────────────────────────── */
-const stats = [
-  { value: 50,  suffix: "",  label: "Expert Pharmacists",    icon: "fas fa-user-md" },
-  { value: 150, suffix: "k", label: "Medicine Varieties",    icon: "fas fa-pills" },
-  { value: 99,  suffix: "%", label: "Customer Satisfaction", icon: "fas fa-heart" },
-  { value: 20,  suffix: "",  label: "Years of Service",      icon: "fas fa-certificate" },
-];
-
 const values = [
   { icon: "fas fa-shield-alt",    label: "Integrity" },
   { icon: "fas fa-handshake",     label: "Reliability" },
@@ -39,10 +32,26 @@ const values = [
 ];
 
 const commitments = [
-  { icon: "fas fa-clock",          label: "24-Hour Access",       text: "Our Madina branch never closes — because health needs don't follow office hours." },
-  { icon: "fas fa-shield-alt",     label: "Genuine Medications",  text: "Every product on our shelves is sourced from verified, licensed suppliers only." },
-  { icon: "fas fa-user-md",        label: "Expert Guidance",      text: "Our qualified pharmacists counsel every patient — not just dispense pills." },
-  { icon: "fas fa-hands-helping",  label: "Community First",      text: "We serve our local branch areas as neighbours, not just customers." },
+  {
+    icon: "fas fa-clock",
+    label: "Always Available",
+    text: "When you need support, we're here — because health concerns don't keep office hours.",
+  },
+  {
+    icon: "fas fa-shield-alt",
+    label: "Genuine Medications",
+    text: "Every product we stock comes from verified, licensed suppliers you can trust.",
+  },
+  {
+    icon: "fas fa-user-md",
+    label: "Expert Guidance",
+    text: "Our qualified pharmacists counsel every patient — not just dispense medication.",
+  },
+  {
+    icon: "fas fa-hands-helping",
+    label: "Community First",
+    text: "We treat the people we serve as neighbours and partners in their health journey.",
+  },
 ];
 
 export default function AboutExtra() {
@@ -83,7 +92,7 @@ export default function AboutExtra() {
                 <p className="about-mv-card-body">
                   To alleviate the suffering of all who walk through our doors, impart life-saving knowledge through
                   information and counselling, and ensure measurable delivery of accountable healthcare to our
-                  communities across Madina, Odorkor, Sakumono and Santeo.
+                  communities.
                 </p>
               </div>
             </motion.div>
@@ -156,9 +165,9 @@ export default function AboutExtra() {
                 A Pharmacy Built to <br /> Serve You Better
               </h2>
               <p className="pra mb-5" style={{ lineHeight: 1.9, color: "rgba(0,0,0,0.72)" }}>
-                At Enviro Pharmacy, everything we do is driven by one purpose — making sure the people of Madina
-                and Odorkor get the care they deserve. Genuine medications, real pharmacist guidance, and a team
-                that shows up for you every single day.
+                At Enviro Pharmacy, everything we do is driven by one purpose — making sure the people we serve
+                get the care they deserve. Genuine medications, real pharmacist guidance, and a team that shows up
+                for you every single day.
               </p>
               <div className="about-timeline">
                 {commitments.map((item, i) => (
@@ -186,8 +195,8 @@ export default function AboutExtra() {
       <section className="about-stats-section">
         <div className="container">
           <div className="row g-4 justify-content-center">
-            {stats.map((stat, i) => (
-              <motion.div key={i} className="col-lg-3 col-6"
+            {pharmacyStats.map((stat, i) => (
+              <motion.div key={stat.label} className="col-lg-4 col-md-4 col-6"
                 initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: i * 0.12 }} viewport={{ once: true }}
               >

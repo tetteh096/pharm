@@ -1,9 +1,16 @@
 import Header from "@/components/medizen/Header";
 import Footer from "@/components/medizen/Footer";
 import PageTitle from "@/components/medizen/PageTitle";
-import ServiceList from "@/components/medizen/sections/ServiceList";
+import ServicesTrustSection from "@/components/medizen/sections/ServicesTrustSection";
 import PharmacyServicesShowcase from "@/components/medizen/sections/PharmacyServicesShowcase";
 import Appointment from "@/components/medizen/sections/Appointment";
+
+export const metadata = {
+  title: "Pharmacy Services — Prescriptions, Chronic Care & Consultations",
+  description:
+    "Explore Enviro Pharmacy services across Accra: prescription dispensing, chronic-care management, pharmacist consultations, home delivery and more in Madina, Odorkor, Sakumono and Santeo.",
+  alternates: { canonical: "/service" },
+};
 
 export default function ServicePage() {
   return (
@@ -12,7 +19,7 @@ export default function ServicePage() {
       <main>
         <PageTitle title="Services" />
         <PharmacyServicesShowcase />
-        <ServiceList />
+        <ServicesTrustSection />
         <Appointment />
       </main>
       <Footer />

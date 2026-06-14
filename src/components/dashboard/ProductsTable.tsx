@@ -59,10 +59,12 @@ export function ProductsTable({
   initialProducts,
   initialCategories,
   branches,
+  readOnly = false,
 }: {
   initialProducts: ProductRow[]
   initialCategories: CategoryRow[]
   branches: BranchRow[]
+  readOnly?: boolean
 }) {
   const [products, setProducts] = React.useState(initialProducts)
   const [categories] = React.useState(initialCategories)
@@ -161,18 +163,22 @@ export function ProductsTable({
             <RefreshCcw className={`mr-2 h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`} />
             Refresh
           </Button>
-          <Button variant="outline" size="sm" asChild>
-            <Link href="/dashboard/products/categories">
-              <FolderTree className="mr-2 h-4 w-4" />
-              Categories
-            </Link>
-          </Button>
-          <Button asChild>
-            <Link href="/dashboard/products/new">
-              <Plus className="mr-2 h-4 w-4" />
-              Add product
-            </Link>
-          </Button>
+          {!readOnly ? (
+            <>
+              <Button variant="outline" size="sm" asChild>
+                <Link href="/dashboard/products/categories">
+                  <FolderTree className="mr-2 h-4 w-4" />
+                  Categories
+                </Link>
+              </Button>
+              <Button asChild>
+                <Link href="/dashboard/products/new">
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add product
+                </Link>
+              </Button>
+            </>
+          ) : null}
         </div>
       </div>
 
@@ -244,24 +250,34 @@ export function ProductsTable({
                 <TableHead className="w-[64px]">Image</TableHead>
                 <TableHead>Product</TableHead>
                 <TableHead className="hidden lg:table-cell">Category</TableHead>
-                <TableHead className="hidden md:table-cell">Cost</TableHead>
+                {!readOnly ? (
+                  <TableHead className="hidden md:table-cell">Cost</TableHead>
+                ) : null}
                 <TableHead>Price</TableHead>
                 <TableHead>Qty</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="hidden md:table-cell">Branch</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                {!readOnly ? (
+                  <TableHead className="text-right">Actions</TableHead>
+                ) : null}
               </TableRow>
             </TableHeader>
             <TableBody>
               {filteredProducts.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={9} className="h-28 text-center text-muted-foreground">
+                  <TableCell colSpan={readOnly ? 7 : 9} className="h-28 text-center text-muted-foreground">
                     {products.length === 0 ? (
                       <span>
-                        No products yet.{" "}
-                        <Link href="/dashboard/products/new" className="text-primary font-medium underline">
-                          Add your first product
-                        </Link>
+                        {readOnly
+                          ? "No products in inventory yet."
+                          : (
+                            <>
+                              No products yet.{" "}
+                              <Link href="/dashboard/products/new" className="text-primary font-medium underline">
+                                Add your first product
+                              </Link>
+                            </>
+                          )}
                       </span>
                     ) : (
                       "No products match your filters."
@@ -286,12 +302,16 @@ export function ProductsTable({
                     </TableCell>
                     <TableCell>
                       <div className="max-w-[200px]">
-                        <Link
-                          href={`/dashboard/products/${product.id}/edit`}
-                          className="font-medium hover:underline line-clamp-1"
-                        >
-                          {product.name}
-                        </Link>
+                        {readOnly ? (
+                          <div className="font-medium line-clamp-1">{product.name}</div>
+                        ) : (
+                          <Link
+                            href={`/dashboard/products/${product.id}/edit`}
+                            className="font-medium hover:underline line-clamp-1"
+                          >
+                            {product.name}
+                          </Link>
+                        )}
                         {product.sku && (
                           <p className="text-[10px] text-muted-foreground font-mono">{product.sku}</p>
                         )}
@@ -315,9 +335,11 @@ export function ProductsTable({
                     <TableCell className="hidden lg:table-cell text-sm text-muted-foreground">
                       {product.category?.name ?? "—"}
                     </TableCell>
-                    <TableCell className="hidden md:table-cell text-sm text-muted-foreground">
-                      GH₵{(product.costPrice ?? 0).toFixed(2)}
-                    </TableCell>
+                    {!readOnly ? (
+                      <TableCell className="hidden md:table-cell text-sm text-muted-foreground">
+                        GH₵{(product.costPrice ?? 0).toFixed(2)}
+                      </TableCell>
+                    ) : null}
                     <TableCell className="font-medium">GH₵{product.price.toFixed(2)}</TableCell>
                     <TableCell>{product.stock}</TableCell>
                     <TableCell>
@@ -337,45 +359,47 @@ export function ProductsTable({
                     <TableCell className="hidden md:table-cell text-sm">
                       {product.branch ?? "All branches"}
                     </TableCell>
-                    <TableCell className="text-right">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon">
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem asChild>
-                            <Link href={`/dashboard/products/${product.id}/edit`}>
-                              <Edit className="h-4 w-4 mr-2" />
-                              Edit
-                            </Link>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() =>
-                              handleToggleFeatured(product.id, !(product.featured ?? false))
-                            }
-                          >
-                            {product.featured ? "Remove from home page" : "Feature on home page"}
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() =>
-                              handleToggleActive(product.id, !(product.active ?? true))
-                            }
-                          >
-                            {product.active === false ? "Show on shop" : "Hide from shop"}
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem
-                            className="text-destructive"
-                            onClick={() => handleDelete(product.id)}
-                          >
-                            <Trash2 className="h-4 w-4 mr-2" />
-                            Delete
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
+                    {!readOnly ? (
+                      <TableCell className="text-right">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon">
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem asChild>
+                              <Link href={`/dashboard/products/${product.id}/edit`}>
+                                <Edit className="h-4 w-4 mr-2" />
+                                Edit
+                              </Link>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() =>
+                                handleToggleFeatured(product.id, !(product.featured ?? false))
+                              }
+                            >
+                              {product.featured ? "Remove from home page" : "Feature on home page"}
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() =>
+                                handleToggleActive(product.id, !(product.active ?? true))
+                              }
+                            >
+                              {product.active === false ? "Show on shop" : "Hide from shop"}
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                              className="text-destructive"
+                              onClick={() => handleDelete(product.id)}
+                            >
+                              <Trash2 className="h-4 w-4 mr-2" />
+                              Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    ) : null}
                   </TableRow>
                 ))
               )}

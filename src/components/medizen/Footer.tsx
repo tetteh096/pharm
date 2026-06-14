@@ -1,8 +1,12 @@
-import React from "react";
-import Link from "next/link";
-import { BrandLogo } from "@/components/brand/BrandLogo";
+import React from "react"
+import Link from "next/link"
+import { BrandLogo } from "@/components/brand/BrandLogo"
+import { getPublicSiteSettings } from "@/lib/site-settings"
+import { PHARMACY_EMAIL, PHARMACY_BRANCHES } from "@/data/pharmacy-branches"
 
-const Footer = () => {
+const Footer = async () => {
+  const { socialLinks } = await getPublicSiteSettings()
+
   return (
     <footer className="footer-section z-1 position-relative blackbg fix">
         <div className="container">
@@ -35,13 +39,22 @@ const Footer = () => {
                                         Serving Madina, Odorkor, Sakumono and Santeo with trusted medications, pharmacist support,
                                         and 24-hour pharmacy service.
                                     </p>
-                                    <div className="social-wrapper d-flex align-items-center">
-                                    <a href="https://www.facebook.com/enviropharmacygh" target="_blank" rel="noopener noreferrer" className="black"><i className="fab fa-facebook-f"></i></a>
-                                        <a href="https://www.linkedin.com/company/enviropharmacygh" target="_blank" rel="noopener noreferrer" className="black"><i className="fa-brands fa-linkedin-in"></i></a>
-                                        <a href="https://www.instagram.com/enviropharmacygh" target="_blank" rel="noopener noreferrer" className="black"><i className="fab fa-instagram"></i></a>
-                                        <a href="https://twitter.com/enviropharmacygh" target="_blank" rel="noopener noreferrer" className="black"><i className="fa-brands fa-x-twitter"></i></a>
-                                        <a href="https://www.tiktok.com/@enviropharmacygh" target="_blank" rel="noopener noreferrer" className="black"><i className="fa-brands fa-tiktok"></i></a>
-                                    </div>
+                                    {socialLinks.length > 0 ? (
+                                      <div className="social-wrapper d-flex align-items-center">
+                                        {socialLinks.map((link) => (
+                                          <a
+                                            key={link.key}
+                                            href={link.url}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="black"
+                                            aria-label={link.label}
+                                          >
+                                            <i className={link.icon} />
+                                          </a>
+                                        ))}
+                                      </div>
+                                    ) : null}
                                 </div>
                             </div>
                         </div>
@@ -103,39 +116,29 @@ const Footer = () => {
                                             <a href="#" className="fs-six fw_500 white sub-font">Madina, Odorkor, Sakumono &amp; Santeo, Accra</a>
                                         </div>
                                     </li>
-                                    <li className="d-flex align-items-center gap-xl-3 gap-2">
+                                    {PHARMACY_BRANCHES.map((branch) => (
+                                      <li key={branch.id} className="d-flex align-items-center gap-xl-3 gap-2">
                                         <span className="icon d-center"><i className="fa-solid fa-phone"></i></span>
                                         <div className="cont">
-                                            <span className="pra fs-seven d-block">Madina Branch</span>
-                                            <a href="tel:+233554612072" className="fs-six fw_500 white sub-font">055 461 2072</a>
-                                        </div>
-                                    </li>
-                                    <li className="d-flex align-items-center gap-xl-3 gap-2">
-                                        <span className="icon d-center"><i className="fa-solid fa-phone"></i></span>
-                                        <div className="cont">
-                                            <span className="pra fs-seven d-block">Odorkor Branch</span>
-                                            <a href="tel:+233599376675" className="fs-six fw_500 white sub-font">059 937 6675</a>
-                                        </div>
-                                    </li>
-                                    <li className="d-flex align-items-center gap-xl-3 gap-2">
-                                        <span className="icon d-center"><i className="fa-solid fa-phone"></i></span>
-                                        <div className="cont">
-                                            <span className="pra fs-seven d-block">Sakumono Branch</span>
-                                            <a href="tel:+233530883354" className="fs-six fw_500 white sub-font">053 088 3354</a>
-                                        </div>
-                                    </li>
-                                    <li className="d-flex align-items-center gap-xl-3 gap-2">
-                                        <span className="icon d-center"><i className="fa-solid fa-phone"></i></span>
-                                        <div className="cont">
-                                            <span className="pra fs-seven d-block">Santeo Branch</span>
+                                          <span className="pra fs-seven d-block">{branch.name}</span>
+                                          {branch.tel ? (
+                                            <a
+                                              href={`tel:+233${branch.tel.replace(/^0/, "")}`}
+                                              className="fs-six fw_500 white sub-font"
+                                            >
+                                              {branch.phone}
+                                            </a>
+                                          ) : (
                                             <span className="fs-six fw_500 white sub-font">Coming soon</span>
+                                          )}
                                         </div>
-                                    </li>
+                                      </li>
+                                    ))}
                                     <li className="d-flex align-items-center gap-xl-3 gap-2">
                                         <span className="icon d-center"><i className="fa-solid fa-envelope"></i></span>
                                         <div className="cont">
                                             <span className="pra fs-seven d-block">Email</span>
-                                            <a href="mailto:enviropharmacyltd@gmail.com" className="fs-six fw_500 white sub-font">enviropharmacyltd@gmail.com</a>
+                                            <a href={`mailto:${PHARMACY_EMAIL}`} className="fs-six fw_500 white sub-font">{PHARMACY_EMAIL}</a>
                                         </div>
                                     </li>
                                 </ul>
@@ -148,13 +151,13 @@ const Footer = () => {
         <div className="footer-bottom text-center">
             <div className="container">
                 <p className="body-font text-center py-4">
-                    &copy; 2025 Enviro Pharmacy | All Rights Reserved
+                    &copy; {new Date().getFullYear()} Enviro Pharmacy &middot; All Rights Reserved
                 </p>
             </div>
         </div>
         <img src="/assets/img/element/footer-element.png" alt="element" className="footer-element" />
     </footer>
-  );
-};
+  )
+}
 
-export default Footer;
+export default Footer

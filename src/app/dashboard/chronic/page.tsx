@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/card"
 import { ChronicPatientsList } from "@/components/dashboard/ChronicPatientsList"
 import { AddChronicPatientDialog } from "@/components/dashboard/AddChronicPatientDialog"
+import { ChronicCsvTools } from "@/components/dashboard/ChronicCsvTools"
 import {
   getChronicPatients,
   getChronicSummary,
@@ -17,9 +18,6 @@ export const dynamic = "force-dynamic"
 
 type SearchParams = Promise<{
   scope?: "mine" | "all"
-  status?: string
-  due?: "overdue" | "thisWeek" | "all"
-  search?: string
 }>
 
 export default async function ChronicCarePage({
@@ -29,12 +27,9 @@ export default async function ChronicCarePage({
 }) {
   const sp = await searchParams
   const scope = sp.scope ?? "mine"
-  const status = sp.status ?? "all"
-  const due = sp.due ?? "all"
-  const search = sp.search?.trim() || undefined
 
   const [list, summary] = await Promise.all([
-    getChronicPatients({ scope, status, due, search }),
+    getChronicPatients({ scope }),
     getChronicSummary(),
   ])
 
@@ -51,7 +46,10 @@ export default async function ChronicCarePage({
             reminders, and contact logs.
           </p>
         </div>
-        <AddChronicPatientDialog />
+        <div className="flex flex-wrap items-center gap-2">
+          <ChronicCsvTools scope={scope} />
+          <AddChronicPatientDialog />
+        </div>
       </div>
 
       <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
@@ -134,9 +132,6 @@ export default async function ChronicCarePage({
           },
         }))}
         currentScope={scope}
-        currentStatus={status}
-        currentDue={due}
-        currentSearch={search ?? ""}
       />
     </div>
   )

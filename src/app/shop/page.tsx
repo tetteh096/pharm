@@ -4,14 +4,29 @@ import PageTitle from "@/components/medizen/PageTitle"
 import ShopBrowser from "@/components/medizen/shop/ShopBrowser"
 import FeaturedCarousel from "@/components/medizen/shop/FeaturedCarousel"
 import Link from "next/link"
+import { Suspense } from "react"
 import {
   getShopFilterMeta,
   searchShopProducts,
 } from "@/app/actions/storefront"
+import { SHOP_PAGE_SIZE } from "@/lib/shop-constants"
 
 export const dynamic = "force-dynamic"
 
-type ShopSearchParams = Promise<{ q?: string | string[] }>
+export const metadata = {
+  title: "Shop Medicines & Health Products Online",
+  description:
+    "Buy medicines, supplements and health products online from Enviro Pharmacy with pickup or delivery across Madina, Odorkor, Sakumono and Santeo in Accra, Ghana.",
+  alternates: { canonical: "/shop" },
+}
+
+type ShopSearchParams = Promise<{ q?: string | string[]; page?: string | string[] }>
+
+function parsePageParam(raw: string | string[] | undefined): number {
+  const value = typeof raw === "string" ? raw : Array.isArray(raw) ? raw[0] : undefined
+  const parsed = Number.parseInt(value ?? "1", 10)
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : 1
+}
 
 export default async function ShopPage({
   searchParams,
@@ -22,12 +37,13 @@ export default async function ShopPage({
   const rawQ = sp.q
   const initialQuery =
     typeof rawQ === "string" ? rawQ.trim() : Array.isArray(rawQ) ? rawQ[0]?.trim() ?? "" : ""
+  const initialPage = parsePageParam(sp.page)
 
   const [initialResult, meta, featured] = await Promise.all([
     searchShopProducts({
       sort: "latest",
-      page: 1,
-      pageSize: 9,
+      page: initialPage,
+      pageSize: SHOP_PAGE_SIZE,
       ...(initialQuery ? { query: initialQuery } : {}),
     }),
     getShopFilterMeta(),
@@ -68,11 +84,18 @@ export default async function ShopPage({
                   <FeaturedCarousel products={featured.products} />
                 )}
                 <div id="all-products" style={{ scrollMarginTop: 100 }}>
-                  <ShopBrowser
-                    initialResult={initialResult}
-                    meta={meta}
-                    initialQuery={initialQuery}
-                  />
+                  <Suspense
+                    fallback={
+                      <div className="text-center py-5 pra">Loading products…</div>
+                    }
+                  >
+                    <ShopBrowser
+                      initialResult={initialResult}
+                      meta={meta}
+                      initialQuery={initialQuery}
+                      initialPage={initialPage}
+                    />
+                  </Suspense>
                 </div>
               </>
             )}

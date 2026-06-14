@@ -7,7 +7,8 @@ import { getStoreBranches } from "@/app/actions/storefront"
 export const dynamic = "force-dynamic"
 
 export const metadata = {
-  title: "Checkout | Enviro Pharmacy",
+  title: "Checkout",
+  robots: { index: false, follow: false },
 }
 
 export default async function CheckoutPage() {

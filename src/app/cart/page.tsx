@@ -6,7 +6,8 @@ import FeaturedCarousel from "@/components/medizen/shop/FeaturedCarousel"
 import { searchShopProducts } from "@/app/actions/storefront"
 
 export const metadata = {
-  title: "Cart | Enviro Pharmacy",
+  title: "Cart",
+  robots: { index: false, follow: true },
 }
 
 export default async function CartPage() {

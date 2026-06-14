@@ -70,6 +70,7 @@ type Props = {
   orderNumber: string
   open: boolean
   onOpenChange: (open: boolean) => void
+  showFinancials?: boolean
 }
 
 export function OrderDetailDrawer({
@@ -77,6 +78,7 @@ export function OrderDetailDrawer({
   orderNumber,
   open,
   onOpenChange,
+  showFinancials = true,
 }: Props) {
   const [detail, setDetail] = React.useState<OrderDetail | null>(null)
   const [loading, setLoading] = React.useState(false)
@@ -372,12 +374,16 @@ export function OrderDetailDrawer({
                         {item.productName}
                       </div>
                       <div className="text-xs text-muted-foreground">
-                        {item.unitPriceFormatted} × {item.quantity}
+                        {showFinancials
+                          ? `${item.unitPriceFormatted} × ${item.quantity}`
+                          : `Qty ${item.quantity}`}
                       </div>
                     </div>
-                    <div className="font-semibold text-foreground">
-                      {item.lineTotalFormatted}
-                    </div>
+                    {showFinancials ? (
+                      <div className="font-semibold text-foreground">
+                        {item.lineTotalFormatted}
+                      </div>
+                    ) : null}
                   </div>
                 ))}
               </div>
@@ -388,12 +394,14 @@ export function OrderDetailDrawer({
                     {detail.paymentMethod ?? "—"}
                   </span>
                 </span>
-                <div className="text-right">
-                  <div className="text-xs text-muted-foreground">Total</div>
-                  <div className="text-xl font-bold">
-                    {detail.totalFormatted}
+                {showFinancials ? (
+                  <div className="text-right">
+                    <div className="text-xs text-muted-foreground">Total</div>
+                    <div className="text-xl font-bold">
+                      {detail.totalFormatted}
+                    </div>
                   </div>
-                </div>
+                ) : null}
               </div>
             </Section>
 

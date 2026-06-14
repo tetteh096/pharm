@@ -24,6 +24,9 @@ import { AccountingFilters } from "@/components/dashboard/AccountingFilters"
 import { RevenueTrendChart } from "@/components/dashboard/RevenueTrendChart"
 import { CsvExportButton } from "@/components/dashboard/CsvExportButton"
 import { getAccountingOverview } from "./actions"
+import { auth } from "@/auth"
+import { redirect } from "next/navigation"
+import { canManageStaff } from "@/lib/dashboard-rbac"
 
 export const dynamic = "force-dynamic"
 
@@ -99,14 +102,19 @@ export default async function AccountingPage({
 }: {
   searchParams: SearchParams
 }) {
+  const session = await auth()
+  if (!canManageStaff(session?.user?.role)) redirect("/dashboard")
+
   const sp = await searchParams
   const preset = sp.preset ?? "30d"
   const branch = sp.branch?.trim() || null
 
-  let from = sp.from
-  let to = sp.to
+  let from = sp.from?.trim()
+  let to = sp.to?.trim()
+
   if (!from || !to) {
-    const found = PRESETS.find((p) => p.id === preset) ?? PRESETS[2]
+    const presetId = preset === "custom" ? "30d" : preset
+    const found = PRESETS.find((p) => p.id === presetId) ?? PRESETS[2]
     const range = found.resolve()
     from = toIso(range.from)
     to = toIso(range.to)
@@ -134,7 +142,7 @@ export default async function AccountingPage({
 
       <AccountingFilters
         presets={PRESETS.map((p) => ({ id: p.id, label: p.label }))}
-        currentPreset={preset}
+        currentPreset={sp.from && sp.to ? (sp.preset ?? "custom") : preset}
         currentFrom={from}
         currentTo={to}
         currentBranch={branch}

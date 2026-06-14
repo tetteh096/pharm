@@ -1,13 +1,15 @@
 "use client"
 
 import React, { Suspense, useState } from "react"
-import Header from "@/components/medizen/Header"
-import Footer from "@/components/medizen/Footer"
-import PageTitle from "@/components/medizen/PageTitle"
 import Link from "next/link"
+import Image from "next/image"
 import { motion } from "framer-motion"
 import { signIn } from "next-auth/react"
 import { useRouter, useSearchParams } from "next/navigation"
+import { X } from "lucide-react"
+import { BrandLogo } from "@/components/brand/BrandLogo"
+
+const LOGIN_IMAGE = "/photo/9b7fa25193e0b7efed42c0dc3f97061d.jpg"
 
 export default function SignInPage() {
   return (
@@ -21,8 +23,6 @@ function SignInContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const rawCallback = searchParams.get("callbackUrl") || "/dashboard"
-  // Strip any absolute origin so a localhost callbackUrl from next-auth never
-  // redirects a production user back to localhost.
   const callbackUrl = (() => {
     try {
       return new URL(rawCallback).pathname || "/dashboard"
@@ -56,117 +56,219 @@ function SignInContent() {
   }
 
   return (
-    <>
-      <Header />
-      <main className="position-relative overflow-hidden">
-        <div className="position-absolute top-0 start-0 w-100 h-100 pointer-events-none" style={{
-          background: 'radial-gradient(circle at 5% 5%, rgba(19, 236, 138, 0.06) 0%, transparent 40%), radial-gradient(circle at 95% 95%, rgba(17, 87, 238, 0.06) 0%, transparent 40%)',
-          zIndex: 0
-        }}></div>
-
-        <PageTitle title="Account Login" />
-
-        <section className="signin-section section-padding position-relative" style={{ zIndex: 1 }}>
-          <div className="container">
-            <div className="row justify-content-center">
-              <div className="col-lg-5 col-md-8">
-                <motion.div
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.8 }}
-                  className="auth-form-wrapper p-lg-5 p-4 glass-card rounded-5 shadow-xl border-0 overflow-hidden position-relative"
+    <div
+      className="signin-page d-flex align-items-center justify-content-center"
+      style={{
+        minHeight: "100vh",
+        padding: "clamp(16px, 4vw, 40px)",
+        background:
+          "linear-gradient(135deg, #dbeafe 0%, #e0f2fe 45%, #ecfdf5 100%)",
+      }}
+    >
+      <motion.div
+        initial={{ opacity: 0, y: 24 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.55, ease: "easeOut" }}
+        className="signin-card w-100 overflow-hidden bg-white"
+        style={{
+          maxWidth: 980,
+          borderRadius: 28,
+          boxShadow: "0 24px 64px rgba(9, 22, 42, 0.12)",
+        }}
+      >
+        <div className="row g-0">
+          {/* Image panel */}
+          <div className="col-lg-5 d-none d-lg-block">
+            <div
+              className="position-relative h-100"
+              style={{ minHeight: 580 }}
+            >
+              <Image
+                src={LOGIN_IMAGE}
+                alt="Enviro Pharmacy team"
+                fill
+                priority
+                sizes="(min-width: 992px) 420px, 0px"
+                style={{ objectFit: "cover", objectPosition: "center top" }}
+              />
+              <div
+                className="position-absolute bottom-0 start-0 w-100 p-4"
+                style={{
+                  background:
+                    "linear-gradient(to top, rgba(4,10,18,0.72) 0%, transparent 100%)",
+                }}
+              >
+                <p
+                  className="mb-1 text-white fw_700"
+                  style={{ fontSize: "1.05rem" }}
                 >
-                  <div className="position-absolute top-0 start-0 w-100 p1-bg" style={{ height: '4px' }}></div>
-
-                  <div className="text-center mb-40">
-                    <motion.div
-                      initial={{ scale: 0.8 }}
-                      animate={{ scale: 1 }}
-                      transition={{ type: "spring", stiffness: 100 }}
-                      className="auth-icon mb-3 d-inline-flex p1-bg rounded-circle d-center shadow-lg"
-                      style={{ width: '70px', height: '70px', fontSize: '1.5rem', color: '#fff' }}
-                    >
-                      <i className="fas fa-lock"></i>
-                    </motion.div>
-                    <h2 className="black fw_800 mb-2">Welcome Back</h2>
-                    <p className="pra fs-seven">Enter your credentials to access your Enviro Pharmacy account</p>
-                  </div>
-
-                  {error && (
-                    <motion.div
-                      initial={{ opacity: 0, y: -10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="alert d-flex align-items-center gap-2 mb-4"
-                      style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '10px', padding: '12px 16px', color: '#dc2626' }}
-                    >
-                      <i className="fas fa-exclamation-circle"></i>
-                      <span className="fs-eight">{error}</span>
-                    </motion.div>
-                  )}
-
-                  <form onSubmit={handleSubmit} className="row g-4">
-                    <div className="col-lg-12">
-                      <label className="black mb-2 d-block fw_700 fs-seven">Email Address</label>
-                      <div className="input-group">
-                        <span className="input-group-text bg-light border-0 px-3 rounded-start-5">
-                          <i className="far fa-envelope text-muted"></i>
-                        </span>
-                        <input
-                          type="email"
-                          className="form-control bg-light border-0 py-3 rounded-end-5"
-                          placeholder="name@example.com"
-                          value={email}
-                          onChange={e => setEmail(e.target.value)}
-                          required
-                        />
-                      </div>
-                    </div>
-                    <div className="col-lg-12">
-                      <div className="d-flex justify-content-between align-items-center mb-2">
-                        <label className="black mb-0 fw_700 fs-seven">Password</label>
-                        <Link href="/forgot-password" className="p1-clr fs-eight fw_600">Forgot Password?</Link>
-                      </div>
-                      <div className="input-group">
-                        <span className="input-group-text bg-light border-0 px-3 rounded-start-5">
-                          <i className="fas fa-key text-muted"></i>
-                        </span>
-                        <input
-                          type="password"
-                          className="form-control bg-light border-0 py-3 rounded-end-5"
-                          placeholder="••••••••"
-                          value={password}
-                          onChange={e => setPassword(e.target.value)}
-                          required
-                        />
-                      </div>
-                    </div>
-                    <div className="col-lg-12">
-                      <motion.button
-                        type="submit"
-                        disabled={loading}
-                        whileHover={{ scale: loading ? 1 : 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        className="first-box p1-bg text-white w-100 py-3 d-center gap-3 fs-six fw_800 rounded-5 shadow-lg border-0"
-                        style={{ cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.8 : 1 }}
-                      >
-                        {loading ? (
-                          <>
-                            <span className="spinner-border spinner-border-sm" role="status"></span>
-                            Signing in...
-                          </>
-                        ) : (
-                          <>Sign In Now <i className="fas fa-sign-in-alt"></i></>
-                        )}
-                      </motion.button>
-                    </div>
-                  </form>
-                </motion.div>
+                  Enviro Pharmacy
+                </p>
+                <p
+                  className="mb-0 text-white"
+                  style={{ fontSize: "0.88rem", opacity: 0.85 }}
+                >
+                  Staff dashboard access
+                </p>
               </div>
             </div>
           </div>
-        </section>
-      </main>
-      <Footer />
-    </>
+
+          {/* Form panel */}
+          <div className="col-lg-7">
+            <div
+              className="position-relative h-100 d-flex flex-column justify-content-center"
+              style={{ padding: "clamp(28px, 5vw, 52px)" }}
+            >
+              <Link
+                href="/"
+                aria-label="Back to website"
+                className="position-absolute d-flex align-items-center justify-content-center rounded-circle text-decoration-none"
+                style={{
+                  top: 20,
+                  right: 20,
+                  width: 36,
+                  height: 36,
+                  background: "#f1f5f9",
+                  color: "#64748b",
+                }}
+              >
+                <X size={18} />
+              </Link>
+
+              <div className="mb-4">
+                <Link href="/" aria-label="Enviro Pharmacy home">
+                  <BrandLogo variant="full" className="h-10 w-36 mb-4" />
+                </Link>
+                <h1
+                  className="mb-2 fw_800 black"
+                  style={{
+                    fontSize: "clamp(1.75rem, 3vw, 2.15rem)",
+                    letterSpacing: "-0.03em",
+                  }}
+                >
+                  Staff login
+                </h1>
+                <p className="mb-0 pra" style={{ fontSize: "0.95rem" }}>
+                  Sign in to manage orders, inventory, and pharmacy operations.
+                </p>
+              </div>
+
+              {error && (
+                <motion.div
+                  initial={{ opacity: 0, y: -8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="mb-4 px-3 py-2 rounded-3 d-flex align-items-center gap-2"
+                  style={{
+                    background: "#fef2f2",
+                    border: "1px solid #fecaca",
+                    color: "#dc2626",
+                    fontSize: "0.88rem",
+                  }}
+                >
+                  <i className="fas fa-exclamation-circle" />
+                  {error}
+                </motion.div>
+              )}
+
+              <form onSubmit={handleSubmit} className="d-flex flex-column gap-4">
+                <div>
+                  <label
+                    htmlFor="signin-email"
+                    className="d-block mb-2 fw_700 black"
+                    style={{ fontSize: "0.88rem" }}
+                  >
+                    Email address
+                  </label>
+                  <input
+                    id="signin-email"
+                    type="email"
+                    className="form-control w-100"
+                    placeholder="name@enviropharmacy.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    autoComplete="email"
+                    style={{
+                      border: "1px solid #e2e8f0",
+                      borderRadius: 12,
+                      padding: "14px 16px",
+                      fontSize: "0.95rem",
+                      background: "#fff",
+                    }}
+                  />
+                </div>
+
+                <div>
+                  <div className="d-flex justify-content-between align-items-center mb-2">
+                    <label
+                      htmlFor="signin-password"
+                      className="fw_700 black mb-0"
+                      style={{ fontSize: "0.88rem" }}
+                    >
+                      Password
+                    </label>
+                    <Link
+                      href="/forgot-password"
+                      className="text-decoration-none fw_600"
+                      style={{ fontSize: "0.82rem", color: "var(--p2-clr)" }}
+                    >
+                      Forgot password?
+                    </Link>
+                  </div>
+                  <input
+                    id="signin-password"
+                    type="password"
+                    className="form-control w-100"
+                    placeholder="Enter your password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    autoComplete="current-password"
+                    style={{
+                      border: "1px solid #e2e8f0",
+                      borderRadius: 12,
+                      padding: "14px 16px",
+                      fontSize: "0.95rem",
+                      background: "#fff",
+                    }}
+                  />
+                </div>
+
+                <motion.button
+                  type="submit"
+                  disabled={loading}
+                  whileHover={{ scale: loading ? 1 : 1.01 }}
+                  whileTap={{ scale: 0.99 }}
+                  className="w-100 border-0 fw_800 text-white"
+                  style={{
+                    borderRadius: 12,
+                    padding: "15px 20px",
+                    fontSize: "1rem",
+                    background: loading
+                      ? "#94a3b8"
+                      : "linear-gradient(135deg, #0d9488 0%, #13ec8a 100%)",
+                    cursor: loading ? "not-allowed" : "pointer",
+                    boxShadow: "0 10px 28px rgba(13, 148, 136, 0.28)",
+                  }}
+                >
+                  {loading ? "Signing in…" : "Sign in"}
+                </motion.button>
+              </form>
+
+              <p
+                className="mb-0 mt-4 text-center"
+                style={{ fontSize: "0.82rem", color: "#94a3b8" }}
+              >
+                For authorised staff only.{" "}
+                <Link href="/" style={{ color: "var(--p2-clr)" }}>
+                  Back to website
+                </Link>
+              </p>
+            </div>
+          </div>
+        </div>
+      </motion.div>
+    </div>
   )
 }

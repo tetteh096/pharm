@@ -14,7 +14,7 @@ const featureItems = [
       tagline: "PRESCRIPTIONS",
       body: "Skip the queue — refill your repeat prescriptions online through our portal or drop in at either branch. Our system sends automated reminders so you never run out of essential medication.",
       points: [
-        "Refill online or in-store at both branches",
+        "Refill online or in-store at all four branches",
         "Automated SMS & email reminders",
         "Express collection — ready in under 30 minutes",
         "Secure digital prescription records",
@@ -313,99 +313,6 @@ const Features = () => {
           </>
         )}
       </AnimatePresence>
-
-      <style jsx global>{`
-        .feat-row {
-          display: grid;
-          grid-template-columns: 1fr 220px auto;
-          align-items: center;
-          gap: 24px;
-          padding: 28px 0;
-          transition: padding-left 0.25s ease;
-        }
-        .feat-row:hover {
-          padding-left: 6px;
-        }
-        .feat-col-title {
-          display: flex;
-          align-items: center;
-          gap: 20px;
-        }
-        .feat-num {
-          font-size: 0.72rem;
-          font-weight: 800;
-          color: var(--p1-clr);
-          letter-spacing: 0.06em;
-          opacity: 0.7;
-          flex-shrink: 0;
-          min-width: 24px;
-        }
-        .feat-title {
-          font-size: clamp(0.95rem, 1.5vw, 1.15rem);
-          line-height: 1.35;
-        }
-        .feat-list {
-          list-style: none;
-          padding: 0;
-          margin: 0;
-          display: flex;
-          flex-direction: column;
-          gap: 6px;
-        }
-        .feat-li {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          font-size: 0.9rem;
-          color: rgba(0,0,0,0.72);
-          font-weight: 500;
-        }
-        .feat-dot {
-          width: 6px;
-          height: 6px;
-          border-radius: 50%;
-          background: var(--p1-clr);
-          flex-shrink: 0;
-        }
-        .feat-readmore {
-          background: transparent;
-          border: none;
-          cursor: pointer;
-          white-space: nowrap;
-          flex-shrink: 0;
-        }
-        @media (max-width: 991px) {
-          .feat-row {
-            grid-template-columns: 1fr auto;
-            grid-template-rows: auto auto;
-          }
-          .feat-list {
-            grid-column: 1 / 2;
-            padding-left: 44px;
-          }
-          .feat-readmore {
-            grid-column: 2 / 3;
-            grid-row: 1 / 3;
-            align-self: center;
-          }
-        }
-        @media (max-width: 575px) {
-          .feat-row {
-            grid-template-columns: 1fr;
-          }
-          .feat-list {
-            padding-left: 0;
-          }
-          .feat-readmore {
-            grid-column: 1 / 2;
-            grid-row: unset;
-            justify-self: start;
-          }
-          .feature-element {
-            display: none;
-          }
-        }
-      `}</style>
     </section>
   );
 };
