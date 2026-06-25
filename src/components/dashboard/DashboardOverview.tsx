@@ -1,4 +1,5 @@
 import Link from "next/link"
+import Image from "next/image"
 import type { Role } from "@prisma/client"
 import {
   Package,
@@ -122,29 +123,46 @@ export function DashboardOverview({
 
   return (
     <div className="dashboard-page space-y-8">
-      <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">Overview</h1>
-          <p className="text-muted-foreground mt-1">
-            Welcome back, {firstName}. Here is your pharmacy at a glance.
-          </p>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <Button variant="outline" size="sm" asChild>
-            <Link href="/">View website</Link>
-          </Button>
-          {quickActions.map((action) => (
-            <Button key={action.href} variant="secondary" size="sm" asChild>
-              <Link href={action.href}>
-                <action.icon className="mr-1.5 h-3.5 w-3.5" />
-                {action.label}
-              </Link>
+      <section className="dashboard-hero">
+        <Image
+          src="/photo/healthandwellness.jpg"
+          alt=""
+          fill
+          priority
+          className="dashboard-hero__image"
+          sizes="(max-width: 1400px) 100vw, 1400px"
+        />
+        <div className="dashboard-hero__scrim" aria-hidden />
+        <div className="dashboard-hero__body">
+          <div>
+            <h1 className="dashboard-hero__title">Overview</h1>
+            <p className="dashboard-hero__subtitle">
+              Welcome back, {firstName}. Here is your pharmacy at a glance — orders, patients,
+              stock, and website requests in one place.
+            </p>
+          </div>
+          <div className="dashboard-hero__actions">
+            <Button variant="outline" size="sm" className="dashboard-hero-btn-outline" asChild>
+              <Link href="/">View website</Link>
             </Button>
-          ))}
+            {quickActions.map((action) => (
+              <Button
+                key={action.href}
+                size="sm"
+                className="dashboard-hero-btn-solid"
+                asChild
+              >
+                <Link href={action.href}>
+                  <action.icon className="mr-1.5 h-3.5 w-3.5" />
+                  {action.label}
+                </Link>
+              </Button>
+            ))}
+          </div>
         </div>
-      </div>
+      </section>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
         {stats.map((stat) => (
           <Link key={stat.title} href={stat.href} className="group block">
             <Card className="dashboard-card h-full transition-colors hover:border-primary/50">
@@ -163,8 +181,8 @@ export function DashboardOverview({
         ))}
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-2">
-        <Card className="dashboard-card">
+      <div className="grid gap-4 xl:grid-cols-3">
+        <Card className="dashboard-card xl:col-span-2">
           <CardHeader className="flex flex-row items-center justify-between pb-3">
             <div>
               <CardTitle className="text-base">Website inbox</CardTitle>

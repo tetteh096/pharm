@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react"
 import { useSession } from "next-auth/react"
+import { toast } from "sonner"
 import { createUser, toggleUserActive } from "@/app/actions/users"
 import { Role } from "@prisma/client"
 import {
@@ -13,8 +14,9 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import {
-  Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger
+  Sheet, SheetDescription, SheetHeader, SheetTitle, SheetTrigger
 } from "@/components/ui/sheet"
+import { DashboardSheetContent } from "@/components/dashboard/DashboardSheetContent"
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue
 } from "@/components/ui/select"
@@ -59,10 +61,23 @@ function CreateUserSheet({ onCreated }: { onCreated: () => void }) {
 
   const handleCreate = () => {
     startTransition(async () => {
-      await createUser(form)
-      setOpen(false)
-      setForm({ name: "", email: "", password: "", role: "STAFF", department: "", phone: "" })
-      onCreated()
+      try {
+        const email = form.email
+        const { emailSent } = await createUser(form)
+        setOpen(false)
+        setForm({ name: "", email: "", password: "", role: "STAFF", department: "", phone: "" })
+        if (emailSent) {
+          toast.success(`Account created — welcome email sent to ${email}`)
+        } else {
+          toast.success("Account created", {
+            description: "Could not send welcome email — check Resend / email settings.",
+          })
+        }
+        onCreated()
+      } catch (err) {
+        console.error(err)
+        toast.error(err instanceof Error ? err.message : "Could not create account")
+      }
     })
   }
 
@@ -73,7 +88,7 @@ function CreateUserSheet({ onCreated }: { onCreated: () => void }) {
           <Plus size={16} /> Add Staff Member
         </Button>
       </SheetTrigger>
-      <SheetContent side="right" className="w-full sm:max-w-lg p-0 gap-0">
+      <DashboardSheetContent>
         <SheetHeader className="border-b px-5 py-4">
           <div className="flex items-center gap-2.5">
             <div className="h-9 w-9 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
@@ -82,7 +97,7 @@ function CreateUserSheet({ onCreated }: { onCreated: () => void }) {
             <div className="min-w-0">
               <SheetTitle className="text-base">New staff account</SheetTitle>
               <SheetDescription className="text-xs">
-                Send them their temporary password and they can change it after signing in.
+                A welcome email with sign-in details is sent to their inbox automatically.
               </SheetDescription>
             </div>
           </div>
@@ -149,7 +164,7 @@ function CreateUserSheet({ onCreated }: { onCreated: () => void }) {
             {pending ? "Creating..." : "Create account"}
           </Button>
         </div>
-      </SheetContent>
+      </DashboardSheetContent>
     </Sheet>
   )
 }

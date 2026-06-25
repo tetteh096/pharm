@@ -4,8 +4,21 @@ import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { X, ChevronRight, Phone } from "lucide-react";
+import { X, ChevronRight, Phone, Mail } from "lucide-react";
 import { BrandLogo } from "@/components/brand/BrandLogo";
+import {
+  PHARMACY_EMAIL,
+  PHARMACY_HELP_EMAIL,
+  PHARMACY_PRIMARY_PHONE,
+  pharmacyPrimaryTelHref,
+} from "@/data/pharmacy-branches";
+import {
+  buildPublicSiteSettings,
+  DEFAULT_SITE_SETTINGS,
+  type PublicSiteSettings,
+} from "@/lib/site-settings-shared";
+
+const FALLBACK_SETTINGS = buildPublicSiteSettings(DEFAULT_SITE_SETTINGS);
 
 const mobileNavItems = [
   { href: "/", label: "Home" },
@@ -24,6 +37,25 @@ interface MobileMenuProps {
 
 const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose }) => {
   const pathname = usePathname();
+  const [settings, setSettings] =
+    React.useState<PublicSiteSettings>(FALLBACK_SETTINGS);
+
+  React.useEffect(() => {
+    let cancelled = false;
+    fetch("/api/public/site-settings")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data: PublicSiteSettings | null) => {
+        if (!cancelled && data?.whatsappBranches?.length) setSettings(data);
+      })
+      .catch(() => {
+        /* keep fallback */
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const socialLinks = settings.socialLinks;
 
   const isActiveLink = (href: string) => {
     if (href === "/") {
@@ -121,61 +153,72 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose }) => {
                 <h6 className="fw_800 black mb-4 text-uppercase letter-spacing-2">Quick Contact</h6>
                 <div className="d-flex flex-column gap-3">
                   <div className="d-flex align-items-center gap-3">
-                    <div className="icon p2-bg-light rounded-circle d-center" style={{ width: '40px', height: '40px', background: 'rgba(17, 87, 238, 0.12)' }}>
-                      <Phone size={18} className="p2-clr" />
-                    </div>
-                    <div>
-                      <p className="mb-0 fs-nine text-muted">Madina Branch</p>
-                      <Link href="tel:+233554612072" className="black fw_700 fs-seven">055 461 2072</Link>
-                    </div>
-                  </div>
-                  <div className="d-flex align-items-center gap-3">
-                    <div className="icon p1-bg-light rounded-circle d-center" style={{ width: '40px', height: '40px', background: 'rgba(19, 236, 138, 0.12)' }}>
+                    <div
+                      className="icon p1-bg-light p1-clr rounded-circle d-center"
+                      style={{
+                        width: "40px",
+                        height: "40px",
+                        background: "rgba(19, 236, 138, 0.12)",
+                      }}
+                    >
                       <Phone size={18} className="p1-clr" />
                     </div>
                     <div>
-                      <p className="mb-0 fs-nine text-muted">Odorkor Branch</p>
-                      <Link href="tel:+233599376675" className="black fw_700 fs-seven">059 937 6675</Link>
+                      <p className="mb-0 fs-nine text-muted">Call us</p>
+                      <Link href={pharmacyPrimaryTelHref()} className="black fw_700 fs-seven">
+                        {PHARMACY_PRIMARY_PHONE}
+                      </Link>
                     </div>
                   </div>
                   <div className="d-flex align-items-center gap-3">
-                    <div className="icon p2-bg-light rounded-circle d-center" style={{ width: '40px', height: '40px', background: 'rgba(17, 87, 238, 0.12)' }}>
-                      <Phone size={18} className="p2-clr" />
+                    <div
+                      className="icon p2-bg-light p2-clr rounded-circle d-center"
+                      style={{
+                        width: "40px",
+                        height: "40px",
+                        background: "rgba(17, 87, 238, 0.12)",
+                      }}
+                    >
+                      <Mail size={18} className="p2-clr" />
                     </div>
-                    <div>
-                      <p className="mb-0 fs-nine text-muted">Sakumono Branch</p>
-                      <Link href="tel:+233530883354" className="black fw_700 fs-seven">053 088 3354</Link>
-                    </div>
-                  </div>
-                  <div className="d-flex align-items-center gap-3">
-                    <div className="icon p1-bg-light rounded-circle d-center" style={{ width: '40px', height: '40px', background: 'rgba(19, 236, 138, 0.12)' }}>
-                      <Phone size={18} className="p1-clr" />
-                    </div>
-                    <div>
-                      <p className="mb-0 fs-nine text-muted">Santeo Branch</p>
-                      <span className="black fw_700 fs-seven">Coming soon</span>
+                    <div className="min-w-0">
+                      <p className="mb-0 fs-nine text-muted">Email</p>
+                      <a
+                        href={`mailto:${PHARMACY_EMAIL}`}
+                        className="black fw_700 fs-seven text-decoration-none d-block"
+                        style={{ wordBreak: "break-all" }}
+                      >
+                        {PHARMACY_EMAIL}
+                      </a>
+                      <a
+                        href={`mailto:${PHARMACY_HELP_EMAIL}`}
+                        className="black fw_700 fs-seven text-decoration-none d-block mt-1"
+                        style={{ wordBreak: "break-all" }}
+                      >
+                        {PHARMACY_HELP_EMAIL}
+                      </a>
                     </div>
                   </div>
                 </div>
 
-                <div className="social-links d-flex gap-3 mt-5">
-                  {[
-                    "fa-brands fa-facebook-f", 
-                    "fa-brands fa-twitter", 
-                    "fa-brands fa-instagram", 
-                    "fa-brands fa-linkedin-in"
-                  ].map((iconClass, idx) => (
-                    <motion.a 
-                      key={idx}
-                      whileHover={{ scale: 1.1, backgroundColor: 'var(--p1-clr)', color: '#fff' }}
-                      href="#" 
-                      className="d-center rounded-circle bg-light transition-all shadow-sm"
-                      style={{ width: '40px', height: '40px', color: '#666' }}
-                    >
-                      <i className={iconClass}></i>
-                    </motion.a>
-                  ))}
-                </div>
+                {socialLinks.length > 0 && (
+                  <div className="social-links d-flex gap-3 mt-5">
+                    {socialLinks.map((link) => (
+                      <motion.a
+                        key={link.key}
+                        whileHover={{ scale: 1.1, backgroundColor: 'var(--p1-clr)', color: '#fff' }}
+                        href={link.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label={link.label}
+                        className="d-center rounded-circle bg-light transition-all shadow-sm"
+                        style={{ width: '40px', height: '40px', color: '#666' }}
+                      >
+                        <i className={link.icon}></i>
+                      </motion.a>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           </motion.div>

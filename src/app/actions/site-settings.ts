@@ -46,6 +46,7 @@ export async function updateSiteSettings(
       where: { id: "site" },
       create: {
         id: "site",
+        contactEmail: data.contactEmail || null,
         facebookUrl: data.facebookUrl || null,
         linkedinUrl: data.linkedinUrl || null,
         instagramUrl: data.instagramUrl || null,
@@ -57,6 +58,7 @@ export async function updateSiteSettings(
         whatsappSanteo: data.whatsappSanteo || null,
       },
       update: {
+        contactEmail: data.contactEmail || null,
         facebookUrl: data.facebookUrl || null,
         linkedinUrl: data.linkedinUrl || null,
         instagramUrl: data.instagramUrl || null,

@@ -10,6 +10,7 @@ import {
   MessageSquare,
   Mail,
   FileText,
+  Contact,
   UserCog,
   Settings,
 } from "lucide-react"
@@ -35,6 +36,7 @@ export const dashboardNavItems: DashboardNavItem[] = [
   { title: "Consultations", url: "/dashboard/consultations", icon: MessageSquare, roles: ["ADMIN", "PHARMACIST", "STAFF"] },
   { title: "Contact messages", url: "/dashboard/contact-messages", icon: Mail, roles: ["ADMIN", "PHARMACIST", "STAFF"] },
   { title: "Health blog", url: "/dashboard/blog", icon: FileText, roles: ["ADMIN", "PHARMACIST"] },
+  { title: "Team page", url: "/dashboard/team", icon: Contact, roles: ["ADMIN", "PHARMACIST"] },
   { title: "Staff", url: "/dashboard/users", icon: UserCog, roles: ["ADMIN"] },
   { title: "Site settings", url: "/dashboard/settings", icon: Settings, roles: ["ADMIN"] },
 ]

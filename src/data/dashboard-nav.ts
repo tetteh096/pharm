@@ -48,7 +48,7 @@ export const dashboardNavGroups: DashboardNavGroup[] = [
     label: "Content",
     items: [
       { title: "Health blog", url: "/dashboard/blog", icon: FileText, keywords: "articles posts" },
-      { title: "Website team", url: "/dashboard/team", icon: Contact, keywords: "staff profiles public" },
+      { title: "Website team", url: "/dashboard/team", icon: Contact, keywords: "team pharmacists meet our team profiles" },
     ],
   },
   {

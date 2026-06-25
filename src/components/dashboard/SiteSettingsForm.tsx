@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { toast } from "sonner"
-import { Loader2, Save, Share2, MessageCircle } from "lucide-react"
+import { Loader2, Save, Share2, MessageCircle, Mail } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -41,13 +41,37 @@ export function SiteSettingsForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="dashboard-page space-y-6 max-w-3xl mx-auto">
+    <form onSubmit={handleSubmit} className="dashboard-page space-y-6">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Site settings</h1>
         <p className="text-muted-foreground mt-1">
-          Manage WhatsApp chat numbers and footer social links shown on the public website.
+          Manage the public contact email, WhatsApp chat numbers and footer social links shown on the public website.
         </p>
       </div>
+
+      <Card className="dashboard-card">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Mail className="h-4 w-4" />
+            Contact email
+          </CardTitle>
+          <CardDescription>
+            The email address shown in the website footer and on the contact page.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2 max-w-md">
+            <Label htmlFor="contactEmail">Public email</Label>
+            <Input
+              id="contactEmail"
+              type="email"
+              value={form.contactEmail}
+              onChange={(e) => setField("contactEmail")(e.target.value)}
+              placeholder="info@enviropharmacy.com"
+            />
+          </div>
+        </CardContent>
+      </Card>
 
       <Card className="dashboard-card">
         <CardHeader>

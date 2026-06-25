@@ -5,6 +5,10 @@ import { auth } from "@/auth"
 import bcrypt from "bcryptjs"
 import { Role } from "@prisma/client"
 import { revalidatePath } from "next/cache"
+import {
+  sendStaffPasswordUpdatedEmail,
+  sendStaffWelcomeEmail,
+} from "@/lib/email"
 
 async function requireAdmin() {
   const session = await auth()
@@ -38,8 +42,16 @@ export async function createUser(data: {
   const user = await prisma.user.create({
     data: { ...data, password: hashed },
   })
+
+  const emailResult = await sendStaffWelcomeEmail({
+    to: data.email.trim().toLowerCase(),
+    name: data.name.trim(),
+    role: data.role,
+    temporaryPassword: data.password,
+  })
+
   revalidatePath("/dashboard/users")
-  return user
+  return { user, emailSent: emailResult.ok }
 }
 
 export async function updateUserRole(userId: string, role: Role) {
@@ -91,7 +103,22 @@ export async function toggleUserActive(userId: string, active: boolean) {
 
 export async function adminResetPassword(userId: string, newPassword: string) {
   await requireAdmin()
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { id: true, name: true, email: true, role: true },
+  })
+  if (!user) throw new Error("User not found")
+
   const hashed = await bcrypt.hash(newPassword, 12)
   await prisma.user.update({ where: { id: userId }, data: { password: hashed } })
+
+  const emailResult = await sendStaffPasswordUpdatedEmail({
+    to: user.email,
+    name: user.name,
+    role: user.role,
+    temporaryPassword: newPassword,
+  })
+
   revalidatePath("/dashboard/users")
+  return { emailSent: emailResult.ok }
 }

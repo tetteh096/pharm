@@ -162,9 +162,6 @@ export function OrdersTable({
                   Pickup
                 </Badge>
               )}
-              {order.branchName ? (
-                <span className="text-xs text-muted-foreground">{order.branchName}</span>
-              ) : null}
             </div>
           )
         },
@@ -197,7 +194,7 @@ export function OrdersTable({
                 </a>
                 {order.deliveryAddress ? (
                   <span
-                    className="max-w-[220px] truncate text-[10px] text-muted-foreground"
+                    className="max-w-[320px] text-xs leading-snug text-muted-foreground line-clamp-2"
                     title={order.deliveryAddress}
                   >
                     {order.deliveryAddress}
@@ -287,14 +284,13 @@ export function OrdersTable({
         columns={columns}
         getRowId={(order) => order.dbId}
         itemLabel="orders"
-        searchPlaceholder="Search order ID, customer, phone, branch, address…"
+        searchPlaceholder="Search order ID, customer, phone, address…"
         searchFn={(order, query) => {
           const haystack = [
             order.id,
             order.customer,
             order.phone,
             order.email,
-            order.branchName,
             order.deliveryAddress,
             order.status,
           ]

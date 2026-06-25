@@ -62,8 +62,8 @@ const Choose = () => {
                   Care
                 </h2>
                 <p className="choose-lead mb-0">
-                  Genuine medications, pharmacist guidance, and dependable care for families across Madina,
-                  Odorkor, and Sakumono.
+                  Genuine medications, pharmacist guidance, and dependable care for families across
+                  all our branches.
                 </p>
               </div>
               <div className="choose-feature-row">
@@ -113,12 +113,12 @@ const Choose = () => {
                 </p>
                 <div className="choose-mini-grid">
                   <div className="choose-mini-item">
-                    <strong>3</strong>
+                    <strong>4</strong>
                     <span>Branches</span>
                   </div>
                   <div className="choose-mini-item">
-                    <strong>24/7</strong>
-                    <span>Madina access</span>
+                    <strong>Mon–Sat</strong>
+                    <span>Opening days</span>
                   </div>
                   <div className="choose-mini-item">
                     <strong>Real</strong>

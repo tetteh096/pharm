@@ -6,6 +6,7 @@
  * Falls back to the production domain.
  */
 import { BRAND_NAME } from "@/lib/brand"
+import { PHARMACY_BRANCHES, PHARMACY_PRIMARY_PHONE } from "@/data/pharmacy-branches"
 
 export const SITE_URL = (
   process.env.NEXT_PUBLIC_SITE_URL ?? "https://enviropharmacy.com"
@@ -31,7 +32,7 @@ export const SITE_KEYWORDS = [
   "pharmacy in Santeo",
   "pharmacy near me Accra",
   "pharmacy Accra Ghana",
-  "24 hour pharmacy Madina",
+  "community pharmacy Madina",
   "buy medicine online Ghana",
   "chronic care pharmacy Accra",
   "prescription refill Ghana",
@@ -44,7 +45,7 @@ export const BRANCHES = [
     name: "Enviro Pharmacy — Madina",
     area: "Madina",
     phone: "+233554612072",
-    hours: "24 hours",
+    hours: "Mon–Sat",
     city: "Accra",
     region: "Greater Accra",
     country: "GH",
@@ -70,8 +71,8 @@ export const BRANCHES = [
 ] as const
 
 export const CONTACT = {
-  email: "enviropharmacyltd@gmail.com",
-  phone: "+233554612072",
+  email: "info@enviropharmacy.com",
+  phone: `+233${PHARMACY_PRIMARY_PHONE.replace(/\s+/g, "").replace(/^0/, "")}`,
 }
 
 export const SOCIAL_PROFILES = [

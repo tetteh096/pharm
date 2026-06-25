@@ -1,7 +1,6 @@
 "use client"
 
 import * as React from "react"
-import Link from "next/link"
 import { useRouter, usePathname, useSearchParams } from "next/navigation"
 import { toast } from "sonner"
 import {
@@ -17,6 +16,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { CheckInDialog } from "@/components/dashboard/CheckInDialog"
+import { ChronicPatientDetailDrawer } from "@/components/dashboard/ChronicPatientDetailDrawer"
 import { AddChronicPatientDialog } from "@/components/dashboard/AddChronicPatientDialog"
 import { ChronicCsvTools } from "@/components/dashboard/ChronicCsvTools"
 import { DataTable, type DataTableColumn } from "@/components/dashboard/DataTable"
@@ -106,6 +106,27 @@ export function ChronicPatientsList({
   const [checkInTarget, setCheckInTarget] = React.useState<ChronicListItem | null>(
     null
   )
+  const [viewTargetId, setViewTargetId] = React.useState<string | null>(null)
+
+  const openView = React.useCallback((row: ChronicListItem) => {
+    setViewTargetId(row.id)
+  }, [])
+
+  const openCheckInForRow = React.useCallback((row: ChronicListItem) => {
+    if (!row.customer.phone) {
+      toast.info("No phone number on file. Open the patient and add one first.")
+      return
+    }
+    setCheckInTarget(row)
+  }, [])
+
+  const openCheckInFromDrawer = React.useCallback(
+    (id: string, _name: string) => {
+      const row = initial.find((r) => r.id === id)
+      if (row) openCheckInForRow(row)
+    },
+    [initial, openCheckInForRow]
+  )
 
   const setScope = (scope: "mine" | "all") => {
     const next = new URLSearchParams(params.toString())
@@ -118,14 +139,6 @@ export function ChronicPatientsList({
     router.refresh()
   }
 
-  const openCheckIn = React.useCallback((row: ChronicListItem) => {
-    if (!row.customer.phone) {
-      toast.info("No phone number on file. Open the patient and add one first.")
-      return
-    }
-    setCheckInTarget(row)
-  }, [])
-
   const columns = React.useMemo<DataTableColumn<ChronicListItem>[]>(
     () => [
       {
@@ -135,13 +148,16 @@ export function ChronicPatientsList({
           const age = ageFromDob(row.customer.dateOfBirth)
           return (
             <div className="min-w-[140px]">
-              <Link
-                href={`/dashboard/chronic/${row.id}`}
-                onClick={stopRowClick}
-                className="font-medium hover:text-primary"
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  openView(row)
+                }}
+                className="font-medium hover:text-primary text-left"
               >
                 {row.customer.name}
-              </Link>
+              </button>
               {age != null ? (
                 <p className="text-xs text-muted-foreground">
                   {age}y{row.customer.gender ? ` · ${row.customer.gender}` : ""}
@@ -282,23 +298,29 @@ export function ChronicPatientsList({
               className="h-8 gap-1 px-2"
               onClick={(e) => {
                 e.stopPropagation()
-                openCheckIn(row)
+                openCheckInForRow(row)
               }}
             >
               <MessageCircle className="h-3.5 w-3.5" />
               <span className="hidden sm:inline">Log</span>
             </Button>
-            <Button size="sm" variant="ghost" className="h-8 gap-1 px-2" asChild>
-              <Link href={`/dashboard/chronic/${row.id}`} onClick={stopRowClick}>
-                <Eye className="h-3.5 w-3.5" />
-                <span className="hidden sm:inline">View</span>
-              </Link>
+            <Button
+              size="sm"
+              variant="ghost"
+              className="h-8 gap-1 px-2"
+              onClick={(e) => {
+                e.stopPropagation()
+                openView(row)
+              }}
+            >
+              <Eye className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">View log</span>
             </Button>
           </div>
         ),
       },
     ],
-    [openCheckIn]
+    [openCheckInForRow, openView]
   )
 
   if (initial.length === 0) {
@@ -375,8 +397,17 @@ export function ChronicPatientsList({
             predicate: (row, value) => dueMatchesFilter(row.nextCheckInAt, value),
           },
         ]}
-        onRowClick={(row) => router.push(`/dashboard/chronic/${row.id}`)}
+        onRowClick={openView}
         emptyFilteredMessage="No chronic patients match your search or filters."
+      />
+
+      <ChronicPatientDetailDrawer
+        chronicPatientId={viewTargetId}
+        open={Boolean(viewTargetId)}
+        onOpenChange={(open) => {
+          if (!open) setViewTargetId(null)
+        }}
+        onLogCheckIn={openCheckInFromDrawer}
       />
 
       {checkInTarget ? (

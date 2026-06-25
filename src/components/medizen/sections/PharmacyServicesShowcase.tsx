@@ -8,6 +8,10 @@ import {
   type StickyFeatureItem,
 } from "@/components/patterns/ScrollStickyFeatureShowcase";
 import { pharmacyServices, type PharmacyService } from "@/data/pharmacy-services";
+import {
+  PHARMACY_PRIMARY_PHONE,
+  pharmacyPrimaryTelHref,
+} from "@/data/pharmacy-branches";
 
 /**
  * Pharmacy services showcase — scroll-driven split layout on all screen sizes.
@@ -113,10 +117,10 @@ export default function PharmacyServicesShowcase() {
                 ) : (
                   <>
                     <a
-                      href="tel:0554612072"
+                      href={pharmacyPrimaryTelHref()}
                       className="common-btn box-style first-box d-inline-flex justify-content-center align-items-center gap-2 fw-semibold rounded100"
                     >
-                      <i className="fas fa-phone" /> Call Madina Branch
+                      <i className="fas fa-phone" /> Call us — {PHARMACY_PRIMARY_PHONE}
                     </a>
                     <a
                       href="/contact"

@@ -1,14 +1,11 @@
 import Link from "next/link"
 import { ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { getActiveBranches } from "@/app/dashboard/branches/actions"
 import { ManualOrderForm } from "@/components/dashboard/ManualOrderForm"
 
 export const dynamic = "force-dynamic"
 
-export default async function NewOrderPage() {
-  const branches = await getActiveBranches()
-
+export default function NewOrderPage() {
   return (
     <div className="dashboard-page space-y-6">
       <div className="flex items-center gap-3">
@@ -26,13 +23,7 @@ export default async function NewOrderPage() {
         </div>
       </div>
 
-      <ManualOrderForm
-        branches={branches.map((b) => ({
-          id: b.id,
-          name: b.name,
-          location: b.location ?? null,
-        }))}
-      />
+      <ManualOrderForm />
     </div>
   )
 }

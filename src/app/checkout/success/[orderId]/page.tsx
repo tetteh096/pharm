@@ -12,6 +12,10 @@ import {
   MapPin,
   Navigation as NavigationIcon,
 } from "lucide-react"
+import {
+  PHARMACY_PRIMARY_PHONE,
+  pharmacyPrimaryTelHref,
+} from "@/data/pharmacy-branches"
 
 export const dynamic = "force-dynamic"
 
@@ -235,11 +239,11 @@ export default async function OrderSuccessPage({
                 Continue shopping
               </Link>
               <a
-                href="tel:+233554612072"
+                href={pharmacyPrimaryTelHref()}
                 className="common-btn box-style p1-bg text-white rounded-5 px-4 py-3 fw_800 border-0 d-inline-flex align-items-center gap-2 text-decoration-none"
               >
                 <Phone size={16} />
-                Call Madina branch
+                Call us — {PHARMACY_PRIMARY_PHONE}
               </a>
             </div>
           </div>

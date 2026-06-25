@@ -3,6 +3,7 @@ import Footer from "@/components/medizen/Footer";
 import PageTitle from "@/components/medizen/PageTitle";
 import ServicesTrustSection from "@/components/medizen/sections/ServicesTrustSection";
 import PharmacyServicesShowcase from "@/components/medizen/sections/PharmacyServicesShowcase";
+import InPharmacyServicesGrid from "@/components/medizen/sections/InPharmacyServicesGrid";
 import ServicesPharmacistSupport from "@/components/medizen/sections/ServicesPharmacistSupport";
 import Appointment from "@/components/medizen/sections/Appointment";
 
@@ -20,6 +21,7 @@ export default function ServicePage() {
       <main>
         <PageTitle title="Services" />
         <PharmacyServicesShowcase />
+        <InPharmacyServicesGrid />
         <ServicesPharmacistSupport />
         <ServicesTrustSection />
         <Appointment />

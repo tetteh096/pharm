@@ -2,10 +2,16 @@
 
 import Link from "next/link"
 import { useState } from "react"
-import { Minus, Plus, Tag, Truck, Phone, MapPin } from "lucide-react"
+import { Minus, Plus, Tag, Truck, Phone, MapPin, Mail } from "lucide-react"
 import AddToCartButton from "@/components/medizen/shop/AddToCartButton"
 import ProductGallery from "@/components/medizen/shop/ProductGallery"
 import type { ShopProduct } from "@/app/actions/storefront"
+import {
+  PHARMACY_EMAIL,
+  PHARMACY_HELP_EMAIL,
+  PHARMACY_PRIMARY_PHONE,
+  pharmacyPrimaryTelHref,
+} from "@/data/pharmacy-branches"
 
 export default function ProductDetailsClient({ product }: { product: ShopProduct }) {
   const [quantity, setQuantity] = useState(1)
@@ -198,7 +204,7 @@ export default function ProductDetailsClient({ product }: { product: ShopProduct
                 Pickup or local delivery
               </p>
               <p className="pra mb-0" style={{ fontSize: "0.78rem" }}>
-                Pickup ready in 30 minutes at our branches.
+                Ready for pickup in about 30 minutes.
               </p>
             </div>
           </div>
@@ -212,14 +218,35 @@ export default function ProductDetailsClient({ product }: { product: ShopProduct
               </div>
             </div>
           )}
-          <div className="d-flex align-items-start gap-2">
+          <div className="d-flex align-items-start gap-2 mb-2">
             <Phone size={16} className="mt-1" style={{ color: "var(--p1-clr)" }} />
             <div>
               <p className="black fw_700 mb-0" style={{ fontSize: "0.85rem" }}>
                 Need help? Call us
               </p>
               <p className="pra mb-0" style={{ fontSize: "0.78rem" }}>
-                Madina: <a href="tel:+233554612072" className="black">055 461 2072</a> · Odorkor: <a href="tel:+233599376675" className="black">059 937 6675</a>
+                <a href={pharmacyPrimaryTelHref()} className="black fw_600 text-decoration-none">
+                  {PHARMACY_PRIMARY_PHONE}
+                </a>
+              </p>
+            </div>
+          </div>
+          <div className="d-flex align-items-start gap-2">
+            <Mail size={16} className="mt-1" style={{ color: "var(--p2-clr)" }} />
+            <div>
+              <p className="black fw_700 mb-0" style={{ fontSize: "0.85rem" }}>
+                Or email us
+              </p>
+              <p className="pra mb-0" style={{ fontSize: "0.78rem" }}>
+                <a href={`mailto:${PHARMACY_EMAIL}`} className="black fw_600 text-decoration-none d-block">
+                  {PHARMACY_EMAIL}
+                </a>
+                <a
+                  href={`mailto:${PHARMACY_HELP_EMAIL}`}
+                  className="black fw_600 text-decoration-none d-block mt-1"
+                >
+                  {PHARMACY_HELP_EMAIL}
+                </a>
               </p>
             </div>
           </div>

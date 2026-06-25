@@ -2,17 +2,22 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
+import {
+  PHARMACY_PRIMARY_PHONE,
+  pharmacyPrimaryTelHref,
+} from "@/data/pharmacy-branches";
+import { CollapseBlock } from "@/components/medizen/CollapseBlock";
 
 const pillars = [
   {
     icon: "fas fa-clock",
-    title: "Madina branch open 24 hours",
-    text: "Emergency prescriptions and late-night pharmacy support when you need it most.",
+    title: "Monday – Saturday",
+    text: "Walk in during branch opening hours — call ahead if you need to confirm today's times.",
   },
   {
     icon: "fas fa-map-marked-alt",
-    title: "Four branches across Accra",
-    text: "Madina, Odorkor, Sakumono and Santeo — pick the location closest to you.",
+    title: "Branches near you",
+    text: "Visit the contact page for branch details, hours, and directions.",
   },
   {
     icon: "fas fa-user-md",
@@ -64,9 +69,14 @@ export default function ServicesTrustSection() {
           </div>
         </div>
 
+        <CollapseBlock
+          title="Why Enviro Pharmacy"
+          subtitle="Four reasons patients trust us"
+          defaultOpen={false}
+        >
         <div className="row g-3 g-md-4">
           {pillars.map((item, index) => (
-            <div className="col-md-6" key={item.title}>
+            <div key={item.title} className="col-md-6">
               <motion.div
                 initial={{ opacity: 0, y: 22 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -85,6 +95,7 @@ export default function ServicesTrustSection() {
             </div>
           ))}
         </div>
+        </CollapseBlock>
 
         <motion.div
           initial={{ opacity: 0, y: 16 }}
@@ -97,10 +108,10 @@ export default function ServicesTrustSection() {
           </p>
           <div className="d-flex flex-wrap justify-content-center gap-2 gap-md-3">
             <a
-              href="tel:0554612072"
+              href={pharmacyPrimaryTelHref()}
               className="common-btn box-style first-box d-inline-flex justify-content-center align-items-center gap-2 fw-semibold rounded100"
             >
-              <i className="fas fa-phone" /> Call Madina — 055 461 2072
+              <i className="fas fa-phone" /> Call us — {PHARMACY_PRIMARY_PHONE}
             </a>
             <Link
               href="/contact"

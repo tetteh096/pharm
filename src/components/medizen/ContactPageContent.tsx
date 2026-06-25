@@ -9,11 +9,14 @@ import {
   Loader2,
   Mail,
   MapPin,
+  MessageCircle,
   MessageSquare,
   Navigation,
   Phone,
   Send,
 } from "lucide-react"
+import { buildWhatsAppUrl } from "@/lib/whatsapp"
+import type { PublicWhatsAppBranch } from "@/lib/site-settings-shared"
 
 import { submitContactForm } from "@/app/actions/contact"
 import { useIdempotentFormSubmit } from "@/hooks/useIdempotentFormSubmit"
@@ -22,6 +25,8 @@ import {
   PHARMACY_EMAIL,
   PHARMACY_INSTAGRAM,
   PHARMACY_INSTAGRAM_HANDLE,
+  PHARMACY_PRIMARY_PHONE,
+  pharmacyPrimaryTelHref,
   type PharmacyBranch,
 } from "@/data/pharmacy-branches"
 
@@ -33,16 +38,27 @@ const SUBJECT_OPTIONS = [
   "General enquiry",
 ]
 
-export function ContactPageContent() {
-  const [selectedId, setSelectedId] = React.useState<string>("madina")
+export function ContactPageContent({
+  branches = PHARMACY_BRANCHES,
+  contactEmail = PHARMACY_EMAIL,
+  whatsappBranches = [],
+}: {
+  branches?: PharmacyBranch[]
+  contactEmail?: string
+  whatsappBranches?: PublicWhatsAppBranch[]
+}) {
+  const defaultBranchId = branches[0]?.id ?? "madina"
+  const [selectedId, setSelectedId] = React.useState<string>(defaultBranchId)
   const selected =
-    PHARMACY_BRANCHES.find((b) => b.id === selectedId) ?? PHARMACY_BRANCHES[0]
+    branches.find((b) => b.id === selectedId) ?? branches[0]
+  const selectedWhatsApp =
+    whatsappBranches.find((b) => b.id === selectedId && b.whatsapp) ?? null
 
   const [form, setForm] = React.useState({
     fullName: "",
     email: "",
     phone: "",
-    branchId: "madina",
+    branchId: defaultBranchId,
     subject: SUBJECT_OPTIONS[0],
     message: "",
   })
@@ -101,7 +117,7 @@ export function ContactPageContent() {
           <div className="row justify-content-center mb-5">
             <div className="col-lg-8 text-center">
               <span className="contact-eyebrow d-inline-block mb-3 px-4 py-2 rounded-pill fw_700">
-                Four branches across Accra
+                Get in touch
               </span>
               <h2 className="black fw_800 mb-3" style={{ fontSize: "clamp(1.8rem, 3vw, 2.5rem)" }}>
                 Pick a branch, then send us a message
@@ -114,7 +130,7 @@ export function ContactPageContent() {
           </div>
 
           <div className="row g-4 mb-5">
-            {PHARMACY_BRANCHES.map((branch, index) => (
+            {branches.map((branch, index) => (
               <div key={branch.id} className="col-md-6 col-xl-3">
                 <BranchCard
                   branch={branch}
@@ -145,7 +161,26 @@ export function ContactPageContent() {
                     <div>
                       <h3 className="black fw_800 mb-1">Send a message</h3>
                       <p className="pra mb-0" style={{ fontSize: "0.92rem" }}>
-                        We usually reply within a few hours during branch hours.
+                        We usually reply within a few minutes.
+                        {selectedWhatsApp ? (
+                          <>
+                            {" "}
+                            For the fastest response,{" "}
+                            <a
+                              href={buildWhatsAppUrl(
+                                selectedWhatsApp.whatsapp!,
+                                `Hello ${selected.name.replace(" Branch", "")}, I have a question for Enviro Pharmacy.`
+                              )}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="fw_700"
+                              style={{ color: "var(--p2-clr)" }}
+                            >
+                              message us on WhatsApp
+                            </a>
+                            .
+                          </>
+                        ) : null}
                       </p>
                     </div>
                   </div>
@@ -161,7 +196,28 @@ export function ContactPageContent() {
                       <p className="black fw_700 mb-2">Message sent</p>
                       <p className="pra mb-4" style={{ fontSize: "0.92rem" }}>
                         Thank you. Our team at {selected.name.replace(" Branch", "")} will
-                        follow up soon. You can also call us directly for urgent help.
+                        follow up within a few minutes.
+                        {selectedWhatsApp ? (
+                          <>
+                            {" "}
+                            You can also{" "}
+                            <a
+                              href={buildWhatsAppUrl(
+                                selectedWhatsApp.whatsapp!,
+                                `Hello ${selected.name.replace(" Branch", "")}, I just sent a message via your contact form.`
+                              )}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="fw_700"
+                              style={{ color: "var(--p2-clr)" }}
+                            >
+                              chat on WhatsApp
+                            </a>{" "}
+                            or call us for urgent help.
+                          </>
+                        ) : (
+                          <> You can also call us directly for urgent help.</>
+                        )}
                       </p>
                       <button
                         type="button"
@@ -225,7 +281,7 @@ export function ContactPageContent() {
                             onChange={setField("branchId")}
                             className="form-select"
                           >
-                            {PHARMACY_BRANCHES.map((b) => (
+                            {branches.map((b) => (
                               <option key={b.id} value={b.id}>
                                 {b.name}
                                 {b.comingSoon ? " (Coming soon)" : ""}
@@ -301,7 +357,7 @@ export function ContactPageContent() {
             </div>
 
             <div className="col-lg-6">
-              <BranchDetailPanel branch={selected} />
+              <BranchDetailPanel branch={selected} whatsapp={selectedWhatsApp} />
             </div>
           </div>
 
@@ -310,8 +366,8 @@ export function ContactPageContent() {
               <ContactStrip
                 icon={<Mail size={18} />}
                 label="Email"
-                href={`mailto:${PHARMACY_EMAIL}`}
-                value={PHARMACY_EMAIL}
+                href={`mailto:${contactEmail}`}
+                value={contactEmail}
               />
             </div>
             <div className="col-md-4">
@@ -326,9 +382,9 @@ export function ContactPageContent() {
             <div className="col-md-4">
               <ContactStrip
                 icon={<Phone size={18} />}
-                label="Madina (24 hours)"
-                href="tel:+233554612072"
-                value="055 461 2072"
+                label="Call us"
+                href={pharmacyPrimaryTelHref()}
+                value={PHARMACY_PRIMARY_PHONE}
               />
             </div>
           </div>
@@ -411,7 +467,13 @@ function BranchCard({
   )
 }
 
-function BranchDetailPanel({ branch }: { branch: PharmacyBranch }) {
+function BranchDetailPanel({
+  branch,
+  whatsapp,
+}: {
+  branch: PharmacyBranch
+  whatsapp: PublicWhatsAppBranch | null
+}) {
   return (
     <div className="contact-surface h-100 rounded-4 overflow-hidden shadow-sm d-flex flex-column">
       <div className="p-4 p-md-5 flex-grow-1">
@@ -440,9 +502,27 @@ function BranchDetailPanel({ branch }: { branch: PharmacyBranch }) {
           {branch.phone ? (
             <DetailRow icon={<Phone size={16} />} label="Phone" value={branch.phone} />
           ) : null}
+          {whatsapp?.phone ? (
+            <DetailRow icon={<MessageCircle size={16} />} label="WhatsApp" value={whatsapp.phone} />
+          ) : null}
         </div>
 
         <div className="d-flex flex-wrap gap-2">
+          {whatsapp?.whatsapp ? (
+            <a
+              href={buildWhatsAppUrl(
+                whatsapp.whatsapp,
+                `Hello ${branch.name.replace(" Branch", "")}, I would like some help from Enviro Pharmacy.`
+              )}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="common-btn box-style p2-bg text-white rounded-5 px-4 py-2 fw-bold text-decoration-none d-inline-flex align-items-center gap-2"
+              style={{ fontSize: "0.88rem" }}
+            >
+              <MessageCircle size={15} />
+              WhatsApp
+            </a>
+          ) : null}
           {branch.phone ? (
             <a
               href={`tel:+233${branch.tel!.replace(/^0/, "")}`}

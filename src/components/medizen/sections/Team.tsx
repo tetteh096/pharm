@@ -41,7 +41,7 @@ const teamMembers = [
     role: "Customer Care Manager",
     icon: "fas fa-headset",
     accent: "var(--p2-clr)",
-    message: "Your satisfaction is our success. Whether you're picking up a refill, asking about side effects, or need late-night help at our Madina 24-hour branch, our team is here to listen and support you every step of the way.",
+    message: "Your satisfaction is our success. Whether you're picking up a refill, asking about side effects, or need help with a prescription question, our team is here to listen and support you every step of the way.",
   },
 ];
 

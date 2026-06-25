@@ -85,8 +85,9 @@
 .eh-heading {
   color: #fff;
   font-size: clamp(2.4rem, 5.2vw, 4.2rem);
-  font-weight: 800;
-  line-height: 1.1;
+  font-weight: 700;
+  line-height: 1.14;
+  letter-spacing: -0.02em;
   max-width: 700px;
   margin-bottom: 1.2rem;
   text-shadow: 0 2px 24px rgba(0, 0, 0, 0.55), 0 1px 4px rgba(0, 0, 0, 0.45);
@@ -166,20 +167,15 @@
 
 /* ── Popular Products (MedPreview) ── */
 .med-preview-section {
-  --med-preview-blue: #8ea2cc;
-  --med-preview-blue-mid: #b4c3e0;
-  --med-preview-blue-light: #dce4f3;
   position: relative;
   overflow: hidden;
-  padding: clamp(3rem, 6vw, 5rem) 0;
+  padding: clamp(3.25rem, 6vw, 5.25rem) 0;
   background: linear-gradient(
-    165deg,
-    var(--med-preview-blue-light) 0%,
-    var(--med-preview-blue-mid) 48%,
-    var(--med-preview-blue) 100%
+    145deg,
+    #0f4fd4 0%,
+    var(--p2-clr) 42%,
+    #0a3a9e 100%
   );
-  border-top: 1px solid rgba(142, 162, 204, 0.45);
-  border-bottom: 1px solid rgba(69, 90, 130, 0.12);
 }
 .med-preview-section::before,
 .med-preview-section::after {
@@ -189,56 +185,361 @@
   pointer-events: none;
 }
 .med-preview-section::before {
-  top: -140px;
-  right: -100px;
-  width: 360px;
-  height: 360px;
-  background: rgba(255, 255, 255, 0.22);
+  top: -160px;
+  right: -120px;
+  width: 420px;
+  height: 420px;
+  background: radial-gradient(circle, rgba(19, 236, 138, 0.18) 0%, transparent 68%);
 }
 .med-preview-section::after {
-  bottom: -120px;
-  left: -80px;
-  width: 280px;
-  height: 280px;
-  background: rgba(69, 90, 130, 0.1);
+  bottom: -140px;
+  left: -100px;
+  width: 320px;
+  height: 320px;
+  background: rgba(255, 255, 255, 0.06);
 }
 .med-preview-section .container {
   position: relative;
   z-index: 1;
 }
-.med-preview-section .pra {
-  color: rgba(9, 22, 42, 0.72);
+.med-preview-eyebrow {
+  padding: 0.4rem 1rem;
+  border-radius: 999px;
+  background: rgba(19, 236, 138, 0.16);
+  border: 1px solid rgba(19, 236, 138, 0.35);
+  color: #d7ffe8;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
 }
-.med-preview-card {
-  height: 100%;
-  padding: 1rem;
-  background: #fff;
-  border-radius: 18px;
-  border: 1px solid rgba(255, 255, 255, 0.65);
-  box-shadow: 0 12px 36px rgba(69, 90, 130, 0.14);
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
+.med-preview-title {
+  color: #fff;
+  font-size: clamp(1.75rem, 3.2vw, 2.5rem);
+  font-weight: 800;
+  line-height: 1.15;
+  margin: 0;
 }
-.med-preview-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 18px 44px rgba(69, 90, 130, 0.2);
+.med-preview-subtitle {
+  color: rgba(255, 255, 255, 0.78);
+  font-size: clamp(0.88rem, 1.6vw, 1rem);
+  line-height: 1.65;
+  max-width: 34rem;
+}
+.med-preview-view-all {
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.65rem 1.15rem;
+  border-radius: 999px;
+  background: var(--p1-clr);
+  color: #fff;
+  font-size: 0.82rem;
+  font-weight: 800;
+  text-decoration: none;
+  box-shadow: 0 10px 24px rgba(19, 236, 138, 0.28);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+.med-preview-view-all:hover {
+  color: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 14px 28px rgba(19, 236, 138, 0.34);
+}
+.med-preview-view-all--outline {
+  background: transparent;
+  border: 1.5px solid rgba(255, 255, 255, 0.55);
+  box-shadow: none;
+}
+.med-preview-view-all--outline:hover {
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: none;
+}
+.med-preview-view-all--solid {
+  display: inline-flex;
 }
 .med-preview-nav-btn {
-  width: 44px;
-  height: 44px;
+  width: 42px;
+  height: 42px;
   border-radius: 50%;
-  border: 1.5px solid rgba(255, 255, 255, 0.55);
-  background: rgba(255, 255, 255, 0.92);
+  border: none;
+  background: rgba(255, 255, 255, 0.95);
+  color: #09162a;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
-  box-shadow: 0 4px 14px rgba(69, 90, 130, 0.12);
+  transition: background 0.2s, color 0.2s, transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 6px 18px rgba(9, 22, 42, 0.14);
 }
-.med-preview-nav-btn:hover {
+.med-preview-nav-btn:hover:not(:disabled) {
   background: var(--p1-clr);
-  border-color: var(--p1-clr);
-  box-shadow: 0 8px 20px rgba(19, 236, 138, 0.25);
+  color: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 22px rgba(19, 236, 138, 0.3);
+}
+.med-preview-nav-btn--disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+.med-preview-empty {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1.5px dashed rgba(255, 255, 255, 0.28);
+  color: #fff;
+}
+.med-preview-empty p {
+  color: rgba(255, 255, 255, 0.82);
+}
+.med-preview-card {
+  height: 100%;
+  background: #fff;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  box-shadow: 0 14px 40px rgba(9, 22, 42, 0.14);
+  overflow: hidden;
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.35s ease, border-color 0.35s ease;
+}
+.med-preview-card:hover {
+  transform: translateY(-8px);
+  border-color: rgba(19, 236, 138, 0.45);
+  box-shadow: 0 22px 48px rgba(9, 22, 42, 0.2);
+}
+.med-preview-thumb {
+  aspect-ratio: 1 / 1;
+  background: linear-gradient(180deg, #f6f8fb 0%, #eef2f7 100%);
+}
+.med-preview-thumb-img {
+  object-fit: cover;
+  display: block;
+  transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.med-preview-card:hover .med-preview-thumb-img {
+  transform: scale(1.06);
+}
+.med-preview-discount-badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  padding: 0.35rem 0.65rem;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: #fff;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  box-shadow: 0 6px 16px rgba(220, 38, 38, 0.28);
+}
+.med-preview-eye {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.95);
+  color: #09162a;
+  box-shadow: 0 6px 16px rgba(9, 22, 42, 0.12);
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+.med-preview-card:hover .med-preview-eye {
+  opacity: 1;
+  transform: translateY(0);
+}
+.med-preview-card-body {
+  padding: 1rem 1.1rem 1.15rem;
+}
+.med-preview-category {
+  display: block;
+  margin-bottom: 0.35rem;
+  color: var(--p1-clr);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.med-preview-name {
+  margin: 0 0 0.85rem;
+  color: #09162a;
+  font-size: 0.95rem;
+  font-weight: 800;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: 2.65rem;
+}
+.med-preview-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid rgba(9, 22, 42, 0.07);
+}
+.med-preview-prices {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+}
+.med-preview-price {
+  color: var(--p2-clr);
+  font-size: 1.15rem;
+  font-weight: 900;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+.med-preview-price--discount {
+  color: #dc2626;
+}
+.med-preview-price-original {
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: rgba(9, 22, 42, 0.42);
+  text-decoration: line-through;
+  font-variant-numeric: tabular-nums;
+}
+.med-preview-shop-hint {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(19, 236, 138, 0.12);
+  color: var(--p1-clr);
+  transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+.med-preview-card:hover .med-preview-shop-hint {
+  background: var(--p1-clr);
+  color: #fff;
+  transform: translateX(2px);
+}
+
+@media (max-width: 767.98px) {
+  .med-preview-card-body {
+    padding: 0.75rem 0.8rem 0.9rem;
+  }
+  .med-preview-name {
+    font-size: 0.82rem;
+    min-height: 2.3rem;
+    margin-bottom: 0.65rem;
+  }
+  .med-preview-category {
+    font-size: 0.6rem;
+  }
+  .med-preview-price {
+    font-size: 0.95rem;
+  }
+  .med-preview-price-original {
+    font-size: 0.68rem;
+  }
+  .med-preview-shop-hint {
+    width: 30px;
+    height: 30px;
+  }
+  .med-preview-discount-badge {
+    top: 8px;
+    left: 8px;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.6rem;
+  }
+  .med-preview-eye {
+    display: none;
+  }
+}
+
+/* ── Sponsor marquee (homepage ticker — seamless CSS scroll) ── */
+.medizen-wrapper .sponsor-marquee {
+  padding: clamp(1.75rem, 4vw, 2.25rem) 0;
+  background: #fff;
+  border-top: 1px solid rgba(9, 22, 42, 0.06);
+  border-bottom: 1px solid rgba(9, 22, 42, 0.06);
+  overflow: hidden;
+  display: block;
+}
+.medizen-wrapper .sponsor-marquee__viewport {
+  overflow: hidden;
+  width: 100%;
+  mask-image: linear-gradient(
+    90deg,
+    transparent,
+    #000 6%,
+    #000 94%,
+    transparent
+  );
+  -webkit-mask-image: linear-gradient(
+    90deg,
+    transparent,
+    #000 6%,
+    #000 94%,
+    transparent
+  );
+}
+.medizen-wrapper .sponsor-marquee__track {
+  display: inline-flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  align-items: center;
+  width: max-content;
+  animation: sponsor-marquee-scroll 38s linear infinite;
+  will-change: transform;
+}
+.medizen-wrapper .sponsor-marquee__group {
+  display: inline-flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  align-items: center;
+  gap: clamp(1.25rem, 3vw, 2.5rem);
+  padding-right: clamp(1.25rem, 3vw, 2.5rem);
+  flex-shrink: 0;
+}
+.medizen-wrapper .sponsor-marquee__text {
+  display: inline-block;
+  font-family: var(--site-heading-font, Inter, system-ui, sans-serif);
+  font-size: clamp(1.35rem, 3.8vw, 2.75rem);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: var(--black);
+  white-space: nowrap;
+}
+.medizen-wrapper .sponsor-marquee__star {
+  width: clamp(1.1rem, 2.5vw, 1.85rem);
+  height: auto;
+  flex-shrink: 0;
+  display: inline-block;
+}
+@keyframes sponsor-marquee-scroll {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .medizen-wrapper .sponsor-marquee__track {
+    animation: none;
+    transform: none;
+  }
+  .medizen-wrapper .sponsor-marquee__viewport {
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    mask-image: none;
+    -webkit-mask-image: none;
+  }
+  .medizen-wrapper .sponsor-marquee__group[aria-hidden="true"] {
+    display: none !important;
+  }
 }
 
 /* ── FAQ + Testimonials (homepage help section) ── */
@@ -647,15 +948,6 @@
   font-size: 0.8rem;
 }
 
-.med-preview-thumb {
-  aspect-ratio: 1 / 1;
-  background: #f4f6f8;
-}
-.med-preview-price-original {
-  font-size: 0.72rem;
-  color: rgba(0, 0, 0, 0.45);
-  font-weight: 600;
-}
 .special-branches-wrap {
   border-top: 1px solid rgba(0, 0, 0, 0.08);
 }
@@ -925,6 +1217,30 @@
   background: var(--p1-clr) !important;
   border-color: var(--p1-clr) !important;
   color: #fff !important;
+}
+@media (max-width: 767.98px) {
+  .category-services-grid .svc-card-title {
+    font-size: 0.84rem;
+    line-height: 1.35;
+    margin-bottom: 0.35rem;
+  }
+  .category-services-grid .svc-card-summary {
+    font-size: 0.72rem;
+    line-height: 1.45;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .category-services-grid .svc-btn--compact {
+    width: 100%;
+    max-width: 100%;
+    padding: 0.45rem 0.65rem;
+    font-size: 0.7rem;
+  }
+  .category-services-grid .svc-card-illus--boxed {
+    padding: 0.45rem 0.55rem;
+  }
 }
 .svc-cta-btn {
   display: inline-flex;
@@ -2307,6 +2623,89 @@
   line-height: 1.65;
   color: rgba(0, 0, 0, 0.62);
 }
+
+/* ── In-pharmacy services grid (no images — separate from scroll showcase) ── */
+.svc-clinical-section {
+  background: #f4f7fb;
+  border-top: 1px solid rgba(9, 22, 42, 0.06);
+}
+.svc-clinical-group-title {
+  font-size: clamp(1.1rem, 2vw, 1.35rem);
+  font-weight: 800;
+  color: #090a0b;
+  margin: 0 0 0.35rem;
+  line-height: 1.3;
+}
+.svc-clinical-group-intro {
+  font-size: 0.92rem;
+  line-height: 1.65;
+  color: rgba(0, 0, 0, 0.58);
+  max-width: 52ch;
+}
+.svc-clinical-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 1.25rem 1.2rem 1.15rem;
+  background: #fff;
+  border-radius: 16px;
+  border: 1px solid rgba(9, 22, 42, 0.07);
+  box-shadow: 0 10px 32px rgba(9, 22, 42, 0.04);
+  transition: transform 0.28s ease, box-shadow 0.28s ease, border-color 0.28s ease;
+}
+.svc-clinical-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(19, 236, 138, 0.35);
+  box-shadow: 0 16px 40px rgba(9, 22, 42, 0.08);
+}
+.svc-clinical-icon {
+  flex-shrink: 0;
+  width: 46px;
+  height: 46px;
+  margin-bottom: 0.85rem;
+  border-radius: 13px;
+  background: linear-gradient(135deg, rgba(19, 236, 138, 0.18), rgba(17, 87, 238, 0.1));
+  color: #0a8f55;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.05rem;
+}
+.svc-clinical-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #0c0f14;
+  margin: 0 0 0.5rem;
+  line-height: 1.35;
+}
+.svc-clinical-desc {
+  font-size: 0.86rem;
+  line-height: 1.65;
+  color: rgba(0, 0, 0, 0.6);
+  margin: 0 0 0.85rem;
+  flex: 1;
+}
+.svc-clinical-badge {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  padding: 0.28rem 0.65rem;
+  border-radius: 999px;
+  background: rgba(19, 236, 138, 0.1);
+  color: #0a7a4a;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+.svc-clinical-footer-lead {
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: rgba(0, 0, 0, 0.62);
+  max-width: 480px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
 .svc-trust-cta-lead {
   font-size: 0.95rem;
   color: rgba(0, 0, 0, 0.58);
@@ -2422,6 +2821,9 @@
 }
 .team-hero-accent {
   color: var(--p1-clr);
+  font-size: inherit;
+  line-height: inherit;
+  font-weight: inherit;
 }
 .team-hero-lead {
   color: rgba(255, 255, 255, 0.74);
@@ -3111,6 +3513,26 @@ end of Service List panel styles ── */
   overflow: visible;
 }
 
+/* Invisible bridge so the cursor can reach the panel without leaving the nav item. */
+.dropdown-nav::after {
+  content: "";
+  position: absolute;
+  left: -12px;
+  right: -12px;
+  top: 100%;
+  height: 14px;
+  z-index: 1199;
+}
+
+.nav-dropdown-chevron {
+  transition: transform 0.2s ease;
+}
+
+.dropdown-nav:hover .nav-dropdown-chevron,
+.dropdown-nav:focus-within .nav-dropdown-chevron {
+  transform: rotate(180deg);
+}
+
 .header-main-wrapper.sticky-active .header-inner-clay {
   box-shadow: 0 10px 36px rgba(9, 10, 11, 0.12);
 }
@@ -3159,7 +3581,7 @@ end of Service List panel styles ── */
   opacity: 1;
 }
 .nav-dropdown-panel {
-  top: calc(100% + 10px);
+  top: calc(100% + 4px);
   left: 0;
   background: #ffffff !important;
   border: 1px solid rgba(19, 236, 138, 0.18);
@@ -3168,6 +3590,26 @@ end of Service List panel styles ── */
   min-width: 230px;
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.16);
   z-index: 1200;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateY(6px);
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease,
+    visibility 0s linear 0.2s;
+}
+
+.dropdown-nav:hover .nav-dropdown-panel,
+.dropdown-nav:focus-within .nav-dropdown-panel {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateY(0);
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease,
+    visibility 0s;
 }
 .dark .nav-dropdown-panel {
   background: #1e2228 !important;
@@ -3253,6 +3695,7 @@ end of Service List panel styles ── */
 /* main.css sets `input { color: var(--white) }` — reset inside dashboard */
 .dashboard-shell {
   isolation: isolate;
+  width: 100%;
   min-height: 100vh;
   font-family: var(--font-sans), system-ui, sans-serif;
   color: var(--foreground);
@@ -3353,7 +3796,115 @@ end of Service List panel styles ── */
 }
 
 .dashboard-page {
-  max-width: 1200px;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+}
+
+.dashboard-detail-sheet[data-side="right"] {
+  width: min(96vw, 64rem) !important;
+  max-width: none !important;
+  min-width: 0;
+  overflow-x: hidden;
+}
+
+.dashboard-detail-sheet[data-side="left"] {
+  width: min(96vw, 64rem) !important;
+  max-width: none !important;
+  min-width: 0;
+  overflow-x: hidden;
+}
+
+.dashboard-inset {
+  flex: 1 1 0%;
+  min-width: 0;
+  width: 100%;
+}
+
+.dashboard-content-area {
+  width: 100%;
+  max-width: none;
+}
+
+.dashboard-hero {
+  position: relative;
+  overflow: hidden;
+  border-radius: 1.25rem;
+  border: 1px solid rgba(9, 22, 42, 0.08);
+  background: linear-gradient(135deg, #0f4fd4 0%, #1157ee 45%, #0a3a9e 100%);
+  min-height: 11rem;
+}
+.dashboard-hero__image {
+  object-fit: cover;
+  opacity: 0.35;
+}
+.dashboard-hero__scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    105deg,
+    rgba(6, 14, 28, 0.88) 0%,
+    rgba(6, 14, 28, 0.72) 42%,
+    rgba(6, 14, 28, 0.35) 100%
+  );
+  pointer-events: none;
+}
+.dashboard-hero__body {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding: 1.5rem;
+}
+@media (min-width: 768px) {
+  .dashboard-hero__body {
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: space-between;
+    padding: 2rem 2.25rem;
+  }
+}
+.dashboard-hero__title {
+  color: #fff;
+  font-size: clamp(1.75rem, 3vw, 2.35rem);
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+.dashboard-hero__subtitle {
+  color: rgba(255, 255, 255, 0.82);
+  margin-top: 0.35rem;
+  font-size: 0.95rem;
+  max-width: 36rem;
+}
+.dashboard-hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.dashboard-hero__actions .dashboard-hero-btn-outline {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.35);
+  color: #fff;
+}
+.dashboard-hero__actions .dashboard-hero-btn-outline:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+}
+.dashboard-hero__actions .dashboard-hero-btn-solid {
+  background: var(--p1-clr, #13ec8a);
+  color: #04120a;
+  border-color: transparent;
+}
+.dashboard-hero__actions .dashboard-hero-btn-solid:hover {
+  background: #0fd978;
+  color: #04120a;
+}
+
+html.dark .dashboard-hero,
+body.dark-mode .dashboard-hero {
+  border-color: rgba(255, 255, 255, 0.1);
 }
 
 .dashboard-header {
@@ -4266,9 +4817,9 @@ body.dark-mode [data-slot="dialog-content"] .text-muted-foreground {
 .page-title-h1 {
   color: #09162a;
   font-size: clamp(2.7rem, 5vw, 4.8rem);
-  line-height: 0.98;
-  font-weight: 800;
-  letter-spacing: -0.04em;
+  line-height: 1.08;
+  font-weight: 700;
+  letter-spacing: -0.025em;
   margin-top: 0;
 }
 .page-title-h1--image {
@@ -4639,4 +5190,292 @@ body.dark-mode [data-slot="dialog-content"] .text-muted-foreground {
 }
 .blog-details-meta {
   color: rgba(0, 0, 0, 0.55);
+}
+
+/* ════════════════════════════════════════════════════════════
+   PREMIUM HOMEPAGE POLISH
+   Refines the sections below the hero so they match the level of
+   the hero / Popular Products: real card depth, smooth hover
+   motion, refined kickers and CTAs, and gentler section rhythm.
+   ════════════════════════════════════════════════════════════ */
+
+/* ── Category section: subtle backdrop so cards lift off the page ── */
+.category-section {
+  background:
+    radial-gradient(1100px 480px at 50% -10%, rgba(19, 236, 138, 0.06), transparent 60%),
+    linear-gradient(180deg, #ffffff 0%, #f7faf9 100%);
+}
+
+/* ── Service cards: were flat (border only) — now elevated & alive ── */
+.svc-card {
+  border: 1px solid rgba(9, 22, 42, 0.06);
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(9, 22, 42, 0.06);
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.4s ease, border-color 0.4s ease;
+}
+.svc-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 24px 52px rgba(9, 22, 42, 0.14);
+  border-color: rgba(19, 236, 138, 0.4);
+}
+.svc-card-illus img {
+  transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.svc-card:hover .svc-card-illus img {
+  transform: scale(1.06);
+}
+
+/* Service "Learn More" button — subtle depth on hover */
+.svc-btn {
+  transition: background 0.25s, color 0.25s, border-color 0.25s,
+    box-shadow 0.25s, transform 0.2s;
+}
+.svc-btn:hover {
+  box-shadow: 0 8px 20px rgba(19, 236, 138, 0.28);
+  transform: translateY(-2px);
+}
+
+/* ── Refined kickers / eyebrows across the homepage ── */
+.svc-eyebrow,
+.section-title .cmn-tag.p1-bg {
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 0.74rem;
+  border: 1px solid rgba(19, 236, 138, 0.25);
+}
+
+/* ── Primary CTAs: add soft depth so they feel tactile ── */
+.svc-cta-btn {
+  box-shadow: 0 12px 28px rgba(17, 87, 238, 0.22);
+}
+.svc-cta-btn:hover {
+  box-shadow: 0 16px 34px rgba(19, 236, 138, 0.28);
+}
+
+/* ── About "step" cards: gentle hover lift to match the new depth ── */
+.about-step-card {
+  transition: transform 0.35s ease, box-shadow 0.35s ease;
+}
+.about-step-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 38px rgba(9, 22, 42, 0.1);
+}
+
+/* ── Mobile collapse blocks (services page & long sections) ── */
+.collapse-block__trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid rgba(9, 22, 42, 0.1);
+  border-radius: 14px;
+  background: #fff;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(9, 22, 42, 0.04);
+}
+.collapse-block__trigger-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+}
+.collapse-block__title {
+  font-size: 0.98rem;
+  font-weight: 800;
+  color: #090a0b;
+  line-height: 1.3;
+}
+.collapse-block__subtitle {
+  font-size: 0.8rem;
+  line-height: 1.45;
+  color: rgba(0, 0, 0, 0.55);
+}
+.collapse-block__chevron {
+  flex-shrink: 0;
+  color: var(--p1-clr, #13ec8a);
+  transition: transform 0.25s ease;
+}
+.collapse-block__chevron.is-open {
+  transform: rotate(180deg);
+}
+@media (max-width: 991.98px) {
+  .collapse-block__panel {
+    display: none;
+    padding-top: 0.85rem;
+  }
+  .collapse-block__panel.is-open {
+    display: block;
+  }
+  .svc-clinical-intro {
+    max-width: 580px;
+    line-height: 1.7;
+    font-size: 0.92rem;
+  }
+  .svc-support-benefits--collapse,
+  .svc-support-channels--compact {
+    padding-top: 2.5rem !important;
+    padding-bottom: 2.5rem !important;
+  }
+  .svc-support-hero {
+    padding-bottom: 1.5rem;
+  }
+  .svc-clinical-section.section-padding,
+  .svc-trust-section.section-padding {
+    padding-top: 2.75rem;
+    padding-bottom: 2.75rem;
+  }
+  .page-title-section {
+    padding-top: 110px !important;
+    padding-bottom: 48px !important;
+  }
+}
+@media (min-width: 992px) {
+  .collapse-block__panel {
+    display: block !important;
+  }
+}
+
+/* ── Footer mobile layout ── */
+@media (max-width: 991.98px) {
+  .footer-section .footer-newsletter {
+    padding: 2.5rem 0 1.75rem;
+    text-align: left;
+  }
+  .footer-section .footer-newsletter__title {
+    font-size: clamp(1.15rem, 4.5vw, 1.45rem) !important;
+    line-height: 1.35 !important;
+    margin-bottom: 1.25rem !important;
+  }
+  .footer-section .footer-newsletter h2 .newsletter-element {
+    display: none;
+  }
+  .footer-section .footer-newsletter__form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+    max-width: none !important;
+  }
+  .footer-section .footer-newsletter__form input {
+    width: 100% !important;
+    border-radius: 12px;
+    padding: 0.85rem 1rem;
+  }
+  .footer-section .footer-newsletter__form .common-btn {
+    width: 100%;
+    justify-content: center;
+  }
+  .footer-space {
+    padding-top: 0.5rem;
+    padding-bottom: 1.5rem;
+  }
+  .footer-tagline {
+    font-size: 0.88rem;
+    line-height: 1.6;
+    margin-bottom: 0.75rem;
+  }
+  .footer-accordion {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  .footer-accordion__trigger {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0.85rem 0;
+    background: transparent;
+    border: 0;
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.95rem;
+    text-align: left;
+  }
+  .footer-accordion__chevron {
+    color: var(--p1-clr, #13ec8a);
+    transition: transform 0.25s ease;
+  }
+  .footer-accordion__chevron.is-open {
+    transform: rotate(180deg);
+  }
+  .footer-accordion__panel {
+    display: none;
+    padding-bottom: 0.75rem;
+  }
+  .footer-accordion__panel.is-open {
+    display: block;
+  }
+  .footer-accordion__grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem 1.25rem;
+  }
+  .footer-accordion__label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: rgba(255, 255, 255, 0.5);
+    margin-bottom: 0.35rem;
+  }
+  .footer-info .cont a,
+  .footer-info .cont span.fs-six {
+    font-size: 0.88rem !important;
+    word-break: break-word;
+  }
+  .footer-bottom__links {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.35rem 0.5rem;
+    line-height: 1.5;
+    padding-bottom: 1.25rem !important;
+  }
+  .footer-bottom__links a {
+    white-space: nowrap;
+  }
+}
+
+/* ── Site headings: Inter (readable) instead of template Syne ── */
+:root {
+  --site-heading-font: var(--font-heading), "Inter", system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", sans-serif;
+}
+
+.medizen-wrapper :is(
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6,
+    .heading-font,
+    .sub-font,
+    .eh-heading,
+    .page-title-h1,
+    .med-preview-title
+  ) {
+  font-family: var(--site-heading-font);
+}
+
+.medizen-wrapper h1 {
+  font-weight: 700;
+  line-height: 1.12;
+  letter-spacing: -0.022em;
+}
+
+.medizen-wrapper :is(h2, h3, h4, h5, h6) {
+  font-weight: 600;
+  letter-spacing: -0.018em;
+}
+
+.medizen-wrapper h2 {
+  line-height: 1.2;
+}
+
+.medizen-wrapper h3,
+.medizen-wrapper h4 {
+  line-height: 1.3;
 }

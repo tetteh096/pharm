@@ -594,7 +594,7 @@ export type ManualOrderInput = {
     email?: string
   }
   fulfillmentType: "PICKUP" | "DELIVERY"
-  branchName: string
+  branchName?: string | null
   deliveryAddress?: string
   deliveryNotes?: string
   deliveryLat?: number | null
@@ -632,9 +632,6 @@ export async function createManualOrder(
   }
   if (!input.items?.length) {
     return { ok: false, error: "Please add at least one product." }
-  }
-  if (!input.branchName?.trim()) {
-    return { ok: false, error: "Please pick a branch." }
   }
   if (input.fulfillmentType === "DELIVERY" && !input.deliveryAddress?.trim()) {
     return { ok: false, error: "Delivery address is required for delivery orders." }
@@ -723,7 +720,7 @@ export async function createManualOrder(
             paymentMethod: input.paymentMethod,
             total,
             fulfillmentType: input.fulfillmentType,
-            branchName: input.branchName,
+            branchName: input.branchName?.trim() || null,
             deliveryAddress: input.deliveryAddress?.trim() || null,
             deliveryNotes: input.deliveryNotes?.trim() || null,
             deliveryLat:

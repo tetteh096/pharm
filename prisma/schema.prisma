@@ -45,16 +45,23 @@ model Category {
 }
 
 model Branch {
-  id        String   @id @default(cuid())
-  name      String   @unique
-  slug      String?  @unique
-  location  String?  // street / area
-  phone     String?
-  hours     String?  // e.g. "24 hours" or "Mon–Sat 8am–8pm"
-  notes     String?
-  active    Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id         String   @id @default(cuid())
+  name       String   @unique
+  slug       String?  @unique
+  location   String?  // street / area
+  phone      String?
+  tel        String?  // dialable form, e.g. "0554612072"
+  gps        String?  // GhanaPostGPS code
+  hours      String?  // e.g. "Mon–Sat 8am–8pm"
+  notes      String?
+  maps       String?  // Google Maps directions URL
+  mapEmbed   String?  // Google Maps embed URL
+  accent     String?  @default("#13ec8a") // brand accent colour for this branch
+  comingSoon Boolean  @default(false)
+  sortOrder  Int      @default(0)
+  active     Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 }
 
 model Product {
@@ -341,6 +348,8 @@ model TeamProfile {
 
 model SiteSettings {
   id String @id @default("site")
+
+  contactEmail String?
 
   facebookUrl  String?
   linkedinUrl  String?

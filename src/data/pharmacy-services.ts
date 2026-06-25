@@ -30,7 +30,7 @@ export const pharmacyServices: PharmacyService[] = [
       { label: "Dispensing", detail: "Medications are dispensed with correct labelling — dose, frequency, duration, storage." },
       { label: "Counselling", detail: "Our pharmacist explains how to take the medication, what to avoid, and signs of adverse effects." },
     ],
-    note: "Madina branch open 24 hours for emergency prescription fills.",
+    note: "Available at all branches during opening hours. Call ahead if you need an urgent fill.",
   },
   {
     id: 2,
@@ -64,7 +64,7 @@ export const pharmacyServices: PharmacyService[] = [
       { label: "Pharmacist review", detail: "Prescription items are verified before they leave the pharmacy." },
       { label: "Delivery", detail: "Your order is prepared and sent to your address — call us if you have questions." },
     ],
-    note: "Delivery availability may vary by product and location. Call 055 461 2072 (Madina) for same-day options.",
+    note: "Delivery availability may vary by product and location. Call any branch for same-day options.",
   },
   {
     id: 4,
@@ -81,7 +81,7 @@ export const pharmacyServices: PharmacyService[] = [
       { label: "15-minute result", detail: "The RDT strip detects Plasmodium falciparum antigens." },
       { label: "Pharmacist review", detail: "Our pharmacist explains the result and recommends ACT treatment if positive, or alternative diagnosis if negative." },
     ],
-    note: "Cost: GH₵ 30. Available at our branches. Madina branch is open 24 hours.",
+    note: "Cost: GH₵ 30. Available at our branches during opening hours.",
   },
   {
     id: 5,

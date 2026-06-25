@@ -17,8 +17,8 @@ const faqs = [
     a: "Absolutely. Walk in for free advice on medications, side effects, supplements, and chronic conditions. Private consultation is available at our branches — no appointment needed for quick questions.",
   },
   {
-    q: "Which branch is open 24 hours?",
-    a: "Our Madina branch operates 24 hours a day, every day — including weekends and public holidays. Other branches have regular hours; check our Contact page or call ahead.",
+    q: "What are your branch opening hours?",
+    a: "Our branches are typically open Monday through Saturday. Hours can vary by location — check the Contact page or call your nearest branch before you visit.",
   },
   {
     q: "Are your medicines genuine and safe?",

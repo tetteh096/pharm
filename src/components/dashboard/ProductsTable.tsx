@@ -24,6 +24,9 @@ import {
   RefreshCcw,
   Filter,
   FolderTree,
+  Eye,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react"
 import {
   DropdownMenu,
@@ -48,12 +51,46 @@ import {
 } from "@/app/dashboard/products/actions"
 import { ALL_BRANCHES_VALUE } from "@/lib/inventory"
 import { toast } from "sonner"
+import { ProductDetailDrawer } from "@/components/dashboard/ProductDetailDrawer"
 
 type ProductRow = Awaited<ReturnType<typeof getProducts>>[number]
 type CategoryRow = Awaited<ReturnType<typeof getCategories>>[number]
 type BranchRow = { id: string; name: string }
 
 const STATUS_OPTIONS = ["all", "In Stock", "Low Stock", "Out of Stock"] as const
+const DEFAULT_PAGE_SIZE = 10
+const PAGE_SIZE_OPTIONS = [10, 25, 50] as const
+
+function formatExpiryDate(value: Date | string | null | undefined) {
+  if (!value) return null
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return null
+  return date.toLocaleDateString("en-GH", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  })
+}
+
+function expiryTone(value: Date | string | null | undefined): "none" | "ok" | "soon" | "expired" {
+  if (!value) return "none"
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return "none"
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const expiry = new Date(date)
+  expiry.setHours(0, 0, 0, 0)
+  const diffDays = Math.round((expiry.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
+  if (diffDays < 0) return "expired"
+  if (diffDays <= 30) return "soon"
+  return "ok"
+}
+
+const EXPIRY_TONE_CLASS: Record<Exclude<ReturnType<typeof expiryTone>, "none">, string> = {
+  ok: "text-foreground",
+  soon: "text-amber-700 font-medium",
+  expired: "text-red-600 font-medium",
+}
 
 export function ProductsTable({
   initialProducts,
@@ -73,6 +110,9 @@ export function ProductsTable({
   const [categorySearch, setCategorySearch] = React.useState("")
   const [statusFilter, setStatusFilter] = React.useState<string>("all")
   const [branchFilter, setBranchFilter] = React.useState("all")
+  const [page, setPage] = React.useState(1)
+  const [pageSize, setPageSize] = React.useState(DEFAULT_PAGE_SIZE)
+  const [viewProduct, setViewProduct] = React.useState<ProductRow | null>(null)
 
   const fetchData = React.useCallback(async () => {
     setIsRefreshing(true)
@@ -147,6 +187,28 @@ export function ProductsTable({
 
     return matchesSearch && matchesCategory && matchesStatus && matchesBranch
   })
+
+  const totalPages = Math.max(1, Math.ceil(filteredProducts.length / pageSize))
+  const safePage = Math.min(page, totalPages)
+  const pageStart =
+    filteredProducts.length === 0 ? 0 : (safePage - 1) * pageSize + 1
+  const pageEnd = Math.min(safePage * pageSize, filteredProducts.length)
+  const paginatedProducts = filteredProducts.slice(
+    (safePage - 1) * pageSize,
+    safePage * pageSize
+  )
+
+  React.useEffect(() => {
+    setPage(1)
+  }, [searchQuery, categorySearch, statusFilter, branchFilter, pageSize])
+
+  React.useEffect(() => {
+    if (page > totalPages) setPage(totalPages)
+  }, [page, totalPages])
+
+  const openProductView = React.useCallback((product: ProductRow) => {
+    setViewProduct(product)
+  }, [])
 
   return (
     <div className="dashboard-page space-y-6">
@@ -250,12 +312,10 @@ export function ProductsTable({
                 <TableHead className="w-[64px]">Image</TableHead>
                 <TableHead>Product</TableHead>
                 <TableHead className="hidden lg:table-cell">Category</TableHead>
-                {!readOnly ? (
-                  <TableHead className="hidden md:table-cell">Cost</TableHead>
-                ) : null}
                 <TableHead>Price</TableHead>
                 <TableHead>Qty</TableHead>
                 <TableHead>Status</TableHead>
+                <TableHead className="hidden md:table-cell">Expiry</TableHead>
                 <TableHead className="hidden md:table-cell">Branch</TableHead>
                 {!readOnly ? (
                   <TableHead className="text-right">Actions</TableHead>
@@ -265,7 +325,7 @@ export function ProductsTable({
             <TableBody>
               {filteredProducts.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={readOnly ? 7 : 9} className="h-28 text-center text-muted-foreground">
+                  <TableCell colSpan={readOnly ? 8 : 9} className="h-28 text-center text-muted-foreground">
                     {products.length === 0 ? (
                       <span>
                         {readOnly
@@ -285,8 +345,12 @@ export function ProductsTable({
                   </TableCell>
                 </TableRow>
               ) : (
-                filteredProducts.map((product) => (
-                  <TableRow key={product.id}>
+                paginatedProducts.map((product) => (
+                  <TableRow
+                    key={product.id}
+                    className="cursor-pointer"
+                    onClick={() => openProductView(product)}
+                  >
                     <TableCell>
                       <div className="h-10 w-10 rounded-lg overflow-hidden bg-muted border flex items-center justify-center">
                         {product.image ? (
@@ -302,16 +366,16 @@ export function ProductsTable({
                     </TableCell>
                     <TableCell>
                       <div className="max-w-[200px]">
-                        {readOnly ? (
-                          <div className="font-medium line-clamp-1">{product.name}</div>
-                        ) : (
-                          <Link
-                            href={`/dashboard/products/${product.id}/edit`}
-                            className="font-medium hover:underline line-clamp-1"
-                          >
-                            {product.name}
-                          </Link>
-                        )}
+                        <button
+                          type="button"
+                          className="font-medium hover:underline line-clamp-1 text-left"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            openProductView(product)
+                          }}
+                        >
+                          {product.name}
+                        </button>
                         {product.sku && (
                           <p className="text-[10px] text-muted-foreground font-mono">{product.sku}</p>
                         )}
@@ -335,11 +399,6 @@ export function ProductsTable({
                     <TableCell className="hidden lg:table-cell text-sm text-muted-foreground">
                       {product.category?.name ?? "—"}
                     </TableCell>
-                    {!readOnly ? (
-                      <TableCell className="hidden md:table-cell text-sm text-muted-foreground">
-                        GH₵{(product.costPrice ?? 0).toFixed(2)}
-                      </TableCell>
-                    ) : null}
                     <TableCell className="font-medium">GH₵{product.price.toFixed(2)}</TableCell>
                     <TableCell>{product.stock}</TableCell>
                     <TableCell>
@@ -356,11 +415,29 @@ export function ProductsTable({
                         {product.status}
                       </Badge>
                     </TableCell>
+                    <TableCell className="hidden md:table-cell text-sm whitespace-nowrap">
+                      {(() => {
+                        const formatted = formatExpiryDate(product.expiryDate)
+                        if (!formatted) {
+                          return <span className="text-muted-foreground">—</span>
+                        }
+                        const tone = expiryTone(product.expiryDate)
+                        if (tone === "none") {
+                          return formatted
+                        }
+                        return (
+                          <span className={EXPIRY_TONE_CLASS[tone]} title={formatted}>
+                            {formatted}
+                            {tone === "expired" ? " · Expired" : tone === "soon" ? " · Soon" : null}
+                          </span>
+                        )
+                      })()}
+                    </TableCell>
                     <TableCell className="hidden md:table-cell text-sm">
                       {product.branch ?? "All branches"}
                     </TableCell>
                     {!readOnly ? (
-                      <TableCell className="text-right">
+                      <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button variant="ghost" size="icon">
@@ -368,6 +445,10 @@ export function ProductsTable({
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => openProductView(product)}>
+                              <Eye className="h-4 w-4 mr-2" />
+                              View
+                            </DropdownMenuItem>
                             <DropdownMenuItem asChild>
                               <Link href={`/dashboard/products/${product.id}/edit`}>
                                 <Edit className="h-4 w-4 mr-2" />
@@ -405,8 +486,73 @@ export function ProductsTable({
               )}
             </TableBody>
           </Table>
+
+          {filteredProducts.length > 0 ? (
+            <div className="flex flex-col gap-3 border-t border-border/60 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+              <p className="text-sm text-muted-foreground">
+                Showing {pageStart}–{pageEnd} of {filteredProducts.length} product
+                {filteredProducts.length === 1 ? "" : "s"}
+                {filteredProducts.length !== products.length
+                  ? ` (${products.length} total)`
+                  : ""}
+              </p>
+              <div className="flex flex-wrap items-center gap-2">
+                <Select
+                  value={String(pageSize)}
+                  onValueChange={(value) => setPageSize(Number(value))}
+                >
+                  <SelectTrigger className="h-8 w-[5.5rem]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {PAGE_SIZE_OPTIONS.map((size) => (
+                      <SelectItem key={size} value={String(size)}>
+                        {size} / page
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <div className="flex items-center gap-1">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    className="h-8 w-8"
+                    disabled={safePage <= 1}
+                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    aria-label="Previous page"
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+                  <span className="min-w-[4.5rem] text-center text-sm text-muted-foreground">
+                    {safePage} / {totalPages}
+                  </span>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    className="h-8 w-8"
+                    disabled={safePage >= totalPages}
+                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                    aria-label="Next page"
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            </div>
+          ) : null}
         </CardContent>
       </Card>
+
+      <ProductDetailDrawer
+        product={viewProduct}
+        open={Boolean(viewProduct)}
+        readOnly={readOnly}
+        onOpenChange={(open) => {
+          if (!open) setViewProduct(null)
+        }}
+      />
     </div>
   )
 }

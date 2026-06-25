@@ -1,6 +1,7 @@
 import "server-only"
 
 import { getSiteSettingsDelegate, prismaQuery } from "@/lib/prisma"
+import { getPublicBranches } from "@/lib/branches"
 import {
   SITE_SETTINGS_ID,
   DEFAULT_SITE_SETTINGS,
@@ -15,6 +16,7 @@ import {
 export * from "@/lib/site-settings-shared"
 
 type SiteSettingsRow = {
+  contactEmail: string | null
   facebookUrl: string | null
   linkedinUrl: string | null
   instagramUrl: string | null
@@ -28,6 +30,7 @@ type SiteSettingsRow = {
 
 function rowToFormData(row: SiteSettingsRow | null): SiteSettingsFormData {
   return {
+    contactEmail: row?.contactEmail ?? DEFAULT_SITE_SETTINGS.contactEmail,
     facebookUrl: row?.facebookUrl ?? DEFAULT_SITE_SETTINGS.facebookUrl,
     linkedinUrl: row?.linkedinUrl ?? DEFAULT_SITE_SETTINGS.linkedinUrl,
     instagramUrl: row?.instagramUrl ?? DEFAULT_SITE_SETTINGS.instagramUrl,
@@ -83,6 +86,9 @@ export async function getSiteSettingsFormData(): Promise<SiteSettingsFormData> {
 }
 
 export async function getPublicSiteSettings() {
-  const form = await getSiteSettingsFormData()
-  return buildPublicSiteSettings(form)
+  const [form, branches] = await Promise.all([
+    getSiteSettingsFormData(),
+    getPublicBranches(),
+  ])
+  return buildPublicSiteSettings(form, branches)
 }

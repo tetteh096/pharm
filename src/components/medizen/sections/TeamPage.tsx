@@ -34,24 +34,16 @@ function TeamHero() {
           </div>
 
           <h1 className="team-hero-title fw_900 mb-4">
-            Dedicated Professionals,{" "}
-            <span className="team-hero-accent">Committed</span>{" "}
-            to Your Health
+            Dedicated Professionals,
+            <br />
+            <span className="team-hero-accent">Committed</span> to Your Health
           </h1>
 
-          <p className="team-hero-lead mb-4">
+          <p className="team-hero-lead mb-0">
             From our leadership to our pharmacy technicians, every member of the
             Enviro team is here with one purpose — to serve you with expertise
             and genuine care.
           </p>
-
-          <div className="team-hero-locations d-flex flex-wrap gap-2">
-            {["Madina", "Odorkor", "Sakumono", "Santeo"].map((branch) => (
-              <span key={branch} className="team-hero-location-pill">
-                {branch}
-              </span>
-            ))}
-          </div>
         </div>
       </div>
     </section>

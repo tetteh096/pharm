@@ -8,9 +8,9 @@ import { useIdempotentFormSubmit } from "@/hooks/useIdempotentFormSubmit";
 
 const trusts = [
   { icon: "fas fa-user-md",        label: "Expert Staff",       sub: "Qualified Pharmacists"   },
-  { icon: "fas fa-clock",          label: "Available 24 / 7",   sub: "Madina Branch Always Open" },
+  { icon: "fas fa-clock",          label: "Walk-in welcome",    sub: "Monday – Saturday at our branches" },
   { icon: "fas fa-shield-alt",     label: "Safe & Reliable",    sub: "FDA-Compliant Dispensing"  },
-  { icon: "fas fa-map-marker-alt", label: "Four Branches", sub: "Madina · Odorkor · Sakumono · Santeo" },
+  { icon: "fas fa-map-marker-alt", label: "Our branches", sub: "Find hours and directions on the contact page" },
 ];
 
 const Appointment = () => {

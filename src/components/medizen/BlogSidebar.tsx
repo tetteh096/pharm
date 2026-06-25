@@ -3,8 +3,14 @@
 import React from "react"
 import Link from "next/link"
 import { useRouter, usePathname } from "next/navigation"
-import { Search, FolderOpen, Phone, Tag, Calendar } from "lucide-react"
+import { Search, FolderOpen, Phone, Tag, Calendar, Mail } from "lucide-react"
 import { SafeProductImage } from "@/components/medizen/shop/SafeProductImage"
+import {
+  PHARMACY_EMAIL,
+  PHARMACY_HELP_EMAIL,
+  PHARMACY_PRIMARY_PHONE,
+  pharmacyPrimaryTelHref,
+} from "@/data/pharmacy-branches"
 
 type Category = {
   id: string
@@ -190,45 +196,48 @@ export default function BlogSidebar({
 
       <div className="blog-help-box details-common rounded-4 p-4 text-center">
         <h5 className="black fw_800 mb-2">Need help? Call us</h5>
-        <div className="d-flex justify-content-center mb-3">
+        <div className="d-flex justify-content-center gap-3 mb-3">
           <a
-            href="tel:+233554612072"
+            href={pharmacyPrimaryTelHref()}
             className="d-flex align-items-center justify-content-center rounded-circle p1-bg"
             style={{ width: 52, height: 52, color: "#fff" }}
+            aria-label={`Call ${PHARMACY_PRIMARY_PHONE}`}
           >
             <Phone size={20} />
           </a>
+          <a
+            href={`mailto:${PHARMACY_HELP_EMAIL}`}
+            className="d-flex align-items-center justify-content-center rounded-circle"
+            style={{ width: 52, height: 52, color: "#fff", background: "var(--p2-clr)" }}
+            aria-label={`Email ${PHARMACY_HELP_EMAIL}`}
+          >
+            <Mail size={20} />
+          </a>
         </div>
-        <p className="pra mb-2" style={{ fontSize: "0.82rem", lineHeight: 1.6 }}>
+        <p className="pra mb-3" style={{ fontSize: "0.82rem", lineHeight: 1.6 }}>
           Speak with a pharmacist for personalised health guidance.
         </p>
         <a
-          href="tel:+233554612072"
-          className="fw_800 d-block text-decoration-none mb-1"
+          href={pharmacyPrimaryTelHref()}
+          className="fw_800 d-block text-decoration-none mb-2"
           style={{ color: "var(--p2-clr)" }}
         >
-          Madina · 055 461 2072
+          {PHARMACY_PRIMARY_PHONE}
         </a>
         <a
-          href="tel:+233599376675"
-          className="fw_800 d-block text-decoration-none mb-1"
-          style={{ color: "var(--p2-clr)" }}
+          href={`mailto:${PHARMACY_EMAIL}`}
+          className="fw_700 d-block text-decoration-none mb-1"
+          style={{ color: "var(--p1-clr)", fontSize: "0.88rem", wordBreak: "break-all" }}
         >
-          Odorkor · 059 937 6675
+          {PHARMACY_EMAIL}
         </a>
         <a
-          href="tel:+233530883354"
-          className="fw_800 d-block text-decoration-none mb-1"
-          style={{ color: "var(--p2-clr)" }}
+          href={`mailto:${PHARMACY_HELP_EMAIL}`}
+          className="fw_700 d-block text-decoration-none"
+          style={{ color: "var(--p1-clr)", fontSize: "0.88rem", wordBreak: "break-all" }}
         >
-          Sakumono · 053 088 3354
+          {PHARMACY_HELP_EMAIL}
         </a>
-        <span
-          className="fw_800 d-block"
-          style={{ color: "var(--p2-clr)" }}
-        >
-          Santeo · Coming soon
-        </span>
       </div>
 
       {tags.length > 0 && (

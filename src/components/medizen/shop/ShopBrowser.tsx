@@ -27,6 +27,10 @@ import {
 } from "@/app/actions/storefront"
 import { SHOP_PAGE_SIZE } from "@/lib/shop-constants"
 import { formatGhs } from "@/lib/format"
+import {
+  PHARMACY_PRIMARY_PHONE,
+  pharmacyPrimaryTelHref,
+} from "@/data/pharmacy-branches"
 
 type Props = {
   initialResult: ShopSearchResult
@@ -495,10 +499,10 @@ function FilterSidebar({
           Need help?
         </p>
         <p className="pra mb-2" style={{ fontSize: "0.76rem", lineHeight: 1.5 }}>
-          Call our Madina branch on 055 461 2072 — open 24 hours.
+          Call us on {PHARMACY_PRIMARY_PHONE} — or visit any branch during opening hours.
         </p>
         <a
-          href="tel:+233554612072"
+          href={pharmacyPrimaryTelHref()}
           className="fw_800 text-decoration-none"
           style={{ color: "var(--p1-clr)", fontSize: "0.82rem" }}
         >

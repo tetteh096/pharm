@@ -9,9 +9,17 @@ import { createRateLimiter } from "@/lib/rate-limit"
 // Keyed on email so a single account can't be brute-forced from many IPs
 const loginLimiter = createRateLimiter({ limit: 10, windowMs: 15 * 60 * 1000 })
 
+const authSecret = process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET
+
+if (!authSecret && process.env.NODE_ENV === "production") {
+  throw new Error(
+    "Missing AUTH_SECRET (or NEXTAUTH_SECRET). Add it in Vercel → Project Settings → Environment Variables, then redeploy."
+  )
+}
+
 export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
-  secret: process.env.AUTH_SECRET,
+  secret: authSecret,
   providers: [
     Credentials({
       name: "credentials",

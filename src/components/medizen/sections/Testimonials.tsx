@@ -32,7 +32,7 @@ const testimonials = [
     id: 4,
     name: "Yaw Owusu",
     area: "Tema",
-    text: "Madina branch at night saved us when we needed urgent medication. Real 24-hour support — not just a sign on the door.",
+    text: "When we needed urgent medication, the Madina team picked up the phone and helped us straight away. Genuine support — not just a sign on the door.",
     rating: 5,
   },
   {

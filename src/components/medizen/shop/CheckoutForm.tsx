@@ -15,7 +15,7 @@ import {
 import type { DeliveryLocation } from "@/components/medizen/shop/DeliveryMapPicker"
 import { SafeProductImage } from "@/components/medizen/shop/SafeProductImage"
 import { toast } from "sonner"
-import { Loader2, Phone, MapPin, ShoppingBag, Truck, Building2 } from "lucide-react"
+import { Loader2, MapPin, ShoppingBag, Truck, Building2 } from "lucide-react"
 
 // Leaflet is browser-only, so we lazy-load the map.
 const DeliveryMapPicker = dynamic(
@@ -33,14 +33,6 @@ const DeliveryMapPicker = dynamic(
   }
 )
 
-type Branch = {
-  id: string
-  name: string
-  location: string | null
-  phone: string | null
-  hours: string | null
-}
-
 type Fulfillment = "pickup" | "delivery"
 type Payment = "CASH_ON_DELIVERY" | "MOBILE_MONEY"
 
@@ -57,7 +49,7 @@ const PAYMENT_DESCRIPTIONS: Record<Payment, string> = {
 /** Payment methods shown but not yet available at checkout. */
 const PAYMENT_COMING_SOON = new Set<Payment>(["MOBILE_MONEY"])
 
-export default function CheckoutForm({ branches }: { branches: Branch[] }) {
+export default function CheckoutForm() {
   const router = useRouter()
   const { items, subtotal, isHydrated, clear, count } = useCart()
 
@@ -65,7 +57,6 @@ export default function CheckoutForm({ branches }: { branches: Branch[] }) {
   const [phone, setPhone] = useState("")
   const [email, setEmail] = useState("")
   const [fulfillment, setFulfillment] = useState<Fulfillment>("pickup")
-  const [branchId, setBranchId] = useState<string>(branches[0]?.id ?? "")
   const [address, setAddress] = useState("")
   const [notes, setNotes] = useState("")
   const [payment, setPayment] = useState<Payment>("CASH_ON_DELIVERY")
@@ -125,8 +116,6 @@ export default function CheckoutForm({ branches }: { branches: Branch[] }) {
     )
   }
 
-  const selectedBranch = branches.find((b) => b.id === branchId) ?? null
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!name.trim()) return toast.error("Please enter your name")
@@ -142,7 +131,7 @@ export default function CheckoutForm({ branches }: { branches: Branch[] }) {
         phone: phone.trim(),
       },
       delivery: {
-        branch: selectedBranch?.name ?? null,
+        branch: null,
         address: fulfillment === "delivery" ? address.trim() : undefined,
         notes: notes.trim() || undefined,
         lat: fulfillment === "delivery" ? pinnedLocation?.lat ?? null : null,
@@ -222,7 +211,7 @@ export default function CheckoutForm({ branches }: { branches: Branch[] }) {
                 active={fulfillment === "pickup"}
                 onClick={() => setFulfillment("pickup")}
                 icon={<Building2 size={20} />}
-                label="Pickup at branch"
+                label="Store pickup"
                 desc="Collect within 30 minutes"
               />
             </div>
@@ -236,8 +225,6 @@ export default function CheckoutForm({ branches }: { branches: Branch[] }) {
               />
             </div>
           </div>
-
-          {/* Branch selector hidden for now */}
 
           {fulfillment === "delivery" && (
             <div className="mb-3">
@@ -404,15 +391,6 @@ export default function CheckoutForm({ branches }: { branches: Branch[] }) {
               {formatGhs(total)}
             </span>
           </div>
-
-          {selectedBranch?.phone && (
-            <div className="d-flex align-items-center gap-2 mb-3 rounded-3 p-2" style={{ background: "rgba(17, 87, 238, 0.04)" }}>
-              <Phone size={14} style={{ color: "var(--p2-clr)" }} />
-              <span style={{ fontSize: "0.75rem" }} className="pra">
-                Branch: <a href={`tel:${selectedBranch.phone}`} className="black fw_600 text-decoration-none">{selectedBranch.phone}</a>
-              </span>
-            </div>
-          )}
 
           <button
             type="submit"

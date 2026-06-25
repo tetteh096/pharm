@@ -5,11 +5,11 @@ import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import {
   Sheet,
-  SheetContent,
   SheetDescription,
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet"
+import { DashboardSheetContent } from "@/components/dashboard/DashboardSheetContent"
 import {
   Select,
   SelectContent,
@@ -102,7 +102,7 @@ export function ConsultationActions({
       </Button>
 
       <Sheet open={open} onOpenChange={setOpen}>
-        <SheetContent side="right" className="flex w-full flex-col gap-0 p-0 sm:max-w-xl">
+        <DashboardSheetContent>
           <SheetHeader className="sticky top-0 z-10 border-b bg-background px-6 py-5">
             <div className="flex items-start gap-3 pr-8">
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
@@ -247,7 +247,7 @@ export function ConsultationActions({
               Save changes
             </Button>
           </div>
-        </SheetContent>
+        </DashboardSheetContent>
       </Sheet>
     </>
   )

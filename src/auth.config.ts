@@ -5,6 +5,9 @@ import { canAccessDashboardRoute } from "@/lib/dashboard-rbac"
 // Edge-safe config: NO bcrypt, NO Prisma, NO pg
 // Used by middleware (Edge runtime)
 export const authConfig: NextAuthConfig = {
+  // Lock basePath so NEXTAUTH_URL/AUTH_URL cannot override it with a page path
+  // (e.g. .../signin), which breaks /api/auth/* and returns 400 "Bad request."
+  basePath: "/api/auth",
   // trustHost lets NextAuth5 derive the base URL from the incoming request
   // instead of relying on the hardcoded NEXTAUTH_URL env var.
   // This means redirects always use the actual host/port (localhost:3002,

@@ -3,7 +3,7 @@
 import { prisma, prismaQuery } from "@/lib/prisma"
 import { formatGhs } from "@/lib/format"
 import { SHOP_PAGE_SIZE } from "@/lib/shop-constants"
-import { sendOrderConfirmationEmail } from "@/lib/email"
+import { sendOrderConfirmationEmail, sendOrderNotificationEmail } from "@/lib/email"
 import type { Prisma } from "@prisma/client"
 
 /** Crockford-style alphanumeric token (no 0/O/I/1 confusion) for order numbers. */
@@ -558,25 +558,35 @@ export async function placeOrder(input: PlaceOrderInput): Promise<PlaceOrderResu
 
     // Fire-and-forget order confirmation email. We don't fail the order if
     // mail dispatch fails — the order is already saved.
+    const orderEmailPayload = {
+      customerName: input.customer.name.trim(),
+      customerPhone: input.customer.phone.trim(),
+      customerEmail: input.customer.email?.trim() || null,
+      orderNumber: result.orderNumber,
+      total,
+      items: input.items.map((i) => ({
+        productName: i.name,
+        quantity: i.quantity,
+        unitPrice: i.price,
+      })),
+      paymentMethod: input.paymentMethod,
+      fulfillmentType: input.fulfillmentType,
+      branchName: input.delivery.branch,
+      deliveryAddress: input.delivery.address ?? null,
+      deliveryNotes: input.delivery.notes ?? null,
+      deliveryLat: input.delivery.lat ?? null,
+      deliveryLng: input.delivery.lng ?? null,
+      placedAt: new Date(),
+    }
+
+    void sendOrderNotificationEmail(orderEmailPayload).catch((err) => {
+      console.error("Failed to send order notification email", err)
+    })
+
     if (input.customer.email?.trim()) {
       void sendOrderConfirmationEmail({
         to: input.customer.email.trim(),
-        customerName: input.customer.name.trim(),
-        orderNumber: result.orderNumber,
-        total,
-        items: input.items.map((i) => ({
-          productName: i.name,
-          quantity: i.quantity,
-          unitPrice: i.price,
-        })),
-        paymentMethod: input.paymentMethod,
-        fulfillmentType: input.fulfillmentType,
-        branchName: input.delivery.branch,
-        deliveryAddress: input.delivery.address ?? null,
-        deliveryNotes: input.delivery.notes ?? null,
-        deliveryLat: input.delivery.lat ?? null,
-        deliveryLng: input.delivery.lng ?? null,
-        placedAt: new Date(),
+        ...orderEmailPayload,
       }).catch((err) => {
         console.error("Failed to send order confirmation email", err)
       })

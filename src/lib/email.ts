@@ -1,22 +1,81 @@
 import nodemailer from "nodemailer"
+import { Resend } from "resend"
 import { formatGhs } from "@/lib/format"
+import {
+  PHARMACY_BRANCHES,
+  PHARMACY_EMAIL,
+  PHARMACY_HELP_EMAIL,
+  PHARMACY_PRIMARY_PHONE,
+  pharmacyPrimaryTelHref,
+} from "@/data/pharmacy-branches"
 
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
-  port: Number(process.env.SMTP_PORT ?? 587),
-  secure: false,
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
-  },
-})
+function getSmtpTransporter() {
+  return nodemailer.createTransport({
+    host: process.env.SMTP_HOST,
+    port: Number(process.env.SMTP_PORT ?? 587),
+    secure: false,
+    auth: {
+      user: process.env.SMTP_USER,
+      pass: process.env.SMTP_PASS,
+    },
+  })
+}
 
 const BRAND_NAME = "Enviro Pharmacy"
-const BRAND_PHONE_MADINA = "055 461 2072"
-const BRAND_PHONE_ODORKOR = "059 937 6675"
-const BRAND_PHONE_SAKUMONO = "053 088 3354"
-const BRAND_EMAIL = "enviropharmacyltd@gmail.com"
-const BRAND_LOCATIONS = "Madina, Odorkor & Sakumono, Accra"
+const BRAND_LOCATIONS = "Madina, Odorkor, Sakumono & Santeo, Accra"
+
+function branchPhonesFooterHtml(): string {
+  return PHARMACY_BRANCHES.filter((b) => b.phone && b.tel)
+    .map((b) => {
+      const label = b.name.replace(/ Branch$/i, "")
+      const tel = b.tel!.replace(/\s+/g, "")
+      return `${escape(label)}: <a href="tel:+233${tel.replace(/^0/, "")}" style="color:#1157EE;text-decoration:none;">${escape(b.phone!)}</a>`
+    })
+    .join("<br/>")
+}
+
+/** Staff inboxes for new orders, contact forms, and consultations. */
+function getNotificationEmails(): string[] {
+  const emails = [PHARMACY_EMAIL, PHARMACY_HELP_EMAIL]
+  const configured = process.env.NOTIFICATION_EMAIL?.trim()
+  if (configured) emails.push(configured)
+
+  const seen = new Set<string>()
+  return emails.filter((email) => {
+    const key = email.trim().toLowerCase()
+    if (!key || seen.has(key)) return false
+    seen.add(key)
+    return true
+  })
+}
+
+async function safeSendToNotificationInboxes(opts: {
+  subject: string
+  html: string
+}): Promise<{ ok: boolean; error?: string }> {
+  const recipients = getNotificationEmails()
+  if (recipients.length === 0) {
+    return { ok: false, error: "NO_NOTIFICATION_EMAILS" }
+  }
+
+  // One dedicated send per inbox so info and Gmail each get their own copy.
+  const results = await Promise.all(
+    recipients.map((to) => safeSend({ ...opts, to }))
+  )
+
+  const okCount = results.filter((r) => r.ok).length
+  if (okCount === 0) {
+    return { ok: false, error: results[0]?.error ?? "ALL_SENDS_FAILED" }
+  }
+
+  if (okCount < recipients.length) {
+    console.warn(
+      `[email] Staff notification reached ${okCount}/${recipients.length} inboxes (${recipients.join(", ")})`
+    )
+  }
+
+  return { ok: true }
+}
 
 function getAppBaseUrl(): string {
   // Priority: explicit config → Vercel auto-vars → dynamic fallback
@@ -41,10 +100,21 @@ function getAppBaseUrl(): string {
   return `http://localhost:${port}`
 }
 
-/**
- * Returns `false` when SMTP credentials are clearly not configured.
- * Lets callers gracefully skip mail sending without crashing the request.
- */
+function getEmailFrom(): string {
+  return (
+    process.env.EMAIL_FROM ??
+    process.env.RESEND_FROM ??
+    process.env.SMTP_FROM ??
+    `${BRAND_NAME} <orders@enviropharmacy.com>`
+  )
+}
+
+function isResendConfigured(): boolean {
+  const key = process.env.RESEND_API_KEY?.trim()
+  return Boolean(key && !key.includes("your-resend-api-key"))
+}
+
+/** SMTP fallback for local dev when Resend is not configured. */
 function isSmtpConfigured(): boolean {
   const user = process.env.SMTP_USER
   const pass = process.env.SMTP_PASS
@@ -53,29 +123,66 @@ function isSmtpConfigured(): boolean {
   return true
 }
 
-async function safeSend(opts: {
-  to: string
+function isEmailConfigured(): boolean {
+  return isResendConfigured() || isSmtpConfigured()
+}
+
+async function sendViaResend(opts: {
+  to: string | string[]
   subject: string
   html: string
 }): Promise<{ ok: boolean; error?: string }> {
-  if (!isSmtpConfigured()) {
-    console.warn(
-      `[email] SMTP not configured; skipping mail to ${opts.to} (${opts.subject}).`
-    )
-    return { ok: false, error: "SMTP_NOT_CONFIGURED" }
+  const resend = new Resend(process.env.RESEND_API_KEY)
+  const { error } = await resend.emails.send({
+    from: getEmailFrom(),
+    to: opts.to,
+    subject: opts.subject,
+    html: opts.html,
+  })
+  if (error) {
+    console.error("[email] Resend send failed", error)
+    return { ok: false, error: error.message }
   }
+  return { ok: true }
+}
+
+async function sendViaSmtp(opts: {
+  to: string | string[]
+  subject: string
+  html: string
+}): Promise<{ ok: boolean; error?: string }> {
   try {
-    await transporter.sendMail({
-      from: process.env.SMTP_FROM ?? `${BRAND_NAME} <no-reply@enviro.gh>`,
+    await getSmtpTransporter().sendMail({
+      from: getEmailFrom(),
       to: opts.to,
       subject: opts.subject,
       html: opts.html,
     })
     return { ok: true }
   } catch (err) {
-    console.error("[email] sendMail failed", err)
+    console.error("[email] SMTP sendMail failed", err)
     return { ok: false, error: (err as Error).message }
   }
+}
+
+async function safeSend(opts: {
+  to: string | string[]
+  subject: string
+  html: string
+}): Promise<{ ok: boolean; error?: string }> {
+  const recipients = Array.isArray(opts.to) ? opts.to : [opts.to]
+  if (!isEmailConfigured()) {
+    console.warn(
+      `[email] No email provider configured; skipping mail to ${recipients.join(", ")} (${opts.subject}).`
+    )
+    return { ok: false, error: "EMAIL_NOT_CONFIGURED" }
+  }
+
+  if (isResendConfigured()) {
+    return sendViaResend(opts)
+  }
+
+  return sendViaSmtp(opts)
 }
 
 // ─── Shared HTML layout ──────────────────────────────────────────────────────
@@ -87,8 +194,12 @@ function emailLayout(opts: {
   bodyHtml: string
   /** Optional accent for the header (default: brand green). */
   accent?: string
+  footerNote?: string
 }): string {
   const accent = opts.accent ?? "#13EC8A"
+  const footerNote =
+    opts.footerNote ??
+    "This email was sent because you placed an order with us."
   return `<!doctype html>
 <html lang="en">
   <head>
@@ -137,23 +248,11 @@ function emailLayout(opts: {
               <td style="background:#f8fafc;padding:20px 32px;border-top:1px solid #e2e8f0;text-align:center;color:#64748b;font-size:12px;line-height:1.6;">
                 <strong style="color:#0f172a;">${escape(BRAND_NAME)}</strong><br/>
                 ${escape(BRAND_LOCATIONS)}<br/>
-                Madina: <a href="tel:${BRAND_PHONE_MADINA.replace(
-                  /\s+/g,
-                  ""
-                )}" style="color:#1157EE;text-decoration:none;">${escape(
-    BRAND_PHONE_MADINA
-  )}</a>
-                &nbsp;·&nbsp;
-                Odorkor: <a href="tel:${BRAND_PHONE_ODORKOR.replace(
-                  /\s+/g,
-                  ""
-                )}" style="color:#1157EE;text-decoration:none;">${escape(
-    BRAND_PHONE_ODORKOR
-  )}</a>
+                ${branchPhonesFooterHtml()}
                 <br/><br/>
                 <span style="color:#94a3b8;">© ${new Date().getFullYear()} ${escape(
     BRAND_NAME
-  )} · This email was sent because you placed an order with us.</span>
+  )} · ${escape(footerNote)}</span>
               </td>
             </tr>
           </table>
@@ -203,6 +302,119 @@ export async function sendPasswordResetEmail(
       preheader: "Reset your Enviro Pharmacy password",
       bodyHtml: body,
       accent: "#1157EE",
+      footerNote: "This email was sent because a password reset was requested for your account.",
+    }),
+  })
+}
+
+const STAFF_ROLE_LABELS: Record<string, string> = {
+  ADMIN: "Admin",
+  PHARMACIST: "Pharmacist",
+  STAFF: "Staff",
+}
+
+function staffCredentialsBlock(opts: {
+  email: string
+  temporaryPassword: string
+  signInUrl: string
+  roleLabel: string
+}): string {
+  return `
+    <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:16px 18px;margin:0 0 20px 0;">
+      <div style="color:#1d4ed8;font-size:11px;text-transform:uppercase;letter-spacing:0.08em;font-weight:700;margin-bottom:10px;">Your sign-in details</div>
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="font-size:13px;color:#0f172a;">
+        <tr><td style="padding:4px 0;color:#475569;width:38%;">Sign-in page</td><td style="padding:4px 0;"><a href="${escape(opts.signInUrl)}" style="color:#1157EE;text-decoration:none;font-weight:600;">${escape(opts.signInUrl)}</a></td></tr>
+        <tr><td style="padding:4px 0;color:#475569;">Email</td><td style="padding:4px 0;font-weight:600;">${escape(opts.email)}</td></tr>
+        <tr><td style="padding:4px 0;color:#475569;">Temporary password</td><td style="padding:4px 0;font-family:monospace;font-weight:700;letter-spacing:0.04em;">${escape(opts.temporaryPassword)}</td></tr>
+        <tr><td style="padding:4px 0;color:#475569;">Role</td><td style="padding:4px 0;font-weight:600;">${escape(opts.roleLabel)}</td></tr>
+      </table>
+    </div>
+    <p style="color:#475569;font-size:13px;line-height:1.7;margin:0;">
+      After signing in, use <strong>Forgot password?</strong> on the sign-in page to choose your own password, or ask an admin to reset it for you.
+    </p>
+  `
+}
+
+/** Sent when an admin creates a new dashboard staff account. */
+export async function sendStaffWelcomeEmail(opts: {
+  to: string
+  name: string
+  role: string
+  temporaryPassword: string
+}) {
+  const signInUrl = `${getAppBaseUrl()}/signin`
+  const roleLabel = STAFF_ROLE_LABELS[opts.role] ?? opts.role
+
+  const body = `
+    <p style="color:#0f172a;font-size:15px;margin:0 0 6px 0;">
+      Hi <strong>${escape(opts.name)}</strong>,
+    </p>
+    <p style="color:#475569;line-height:1.65;margin:0 0 18px 0;">
+      An administrator created your ${escape(BRAND_NAME)} dashboard account. Use the details below to sign in.
+    </p>
+    ${staffCredentialsBlock({
+      email: opts.to,
+      temporaryPassword: opts.temporaryPassword,
+      signInUrl,
+      roleLabel,
+    })}
+    <div style="text-align:center;margin:24px 0 0 0;">
+      <a href="${signInUrl}" style="background:#1157EE;color:#ffffff;padding:14px 32px;border-radius:8px;text-decoration:none;font-weight:700;font-size:15px;display:inline-block;">Sign in to dashboard</a>
+    </div>
+  `
+
+  return safeSend({
+    to: opts.to,
+    subject: `${BRAND_NAME} — Your dashboard account is ready`,
+    html: emailLayout({
+      title: "Welcome to the team",
+      subtitle: "Your staff dashboard account has been created",
+      preheader: `Sign in to the ${BRAND_NAME} dashboard`,
+      bodyHtml: body,
+      accent: "#1157EE",
+      footerNote: "This email was sent because a dashboard account was created for you.",
+    }),
+  })
+}
+
+/** Sent when an admin sets a new temporary password for a staff member. */
+export async function sendStaffPasswordUpdatedEmail(opts: {
+  to: string
+  name: string
+  role: string
+  temporaryPassword: string
+}) {
+  const signInUrl = `${getAppBaseUrl()}/signin`
+  const roleLabel = STAFF_ROLE_LABELS[opts.role] ?? opts.role
+
+  const body = `
+    <p style="color:#0f172a;font-size:15px;margin:0 0 6px 0;">
+      Hi <strong>${escape(opts.name)}</strong>,
+    </p>
+    <p style="color:#475569;line-height:1.65;margin:0 0 18px 0;">
+      An administrator reset your ${escape(BRAND_NAME)} dashboard password. Use the new temporary password below to sign in.
+    </p>
+    ${staffCredentialsBlock({
+      email: opts.to,
+      temporaryPassword: opts.temporaryPassword,
+      signInUrl,
+      roleLabel,
+    })}
+    <div style="text-align:center;margin:24px 0 0 0;">
+      <a href="${signInUrl}" style="background:#1157EE;color:#ffffff;padding:14px 32px;border-radius:8px;text-decoration:none;font-weight:700;font-size:15px;display:inline-block;">Sign in now</a>
+    </div>
+  `
+
+  return safeSend({
+    to: opts.to,
+    subject: `${BRAND_NAME} — Your password was reset`,
+    html: emailLayout({
+      title: "Password updated",
+      subtitle: "An admin set a new temporary password for your account",
+      preheader: "Your Enviro Pharmacy dashboard password was reset",
+      bodyHtml: body,
+      accent: "#f59e0b",
+      footerNote: "This email was sent because an administrator reset your account password.",
     }),
   })
 }
@@ -218,6 +430,8 @@ export type OrderEmailItem = {
 export type OrderEmailPayload = {
   to: string
   customerName: string
+  customerPhone?: string | null
+  customerEmail?: string | null
   orderNumber: string
   total: number
   items: OrderEmailItem[]
@@ -269,14 +483,23 @@ function itemsTable(items: OrderEmailItem[]): string {
   `
 }
 
-function deliveryBlock(p: OrderEmailPayload): string {
+function deliveryBlock(
+  p: Pick<
+    OrderEmailPayload,
+    | "fulfillmentType"
+    | "deliveryAddress"
+    | "deliveryLat"
+    | "deliveryLng"
+    | "deliveryNotes"
+  >
+): string {
   if (!p.fulfillmentType) return ""
   const isPickup = p.fulfillmentType === "PICKUP"
   const lines: string[] = []
   lines.push(
-    `<strong style="color:#0f172a;">${
-      isPickup ? "Pickup at" : "Delivery from"
-    }:</strong> ${escape(p.branchName ?? "—")}`
+    `<strong style="color:#0f172a;">Fulfillment:</strong> ${
+      isPickup ? "Store pickup" : "Delivery"
+    }`
   )
   if (!isPickup && p.deliveryAddress) {
     lines.push(`<strong style="color:#0f172a;">Address:</strong> ${escape(p.deliveryAddress)}`)
@@ -381,6 +604,64 @@ export async function sendOrderConfirmationEmail(payload: OrderEmailPayload) {
   })
 }
 
+/** Internal alert when a customer places a new order. */
+export async function sendOrderNotificationEmail(
+  payload: Omit<OrderEmailPayload, "to">
+) {
+  const placedAt = payload.placedAt.toLocaleString("en-GH", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  })
+
+  const body = `
+    <p style="color:#0f172a;font-size:15px;margin:0 0 16px 0;">
+      A new online order was placed on the website.
+    </p>
+
+    <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:16px 18px;margin:0 0 20px 0;">
+      <div style="color:#92400e;font-size:11px;text-transform:uppercase;letter-spacing:0.08em;font-weight:700;margin-bottom:10px;">Order summary</div>
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="font-size:13px;color:#0f172a;">
+        <tr><td style="padding:4px 0;color:#78350f;width:38%;">Order number</td><td style="padding:4px 0;font-weight:800;">${escape(payload.orderNumber)}</td></tr>
+        <tr><td style="padding:4px 0;color:#78350f;">Customer</td><td style="padding:4px 0;font-weight:700;">${escape(payload.customerName)}</td></tr>
+        ${
+          payload.customerPhone
+            ? `<tr><td style="padding:4px 0;color:#78350f;">Phone</td><td style="padding:4px 0;"><a href="tel:${escape(payload.customerPhone.replace(/\s+/g, ""))}" style="color:#1157EE;text-decoration:none;font-weight:600;">${escape(payload.customerPhone)}</a></td></tr>`
+            : ""
+        }
+        ${
+          payload.customerEmail
+            ? `<tr><td style="padding:4px 0;color:#78350f;">Email</td><td style="padding:4px 0;"><a href="mailto:${escape(payload.customerEmail)}" style="color:#1157EE;text-decoration:none;font-weight:600;">${escape(payload.customerEmail)}</a></td></tr>`
+            : ""
+        }
+        <tr><td style="padding:4px 0;color:#78350f;">Total</td><td style="padding:4px 0;font-weight:800;">${escape(formatGhs(payload.total))}</td></tr>
+        <tr><td style="padding:4px 0;color:#78350f;">Payment</td><td style="padding:4px 0;">${escape(paymentLabel(payload.paymentMethod))}</td></tr>
+        <tr><td style="padding:4px 0;color:#78350f;">Fulfillment</td><td style="padding:4px 0;">${escape(payload.fulfillmentType ?? "—")}</td></tr>
+        <tr><td style="padding:4px 0;color:#78350f;">Placed at</td><td style="padding:4px 0;">${escape(placedAt)}</td></tr>
+      </table>
+    </div>
+
+    <h3 style="color:#0f172a;font-size:15px;margin:0 0 8px 0;">Items</h3>
+    ${itemsTable(payload.items)}
+    ${deliveryBlock(payload)}
+
+    <p style="color:#64748b;font-size:12px;margin:18px 0 0 0;">
+      Log in to the dashboard to confirm and fulfil this order.
+    </p>
+  `
+
+  return safeSendToNotificationInboxes({
+    subject: `[New Order] ${payload.orderNumber} — ${payload.customerName}`,
+    html: emailLayout({
+      title: "New order received",
+      subtitle: `${payload.customerName} · ${formatGhs(payload.total)}`,
+      preheader: `New order ${payload.orderNumber} from ${payload.customerName}`,
+      bodyHtml: body,
+      accent: "#f59e0b",
+      footerNote: "This email was sent because a new order was placed on the website.",
+    }),
+  })
+}
+
 export async function sendOrderDeliveredEmail(payload: OrderEmailPayload) {
   const completedAt = new Date().toLocaleString("en-GH", {
     dateStyle: "medium",
@@ -425,14 +706,7 @@ export async function sendOrderDeliveredEmail(payload: OrderEmailPayload) {
 
     <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:14px 16px;margin:20px 0 0 0;color:#475569;font-size:13px;line-height:1.7;">
       Need a follow-up consultation or have a question about your prescription?
-      Call us anytime — Madina <a href="tel:${BRAND_PHONE_MADINA.replace(
-        /\s+/g,
-        ""
-      )}" style="color:#1157EE;text-decoration:none;">${escape(BRAND_PHONE_MADINA)}</a>
-      or Odorkor <a href="tel:${BRAND_PHONE_ODORKOR.replace(
-        /\s+/g,
-        ""
-      )}" style="color:#1157EE;text-decoration:none;">${escape(BRAND_PHONE_ODORKOR)}</a>.
+      Call us during branch hours — <a href="${pharmacyPrimaryTelHref().replace(/&/g, "&amp;")}" style="color:#1157EE;text-decoration:none;">${escape(PHARMACY_PRIMARY_PHONE)}</a>. See all branch numbers below or on our contact page.
     </div>
   `
 
@@ -495,10 +769,8 @@ export async function sendConsultationConfirmationEmail(
     </div>
 
     <p style="color:#475569;font-size:13px;line-height:1.7;margin:0 0 16px 0;">
-      In the meantime, you are welcome to reach us directly:<br/>
-      Madina (24 hrs): <a href="tel:${BRAND_PHONE_MADINA.replace(/\s+/g, "")}" style="color:#1157EE;text-decoration:none;">${escape(BRAND_PHONE_MADINA)}</a><br/>
-      Odorkor: <a href="tel:${BRAND_PHONE_ODORKOR.replace(/\s+/g, "")}" style="color:#1157EE;text-decoration:none;">${escape(BRAND_PHONE_ODORKOR)}</a><br/>
-      Sakumono: <a href="tel:${BRAND_PHONE_SAKUMONO.replace(/\s+/g, "")}" style="color:#1157EE;text-decoration:none;">${escape(BRAND_PHONE_SAKUMONO)}</a>
+      In the meantime, you are welcome to reach any branch directly:<br/>
+      ${branchPhonesFooterHtml()}
     </p>
   `
 
@@ -550,8 +822,7 @@ export async function sendConsultationNotificationEmail(
     </p>
   `
 
-  return safeSend({
-    to: BRAND_EMAIL,
+  return safeSendToNotificationInboxes({
     subject: `[New Consultation] ${payload.fullName} — ${payload.phone}`,
     html: emailLayout({
       title: "New consultation request",
@@ -587,7 +858,7 @@ export async function sendContactConfirmationEmail(payload: ContactEmailPayload)
     </p>
     <p style="color:#475569;line-height:1.65;margin:0 0 18px 0;">
       Thank you for contacting ${escape(BRAND_NAME)}. Our team has received your message
-      and will respond as soon as possible.
+      and will usually reply within a few minutes.
     </p>
     <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:16px 18px;margin:0 0 20px 0;">
       <div style="color:#15803d;font-size:11px;text-transform:uppercase;letter-spacing:0.08em;font-weight:700;margin-bottom:10px;">Your message summary</div>
@@ -607,7 +878,7 @@ export async function sendContactConfirmationEmail(payload: ContactEmailPayload)
     subject: `${BRAND_NAME} — We received your message`,
     html: emailLayout({
       title: "Message received",
-      subtitle: "We'll get back to you shortly",
+      subtitle: "We usually reply within a few minutes",
       preheader: "Your contact message was received by Enviro Pharmacy",
       bodyHtml: body,
       accent: "#13EC8A",
@@ -639,8 +910,7 @@ export async function sendContactNotificationEmail(payload: ContactEmailPayload)
     </div>
   `
 
-  return safeSend({
-    to: BRAND_EMAIL,
+  return safeSendToNotificationInboxes({
     subject: `[Contact] ${payload.subject} — ${payload.fullName}`,
     html: emailLayout({
       title: "New contact message",

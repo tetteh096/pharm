@@ -42,8 +42,15 @@ type BranchRow = {
   slug: string | null
   location: string | null
   phone: string | null
+  tel: string | null
+  gps: string | null
   hours: string | null
   notes: string | null
+  maps: string | null
+  mapEmbed: string | null
+  accent: string | null
+  comingSoon: boolean
+  sortOrder: number
   active: boolean
 }
 
@@ -53,9 +60,52 @@ const emptyForm: FormState = {
   name: "",
   location: "",
   phone: "",
+  tel: "",
+  gps: "",
   hours: "",
   notes: "",
+  maps: "",
+  mapEmbed: "",
+  accent: "#13ec8a",
+  comingSoon: false,
+  sortOrder: 0,
   active: true,
+}
+
+function rowFromBranch(b: {
+  id: string
+  name: string
+  slug: string | null
+  location: string | null
+  phone: string | null
+  tel: string | null
+  gps: string | null
+  hours: string | null
+  notes: string | null
+  maps: string | null
+  mapEmbed: string | null
+  accent: string | null
+  comingSoon: boolean
+  sortOrder: number
+  active: boolean
+}): BranchRow {
+  return {
+    id: b.id,
+    name: b.name,
+    slug: b.slug,
+    location: b.location,
+    phone: b.phone,
+    tel: b.tel,
+    gps: b.gps,
+    hours: b.hours,
+    notes: b.notes,
+    maps: b.maps,
+    mapEmbed: b.mapEmbed,
+    accent: b.accent,
+    comingSoon: b.comingSoon,
+    sortOrder: b.sortOrder,
+    active: b.active,
+  }
 }
 
 export function BranchesManager({ initialBranches }: { initialBranches: BranchRow[] }) {
@@ -78,8 +128,15 @@ export function BranchesManager({ initialBranches }: { initialBranches: BranchRo
       name: branch.name,
       location: branch.location ?? "",
       phone: branch.phone ?? "",
+      tel: branch.tel ?? "",
+      gps: branch.gps ?? "",
       hours: branch.hours ?? "",
       notes: branch.notes ?? "",
+      maps: branch.maps ?? "",
+      mapEmbed: branch.mapEmbed ?? "",
+      accent: branch.accent ?? "#13ec8a",
+      comingSoon: branch.comingSoon,
+      sortOrder: branch.sortOrder,
       active: branch.active,
     })
     setDialogOpen(true)
@@ -93,8 +150,15 @@ export function BranchesManager({ initialBranches }: { initialBranches: BranchRo
       name: form.name,
       location: form.location,
       phone: form.phone,
+      tel: form.tel,
+      gps: form.gps,
       hours: form.hours,
       notes: form.notes,
+      maps: form.maps,
+      mapEmbed: form.mapEmbed,
+      accent: form.accent,
+      comingSoon: form.comingSoon,
+      sortOrder: form.sortOrder,
       active: form.active,
     }
 
@@ -103,39 +167,16 @@ export function BranchesManager({ initialBranches }: { initialBranches: BranchRo
         const updated = await updateBranch(form.id, payload)
         setBranches((prev) =>
           prev
-            .map((b) =>
-              b.id === updated.id
-                ? {
-                    id: updated.id,
-                    name: updated.name,
-                    slug: updated.slug,
-                    location: updated.location,
-                    phone: updated.phone,
-                    hours: updated.hours,
-                    notes: updated.notes,
-                    active: updated.active,
-                  }
-                : b
-            )
+            .map((b) => (b.id === updated.id ? rowFromBranch(updated) : b))
             .sort((a, b) => a.name.localeCompare(b.name))
         )
         toast.success("Branch updated")
       } else {
         const created = await createBranch(payload)
         setBranches((prev) =>
-          [
-            ...prev,
-            {
-              id: created.id,
-              name: created.name,
-              slug: created.slug,
-              location: created.location,
-              phone: created.phone,
-              hours: created.hours,
-              notes: created.notes,
-              active: created.active,
-            },
-          ].sort((a, b) => a.name.localeCompare(b.name))
+          [...prev, rowFromBranch(created)].sort((a, b) =>
+            a.name.localeCompare(b.name)
+          )
         )
         toast.success(`Added "${created.name}"`)
       }
@@ -303,7 +344,7 @@ export function BranchesManager({ initialBranches }: { initialBranches: BranchRo
       )}
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="sm:max-w-[500px]">
+        <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{isEdit ? "Edit branch" : "Add new branch"}</DialogTitle>
             <DialogDescription>
@@ -340,12 +381,85 @@ export function BranchesManager({ initialBranches }: { initialBranches: BranchRo
               <div className="space-y-2">
                 <label className="text-sm font-medium">Hours</label>
                 <Input
-                  placeholder="24 hours / Mon-Sat 8am-8pm"
+                  placeholder="Mon–Sat 8am–8pm"
                   value={form.hours}
                   onChange={(e) => setForm({ ...form, hours: e.target.value })}
                 />
               </div>
             </div>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Dial number (tel)</label>
+                <Input
+                  placeholder="0554612072 (auto from phone if blank)"
+                  value={form.tel}
+                  onChange={(e) => setForm({ ...form, tel: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">GhanaPostGPS</label>
+                <Input
+                  placeholder="GM-000-2908"
+                  value={form.gps}
+                  onChange={(e) => setForm({ ...form, gps: e.target.value })}
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Google Maps directions link</label>
+              <Input
+                placeholder="https://www.google.com/maps/dir/?api=1&destination=… (auto from location if blank)"
+                value={form.maps}
+                onChange={(e) => setForm({ ...form, maps: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Google Maps embed link</label>
+              <Input
+                placeholder="https://maps.google.com/maps?q=…&output=embed (auto from location if blank)"
+                value={form.mapEmbed}
+                onChange={(e) => setForm({ ...form, mapEmbed: e.target.value })}
+              />
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Accent colour</label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="color"
+                    value={form.accent || "#13ec8a"}
+                    onChange={(e) => setForm({ ...form, accent: e.target.value })}
+                    className="h-9 w-12 rounded border border-input bg-white p-1"
+                    aria-label="Accent colour"
+                  />
+                  <Input
+                    placeholder="#13ec8a"
+                    value={form.accent}
+                    onChange={(e) => setForm({ ...form, accent: e.target.value })}
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Sort order</label>
+                <Input
+                  type="number"
+                  placeholder="0"
+                  value={form.sortOrder ?? 0}
+                  onChange={(e) =>
+                    setForm({ ...form, sortOrder: Number(e.target.value) || 0 })
+                  }
+                />
+              </div>
+            </div>
+            <label className="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={form.comingSoon ?? false}
+                onChange={(e) => setForm({ ...form, comingSoon: e.target.checked })}
+                className="h-4 w-4 rounded border-input"
+              />
+              <span>Coming soon — show branch but mark as not yet open</span>
+            </label>
             <div className="space-y-2">
               <label className="text-sm font-medium">Notes</label>
               <textarea

@@ -3,9 +3,9 @@
 import React from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { PHARMACY_BRANCHES } from "@/data/pharmacy-branches";
+import { PHARMACY_BRANCHES, type PharmacyBranch } from "@/data/pharmacy-branches";
 
-const branches = PHARMACY_BRANCHES.map((b) => ({
+const toBranchView = (b: PharmacyBranch) => ({
   name: b.name,
   location: b.location,
   gps: b.gps ?? "",
@@ -15,9 +15,10 @@ const branches = PHARMACY_BRANCHES.map((b) => ({
   maps: b.maps,
   accent: b.accent === "#13ec8a" ? "var(--p1-clr)" : b.accent === "#1157ee" ? "var(--p2-clr)" : b.accent,
   comingSoon: b.comingSoon,
-}));
+});
 
-const Special = () => {
+const Special = ({ branches: source = PHARMACY_BRANCHES }: { branches?: PharmacyBranch[] }) => {
+  const branches = source.map(toBranchView);
   return (
     <section className="special-care-section body-bg space-bottom">
       <div className="container custom-contaienr">
@@ -61,13 +62,13 @@ const Special = () => {
                     <img src="/assets/img/icon/arrow-right-black.png" alt="" />
                   </Link>
                   <a
-                    href="tel:0554612072"
+                    href="tel:0530883354"
                     className="header-help d-flex align-items-center gap-3 text-decoration-none"
                   >
                     <img src="/assets/img/icon/chat-icon.png" alt="" />
                     <span className="cont">
                       <span className="pra d-block">Ask a Pharmacist</span>
-                      <span className="black fw_600">055 461 2072</span>
+                      <span className="black fw_600">053 088 3354</span>
                     </span>
                   </a>
                 </div>

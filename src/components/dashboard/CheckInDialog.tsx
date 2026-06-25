@@ -14,13 +14,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet"
+import { Sheet, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet"
+import { DashboardSheetContent } from "@/components/dashboard/DashboardSheetContent"
 import { cn } from "@/lib/utils"
 import { logCheckIn } from "@/app/dashboard/chronic/actions"
 
@@ -110,20 +105,17 @@ export function CheckInDialog({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent
-        side="right"
-        className="flex w-full flex-col gap-0 p-0 sm:max-w-2xl"
-      >
+      <DashboardSheetContent>
         <SheetHeader className="sticky top-0 z-10 border-b bg-background px-6 py-5">
           <div className="flex items-start gap-3 pr-8">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
               <MessageCircle size={20} />
             </div>
             <div className="min-w-0 flex-1">
-              <SheetTitle className="text-lg leading-tight">
+              <SheetTitle className="text-xl leading-tight">
                 Log check-in
               </SheetTitle>
-              <SheetDescription className="mt-1 text-sm">
+              <SheetDescription className="mt-1 text-base">
                 Record how the contact went for{" "}
                 <span className="font-medium text-foreground">{patientName}</span>.
                 This is saved to the patient history for the whole team.
@@ -132,8 +124,8 @@ export function CheckInDialog({
           </div>
         </SheetHeader>
 
-        <div className="flex-1 overflow-y-auto px-6 py-5">
-          <div className="mx-auto flex w-full max-w-xl flex-col gap-5">
+        <div className="flex-1 overflow-y-auto px-6 py-6">
+          <div className="flex w-full flex-col gap-5 min-w-0">
             <section className="rounded-xl border border-border/70 bg-card p-4 shadow-sm">
               <h3 className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                 Contact details
@@ -253,7 +245,7 @@ export function CheckInDialog({
             Save check-in
           </Button>
         </div>
-      </SheetContent>
+      </DashboardSheetContent>
     </Sheet>
   )
 }

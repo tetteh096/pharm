@@ -8,7 +8,6 @@ import {
   ClipboardList,
   Loader2,
   Mail,
-  MapPin,
   Navigation,
   Package,
   Phone,
@@ -21,11 +20,11 @@ import {
 
 import {
   Sheet,
-  SheetContent,
   SheetDescription,
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet"
+import { DashboardSheetContent } from "@/components/dashboard/DashboardSheetContent"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -127,7 +126,7 @@ export function OrderDetailDrawer({
     } else if (next === "DELIVERED") {
       toast.success(`${orderNumber} marked delivered`, {
         description: detail.customer.email
-          ? "We couldn't email the customer — check SMTP settings."
+          ? "We couldn't email the customer — check Resend / email settings."
           : "Customer has no email on file.",
       })
     } else {
@@ -153,16 +152,13 @@ export function OrderDetailDrawer({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent
-        side="right"
-        className="w-full sm:max-w-2xl overflow-y-auto p-0"
-      >
-        <SheetHeader className="border-b px-6 py-4 sticky top-0 bg-background z-10">
-          <SheetTitle className="flex items-center gap-2">
-            <Package size={18} className="text-primary" />
+      <DashboardSheetContent className="overflow-y-auto">
+        <SheetHeader className="border-b px-6 py-5 sticky top-0 bg-background z-10">
+          <SheetTitle className="flex items-center gap-2 text-xl">
+            <Package size={22} className="text-primary" />
             Order {orderNumber}
           </SheetTitle>
-          <SheetDescription>
+          <SheetDescription className="text-base">
             {detail
               ? `Placed ${formatDateTime(detail.createdAt)}`
               : "Loading order details…"}
@@ -175,14 +171,14 @@ export function OrderDetailDrawer({
             <span className="text-sm">Loading order…</span>
           </div>
         ) : (
-          <div className="px-6 py-5 space-y-6">
+          <div className="px-6 py-6 space-y-7 text-base">
             {/* Status + change dropdown */}
-            <div className="rounded-lg border bg-card p-4">
+            <div className="rounded-xl border bg-card p-5">
               <div className="flex items-center justify-between gap-3 flex-wrap">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
                   <OrderStatusBadge status={detail.status} />
                   <span className="text-sm text-muted-foreground">
-                    · Last updated {formatDateTime(detail.updatedAt)}
+                    Last updated {formatDateTime(detail.updatedAt)}
                   </span>
                 </div>
                 <DropdownMenu>
@@ -224,192 +220,189 @@ export function OrderDetailDrawer({
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
-              <div className="mt-3 space-y-1">
+              <div className="mt-4 space-y-2">
                 <label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                   Optional note for this status change
                 </label>
                 <textarea
                   value={noteDraft}
                   onChange={(e) => setNoteDraft(e.target.value)}
-                  rows={2}
+                  rows={3}
                   placeholder="e.g. Rider dispatched at 2:15 PM, customer notified by phone."
-                  className="w-full rounded-md border border-input bg-white px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring dark:bg-[oklch(0.28_0.03_260)] dark:text-foreground"
+                  className="w-full rounded-md border border-input bg-white px-3 py-2.5 text-base placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring dark:bg-[oklch(0.28_0.03_260)] dark:text-foreground"
                 />
-                <p className="text-[11px] text-muted-foreground">
+                <p className="text-xs text-muted-foreground">
                   The note + your staff account will be saved on the audit log
                   when you change the status.
                 </p>
               </div>
             </div>
 
-            {/* Customer block */}
-            <Section icon={<User size={14} />} title="Customer">
-              <div className="space-y-1.5 text-sm">
-                <div className="font-semibold text-foreground">
-                  {detail.customer.name}
-                </div>
-                {detail.customer.phone && (
-                  <a
-                    href={`tel:${detail.customer.phone}`}
-                    className="flex items-center gap-2 text-muted-foreground hover:text-foreground"
-                  >
-                    <Phone size={13} />
-                    {detail.customer.phone}
-                  </a>
-                )}
-                {detail.customer.email && (
-                  <a
-                    href={`mailto:${detail.customer.email}`}
-                    className="flex items-center gap-2 text-muted-foreground hover:text-foreground"
-                  >
-                    <Mail size={13} />
-                    {detail.customer.email}
-                  </a>
-                )}
-              </div>
-            </Section>
-
-            {/* Fulfillment / delivery */}
-            <Section
-              icon={isDelivery ? <Truck size={14} /> : <Store size={14} />}
-              title={isDelivery ? "Delivery" : "Pickup"}
-            >
-              <div className="space-y-3 text-sm">
-                <div className="flex flex-wrap items-center gap-2">
-                  {isDelivery ? (
-                    <Badge variant="outline" className="gap-1">
-                      <Truck className="h-3 w-3" /> Delivery
-                    </Badge>
-                  ) : detail.fulfillmentType === "PICKUP" ? (
-                    <Badge variant="outline" className="gap-1">
-                      <Store className="h-3 w-3" /> Pickup
-                    </Badge>
-                  ) : (
-                    <Badge variant="outline">Not specified</Badge>
+            <div className="grid gap-6 md:grid-cols-2">
+              {/* Customer block */}
+              <Section icon={<User size={16} />} title="Customer">
+                <div className="rounded-xl border bg-card p-4 space-y-2">
+                  <div className="text-lg font-semibold text-foreground">
+                    {detail.customer.name}
+                  </div>
+                  {detail.customer.phone && (
+                    <a
+                      href={`tel:${detail.customer.phone}`}
+                      className="flex items-center gap-2 text-muted-foreground hover:text-foreground"
+                    >
+                      <Phone size={16} />
+                      {detail.customer.phone}
+                    </a>
                   )}
-                  {detail.branchName && (
-                    <Badge variant="secondary" className="gap-1">
-                      <MapPin className="h-3 w-3" />
-                      {detail.branchName}
-                    </Badge>
+                  {detail.customer.email && (
+                    <a
+                      href={`mailto:${detail.customer.email}`}
+                      className="flex items-center gap-2 text-muted-foreground hover:text-foreground break-all"
+                    >
+                      <Mail size={16} />
+                      {detail.customer.email}
+                    </a>
                   )}
                 </div>
+              </Section>
 
-                {detail.deliveryAddress && (
-                  <div className="space-y-1">
-                    <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                      Address
-                    </div>
-                    <p className="text-foreground leading-relaxed">
-                      {detail.deliveryAddress}
-                    </p>
+              {/* Fulfillment / delivery */}
+              <Section
+                icon={isDelivery ? <Truck size={16} /> : <Store size={16} />}
+                title={isDelivery ? "Delivery" : "Pickup"}
+              >
+                <div className="rounded-xl border bg-card p-4 space-y-4">
+                  <div className="flex flex-wrap items-center gap-2">
+                    {isDelivery ? (
+                      <Badge variant="outline" className="gap-1 text-sm px-3 py-1">
+                        <Truck className="h-3.5 w-3.5" /> Delivery
+                      </Badge>
+                    ) : detail.fulfillmentType === "PICKUP" ? (
+                      <Badge variant="outline" className="gap-1 text-sm px-3 py-1">
+                        <Store className="h-3.5 w-3.5" /> Store pickup
+                      </Badge>
+                    ) : (
+                      <Badge variant="outline">Not specified</Badge>
+                    )}
                   </div>
-                )}
 
-                {hasGps && (
-                  <div className="space-y-2">
-                    <div className="rounded-md overflow-hidden border bg-muted/40 aspect-video">
-                      {mapUrl && (
-                        <iframe
-                          src={mapUrl}
-                          title="Delivery location"
-                          className="w-full h-full"
-                          loading="lazy"
-                          referrerPolicy="no-referrer-when-downgrade"
-                        />
-                      )}
+                  {detail.deliveryAddress && (
+                    <div className="space-y-1.5">
+                      <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                        Address
+                      </div>
+                      <p className="text-foreground leading-relaxed">
+                        {detail.deliveryAddress}
+                      </p>
                     </div>
-                    <div className="flex flex-wrap gap-2">
-                      <a
-                        href={`https://www.google.com/maps/dir/?api=1&destination=${detail.deliveryLat},${detail.deliveryLng}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold bg-blue-600 text-white hover:bg-blue-700 transition"
-                      >
-                        <Navigation className="h-3 w-3" />
-                        Google Maps
-                      </a>
-                      <a
-                        href={`https://www.openstreetmap.org/?mlat=${detail.deliveryLat}&mlon=${detail.deliveryLng}#map=17/${detail.deliveryLat}/${detail.deliveryLng}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold border border-input hover:bg-muted transition"
-                      >
-                        OpenStreetMap
-                      </a>
-                      <span className="text-[11px] text-muted-foreground self-center">
-                        {detail.deliveryLat!.toFixed(5)},{" "}
-                        {detail.deliveryLng!.toFixed(5)}
-                      </span>
-                    </div>
-                  </div>
-                )}
+                  )}
 
-                {detail.deliveryNotes && (
-                  <div className="space-y-1 rounded-md border border-amber-300/40 bg-amber-50/60 dark:bg-amber-500/5 p-3">
-                    <div className="text-xs font-semibold uppercase tracking-wide text-amber-700 dark:text-amber-400 flex items-center gap-1.5">
-                      <StickyNote size={12} /> Delivery notes from customer
+                  {hasGps && (
+                    <div className="space-y-3">
+                      <div className="rounded-lg overflow-hidden border bg-muted/40 min-h-[220px] aspect-[16/10]">
+                        {mapUrl && (
+                          <iframe
+                            src={mapUrl}
+                            title="Delivery location"
+                            className="w-full h-full min-h-[220px]"
+                            loading="lazy"
+                            referrerPolicy="no-referrer-when-downgrade"
+                          />
+                        )}
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        <a
+                          href={`https://www.google.com/maps/dir/?api=1&destination=${detail.deliveryLat},${detail.deliveryLng}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold bg-blue-600 text-white hover:bg-blue-700 transition"
+                        >
+                          <Navigation className="h-4 w-4" />
+                          Google Maps
+                        </a>
+                        <a
+                          href={`https://www.openstreetmap.org/?mlat=${detail.deliveryLat}&mlon=${detail.deliveryLng}#map=17/${detail.deliveryLat}/${detail.deliveryLng}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold border border-input hover:bg-muted transition"
+                        >
+                          OpenStreetMap
+                        </a>
+                        <span className="text-xs text-muted-foreground self-center">
+                          {detail.deliveryLat!.toFixed(5)},{" "}
+                          {detail.deliveryLng!.toFixed(5)}
+                        </span>
+                      </div>
                     </div>
-                    <p className="text-foreground leading-relaxed text-sm whitespace-pre-wrap">
-                      {detail.deliveryNotes}
-                    </p>
-                  </div>
-                )}
-              </div>
-            </Section>
+                  )}
+
+                  {detail.deliveryNotes && (
+                    <div className="space-y-1.5 rounded-lg border border-amber-300/40 bg-amber-50/60 dark:bg-amber-500/5 p-4">
+                      <div className="text-xs font-semibold uppercase tracking-wide text-amber-700 dark:text-amber-400 flex items-center gap-1.5">
+                        <StickyNote size={14} /> Delivery notes from customer
+                      </div>
+                      <p className="text-foreground leading-relaxed whitespace-pre-wrap">
+                        {detail.deliveryNotes}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </Section>
+            </div>
 
             {/* Items */}
             <Section
-              icon={<ClipboardList size={14} />}
+              icon={<ClipboardList size={16} />}
               title={`Items (${detail.items.length})`}
             >
-              <div className="space-y-2">
+              <div className="rounded-xl border bg-card p-4 space-y-3">
                 {detail.items.map((item) => (
                   <div
                     key={item.id}
-                    className="flex items-center justify-between gap-2 rounded-md border bg-card px-3 py-2 text-sm"
+                    className="flex items-center justify-between gap-3 rounded-lg border bg-background px-4 py-3"
                   >
                     <div className="min-w-0">
-                      <div className="font-medium text-foreground truncate">
+                      <div className="font-medium text-foreground text-base">
                         {item.productName}
                       </div>
-                      <div className="text-xs text-muted-foreground">
+                      <div className="text-sm text-muted-foreground">
                         {showFinancials
                           ? `${item.unitPriceFormatted} × ${item.quantity}`
                           : `Qty ${item.quantity}`}
                       </div>
                     </div>
                     {showFinancials ? (
-                      <div className="font-semibold text-foreground">
+                      <div className="font-semibold text-foreground text-base">
                         {item.lineTotalFormatted}
                       </div>
                     ) : null}
                   </div>
                 ))}
-              </div>
-              <div className="mt-4 flex justify-between items-center border-t pt-3">
-                <span className="text-sm text-muted-foreground">
-                  Payment method:{" "}
-                  <span className="font-medium text-foreground">
-                    {detail.paymentMethod ?? "—"}
+                <div className="flex justify-between items-center border-t pt-4">
+                  <span className="text-sm text-muted-foreground">
+                    Payment method:{" "}
+                    <span className="font-medium text-foreground">
+                      {detail.paymentMethod ?? "—"}
+                    </span>
                   </span>
-                </span>
-                {showFinancials ? (
-                  <div className="text-right">
-                    <div className="text-xs text-muted-foreground">Total</div>
-                    <div className="text-xl font-bold">
-                      {detail.totalFormatted}
+                  {showFinancials ? (
+                    <div className="text-right">
+                      <div className="text-sm text-muted-foreground">Total</div>
+                      <div className="text-2xl font-bold">
+                        {detail.totalFormatted}
+                      </div>
                     </div>
-                  </div>
-                ) : null}
+                  ) : null}
+                </div>
               </div>
             </Section>
 
             {/* Audit trail */}
             <Section
-              icon={<History size={14} />}
+              icon={<History size={16} />}
               title={`Audit trail (${detail.statusLogs.length})`}
             >
+              <div className="rounded-xl border bg-card p-4">
               {detail.statusLogs.length === 0 ? (
                 <p className="text-sm text-muted-foreground">
                   No status changes have been logged yet. The next change will
@@ -459,10 +452,11 @@ export function OrderDetailDrawer({
                   ))}
                 </ol>
               )}
+              </div>
             </Section>
           </div>
         )}
-      </SheetContent>
+      </DashboardSheetContent>
     </Sheet>
   )
 }
@@ -477,8 +471,8 @@ function Section({
   children: React.ReactNode
 }) {
   return (
-    <div className="space-y-2">
-      <h3 className="text-sm font-bold uppercase tracking-wide text-muted-foreground flex items-center gap-1.5">
+    <div className="space-y-3">
+      <h3 className="text-sm font-bold uppercase tracking-wide text-muted-foreground flex items-center gap-2">
         {icon}
         {title}
       </h3>

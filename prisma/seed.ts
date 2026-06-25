@@ -4,6 +4,7 @@ import { PrismaClient, Role } from "@prisma/client"
 import bcrypt from "bcryptjs"
 import * as dotenv from "dotenv"
 import { PHARMACY_CATEGORIES } from "../src/data/pharmacy-categories"
+import { PHARMACY_BRANCHES } from "../src/data/pharmacy-branches"
 import { slugifyCategory } from "../src/lib/inventory"
 
 dotenv.config()
@@ -49,11 +50,17 @@ async function main() {
 
   const seedBranches = [
     {
+      name: "Sakumono",
+      location: "NHTC Estate, Sakumono, Accra",
+      phone: "053 088 3354",
+      hours: "Monday – Saturday",
+    },
+    {
       name: "Madina",
       location: "La-Nkwantanang-Madina, Accra",
       phone: "055 461 2072",
-      hours: "Open 24 hours · Every day",
-      notes: "Main branch — open 24/7",
+      hours: "Monday – Saturday",
+      notes: null,
     },
     {
       name: "Odorkor",
@@ -62,39 +69,38 @@ async function main() {
       hours: "Monday – Saturday",
     },
     {
-      name: "Sakumono",
-      location: "NHTC Estate, Sakumono, Accra",
-      phone: "053 088 3354",
-      hours: "Monday – Saturday",
-    },
-    {
       name: "Santeo",
-      location: "Santeo, Accra (Coming Soon)",
-      phone: "Coming soon",
+      location: "Icgc Dominion Temple, Adjei Kojo Santeo Road, Santeo, Accra",
+      phone: "053 118 3617",
       hours: "Monday – Saturday",
-      notes: "Branch opening soon",
     },
   ]
 
-  for (const b of seedBranches) {
+  // Enrich each branch with the richer public-site fields (gps, maps, accent…)
+  // from the shared static data, matched by slug.
+  const staticBySlug = new Map(PHARMACY_BRANCHES.map((b) => [b.id, b]))
+
+  for (const [index, b] of seedBranches.entries()) {
+    const slug = slugifyCategory(b.name)
+    const meta = staticBySlug.get(slug)
+    const data = {
+      slug,
+      location: b.location,
+      phone: b.phone,
+      tel: meta?.tel ?? (b.phone ? b.phone.replace(/[^\d]/g, "") : null),
+      gps: meta?.gps ?? null,
+      hours: b.hours,
+      notes: b.notes ?? null,
+      maps: meta?.maps ?? null,
+      mapEmbed: meta?.mapEmbed ?? null,
+      accent: meta?.accent ?? "#13ec8a",
+      comingSoon: meta?.comingSoon ?? false,
+      sortOrder: index,
+    }
     await prisma.branch.upsert({
       where: { name: b.name },
-      update: {
-        slug: slugifyCategory(b.name),
-        location: b.location,
-        phone: b.phone,
-        hours: b.hours,
-        notes: b.notes ?? null,
-      },
-      create: {
-        name: b.name,
-        slug: slugifyCategory(b.name),
-        location: b.location,
-        phone: b.phone,
-        hours: b.hours,
-        notes: b.notes ?? null,
-        active: true,
-      },
+      update: data,
+      create: { name: b.name, active: true, ...data },
     })
   }
   console.log(`✅ Branches ready (${seedBranches.length} default branches).`)

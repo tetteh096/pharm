@@ -5,7 +5,7 @@ import {
   sendContactConfirmationEmail,
   sendContactNotificationEmail,
 } from "@/lib/email"
-import { PHARMACY_BRANCHES } from "@/data/pharmacy-branches"
+import { getPublicBranches } from "@/lib/branches"
 import {
   isUniqueConstraintError,
   normalizeIdempotencyKey,
@@ -42,8 +42,8 @@ export async function submitContactForm(
     return { success: false, error: "Invalid submission. Please refresh and try again." }
   }
 
-  const branch =
-    PHARMACY_BRANCHES.find((b) => b.id === data.branchId) ?? PHARMACY_BRANCHES[0]
+  const branches = await getPublicBranches()
+  const branch = branches.find((b) => b.id === data.branchId) ?? branches[0]
 
   const normalized = {
     fullName: data.fullName.trim(),

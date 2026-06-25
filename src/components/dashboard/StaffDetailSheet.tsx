@@ -30,11 +30,11 @@ import {
 } from "@/components/ui/select"
 import {
   Sheet,
-  SheetContent,
   SheetDescription,
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet"
+import { DashboardSheetContent } from "@/components/dashboard/DashboardSheetContent"
 import {
   adminResetPassword,
   toggleUserActive,
@@ -177,8 +177,14 @@ export function StaffDetailSheet({
     }
     setResetting(true)
     try {
-      await adminResetPassword(user.id, newPassword)
-      toast.success("Password reset")
+      const { emailSent } = await adminResetPassword(user.id, newPassword)
+      if (emailSent) {
+        toast.success("Password reset — email sent to staff member")
+      } else {
+        toast.success("Password updated", {
+          description: "Could not email the new password — share it with them manually.",
+        })
+      }
       setShowReset(false)
       setNewPassword("")
     } catch (err) {
@@ -191,7 +197,7 @@ export function StaffDetailSheet({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="w-full sm:max-w-lg p-0 gap-0">
+      <DashboardSheetContent>
         <SheetHeader className="border-b px-5 py-4">
           <div className="flex items-start gap-3">
             <div className="h-11 w-11 rounded-full bg-gradient-to-br from-teal-400 to-emerald-500 text-white flex items-center justify-center text-sm font-bold flex-shrink-0">
@@ -270,7 +276,7 @@ export function StaffDetailSheet({
                   {showReset && !isSelf && (
                     <div className="rounded-lg border bg-muted/30 p-3 space-y-2">
                       <Label htmlFor="newPw" className="text-xs">
-                        New temporary password
+                        New temporary password (emailed to staff)
                       </Label>
                       <Input
                         id="newPw"
@@ -441,7 +447,7 @@ export function StaffDetailSheet({
             </>
           )}
         </div>
-      </SheetContent>
+      </DashboardSheetContent>
     </Sheet>
   )
 }

@@ -22,8 +22,9 @@ export default function DashboardLayout({
   return (
     <AuthProvider>
       <TooltipProvider>
-        <div className="dashboard-shell min-h-svh bg-background text-foreground">
+        <div className="dashboard-shell min-h-svh w-full bg-background text-foreground">
           <SidebarProvider
+            className="w-full min-h-svh"
             style={
               {
                 /* Default 3rem is too tight for dashboard icons */
@@ -34,7 +35,9 @@ export default function DashboardLayout({
             <DashboardSidebar />
             <SidebarInset className="dashboard-inset bg-background">
               <DashboardHeader />
-              <div className="flex flex-1 flex-col gap-4 p-4 md:p-6 lg:p-8">{children}</div>
+              <div className="dashboard-content-area flex flex-1 flex-col gap-4 p-4 md:p-6 lg:p-8 xl:px-10">
+                {children}
+              </div>
             </SidebarInset>
           </SidebarProvider>
           <Toaster position="top-right" richColors closeButton />

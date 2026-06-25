@@ -95,8 +95,8 @@ export default function Category() {
           className="text-center mb-5"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
+          viewport={{ once: true, amount: 0.2, margin: "0px 0px 160px 0px" }}
         >
           <span className="svc-eyebrow">WHAT WE OFFER</span>
           <h2 className="fw_800 black mt-2" style={{ fontSize: "clamp(1.8rem, 3.5vw, 2.6rem)" }}>
@@ -108,14 +108,14 @@ export default function Category() {
         </motion.div>
 
         {/* Cards */}
-        <div className="row g-4 justify-content-center">
+        <div className="row g-3 g-md-4 justify-content-center category-services-grid">
           {services.map((svc, i) => (
-            <div className="col-lg-3 col-md-6" key={svc.id}>
+            <div className="col-6 col-md-6 col-lg-3" key={svc.id}>
               <motion.div
-                initial={{ opacity: 0, y: 36 }}
+                initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.55, delay: i * 0.12 }}
-                viewport={{ once: true }}
+                transition={{ duration: 0.45, delay: i * 0.06 }}
+                viewport={{ once: true, amount: 0.15, margin: "0px 0px 160px 0px" }}
                 className="svc-card h-100 d-flex flex-column rounded-4 bg-white text-center overflow-hidden"
               >
                 <div
@@ -124,13 +124,15 @@ export default function Category() {
                   <img src={svc.image} alt={svc.title} />
                 </div>
 
-                <div className={`d-flex flex-column flex-grow-1 px-4 pb-4${svc.boxedIllus ? " pt-3" : ""}`}>
-                <h5 className="fw_700 black mb-2">{svc.title}</h5>
-                <p className="pra fs-seven mb-4 flex-grow-1">{svc.summary}</p>
+                <div
+                  className={`svc-card-inner d-flex flex-column flex-grow-1 px-3 px-md-4 pb-3 pb-md-4${svc.boxedIllus ? " pt-2 pt-md-3" : ""}`}
+                >
+                <h5 className="svc-card-title fw_700 black mb-2">{svc.title}</h5>
+                <p className="svc-card-summary pra fs-seven mb-3 mb-md-4 flex-grow-1">{svc.summary}</p>
 
                 <button
                   onClick={() => setActive(svc)}
-                  className="svc-btn mt-auto mx-auto"
+                  className="svc-btn svc-btn--compact mt-auto mx-auto"
                   style={{ borderColor: svc.accent, color: svc.accent }}
                 >
                   Learn More <i className="fas fa-arrow-right ms-1" />
@@ -146,8 +148,8 @@ export default function Category() {
           className="text-center mt-5"
           initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.5 }}
-          viewport={{ once: true }}
+          transition={{ duration: 0.45 }}
+          viewport={{ once: true, amount: 0.4, margin: "0px 0px 120px 0px" }}
         >
           <Link href="/service" className="svc-cta-btn">
             View All Services <i className="fas fa-arrow-right ms-2" />

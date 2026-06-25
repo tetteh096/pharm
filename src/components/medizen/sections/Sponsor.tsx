@@ -1,52 +1,67 @@
 "use client";
 
 import React from "react";
-import { Swiper, SwiperSlide } from "swiper/react";
-import { Autoplay } from "swiper/modules";
 
-// Import Swiper styles
-import "swiper/css";
-
-const sponsorTexts = [
-  { text: "Quality Care Service" },
-  { icon: "/assets/img/icon/star-text.png" },
-  { text: "Your Wellness Priority" },
-  { icon: "/assets/img/icon/star-text.png" },
-  { text: "Caring for You Always" },
-  { icon: "/assets/img/icon/star-text.png" },
-  { text: "Quality Care Service" },
-  { icon: "/assets/img/icon/star-text.png" },
+const MARQUEE_ITEMS = [
+  { type: "text" as const, value: "Quality Care Service" },
+  { type: "icon" as const },
+  { type: "text" as const, value: "Your Wellness Priority" },
+  { type: "icon" as const },
+  { type: "text" as const, value: "Caring for You Always" },
+  { type: "icon" as const },
 ];
+
+const trackStyle: React.CSSProperties = {
+  display: "inline-flex",
+  flexDirection: "row",
+  flexWrap: "nowrap",
+  alignItems: "center",
+  width: "max-content",
+};
+
+const itemRowStyle: React.CSSProperties = {
+  display: "inline-flex",
+  flexDirection: "row",
+  flexWrap: "nowrap",
+  alignItems: "center",
+  flexShrink: 0,
+};
+
+function MarqueeItems() {
+  return (
+    <>
+      {MARQUEE_ITEMS.map((item, index) =>
+        item.type === "text" ? (
+          <span key={`t-${index}`} className="sponsor-marquee__text">
+            {item.value}
+          </span>
+        ) : (
+          <img
+            key={`i-${index}`}
+            src="/assets/img/icon/star-text.png"
+            alt=""
+            className="sponsor-marquee__star"
+          />
+        )
+      )}
+    </>
+  );
+}
 
 const Sponsor = () => {
   return (
-    <div className="sponsor-text-slide white-bg swiper">
-      <Swiper
-        modules={[Autoplay]}
-        speed={6000}
-        loop={true}
-        slidesPerView="auto"
-        centeredSlides={true}
-        autoplay={{
-          delay: 1,
-          disableOnInteraction: false,
-        }}
-        breakpoints={{
-          991: { spaceBetween: 30 },
-          600: { spaceBetween: 20 },
-          400: { spaceBetween: 16 },
-          0: { spaceBetween: 14 },
-        }}
-      >
-        {sponsorTexts.concat(sponsorTexts).map((item, index) => (
-          <SwiperSlide key={index} style={{ width: "auto" }}>
-            <div className="text-slide-item">
-              {item.text ? item.text : <img src={item.icon} alt="icon" />}
-            </div>
-          </SwiperSlide>
-        ))}
-      </Swiper>
-    </div>
+    <section className="sponsor-marquee white-bg" aria-label="Pharmacy care highlights">
+      <div className="sponsor-marquee__viewport">
+        <div className="sponsor-marquee__track" style={trackStyle}>
+          <div className="sponsor-marquee__group" style={itemRowStyle}>
+            <MarqueeItems />
+          </div>
+          <div className="sponsor-marquee__group" style={itemRowStyle} aria-hidden>
+            <MarqueeItems />
+          </div>
+        </div>
+      </div>
+    </section>
   );
 };
 

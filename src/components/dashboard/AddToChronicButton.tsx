@@ -8,12 +8,12 @@ import { HeartPulse, Loader2, Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   Sheet,
-  SheetContent,
   SheetDescription,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet"
+import { DashboardSheetContent } from "@/components/dashboard/DashboardSheetContent"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import {
@@ -90,10 +90,7 @@ export function AddToChronicButton({
           Add to chronic care
         </Button>
       </SheetTrigger>
-      <SheetContent
-        side="right"
-        className="w-full sm:max-w-lg p-0 gap-0"
-      >
+      <DashboardSheetContent>
         <SheetHeader className="border-b px-5 py-4">
           <div className="flex items-center gap-2.5">
             <div className="h-9 w-9 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
@@ -205,7 +202,7 @@ export function AddToChronicButton({
             Add to chronic care
           </Button>
         </div>
-      </SheetContent>
+      </DashboardSheetContent>
     </Sheet>
   )
 }

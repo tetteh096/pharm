@@ -15,10 +15,15 @@ import { CartProvider } from "@/context/CartContext";
 import { Toaster } from "@/components/ui/sonner";
 import { SiteWidgets } from "@/components/medizen/SiteWidgets";
 import "@/app/medizen-dark.css";
-import { Geist } from "next/font/google";
+import { Geist, Inter } from "next/font/google";
 import { cn } from "@/lib/utils";
 
-const geist = Geist({subsets:['latin'],variable:'--font-sans'});
+const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-heading",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -78,7 +83,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={cn("font-sans", geist.variable)}>
+    <html lang="en" className={cn("font-sans", geist.variable, inter.variable)}>
       <ThemeProvider>
         <CartProvider>
           <body className="body-bg">
@@ -92,6 +97,7 @@ export default function RootLayout({
             <link rel="stylesheet" href="/assets/css/swiper-bundle.min.css" />
             <link rel="stylesheet" href="/assets/css/nice-select.css" />
             <link rel="stylesheet" href="/assets/css/main.css" />
+            <link rel="stylesheet" href="/assets/css/site-overrides.css" />
             <Preloader />
             <MouseFollower />
             {children}

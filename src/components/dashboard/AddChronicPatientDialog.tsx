@@ -18,12 +18,12 @@ import {
 import { Button } from "@/components/ui/button"
 import {
   Sheet,
-  SheetContent,
   SheetDescription,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet"
+import { DashboardSheetContent } from "@/components/dashboard/DashboardSheetContent"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import {
@@ -169,10 +169,7 @@ export function AddChronicPatientDialog() {
           Add chronic patient
         </Button>
       </SheetTrigger>
-      <SheetContent
-        side="right"
-        className="w-full sm:max-w-lg p-0 gap-0"
-      >
+      <DashboardSheetContent>
         <SheetHeader className="border-b px-5 py-4">
           <div className="flex items-center gap-2.5">
             {stage === "form" && (
@@ -442,7 +439,7 @@ export function AddChronicPatientDialog() {
             </Button>
           )}
         </div>
-      </SheetContent>
+      </DashboardSheetContent>
     </Sheet>
   )
 }

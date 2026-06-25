@@ -83,9 +83,15 @@ const NAV_PAGES: {
     roles: ["ADMIN", "PHARMACIST"],
   },
   {
+    title: "Team page",
+    href: "/dashboard/team",
+    keywords: ["team", "pharmacists", "staff profiles", "meet our team", "website team"],
+    roles: ["ADMIN", "PHARMACIST"],
+  },
+  {
     title: "Staff",
     href: "/dashboard/users",
-    keywords: ["staff", "users", "team"],
+    keywords: ["staff", "users", "accounts", "login"],
     roles: ["ADMIN"],
   },
   {

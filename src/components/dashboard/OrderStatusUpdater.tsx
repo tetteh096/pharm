@@ -67,7 +67,7 @@ export function OrderStatusUpdater({
           toast.success(`Order ${orderNumber} marked delivered · receipt emailed to ${customerEmail}`)
         } else if (customerEmail && !result.emailSent) {
           toast.success(`Order ${orderNumber} marked delivered`, {
-            description: "We couldn't email the customer — check SMTP settings.",
+            description: "We couldn't email the customer — check Resend / email settings.",
           })
         } else {
           toast.success(`Order ${orderNumber} marked delivered`, {

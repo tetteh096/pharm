@@ -6,7 +6,11 @@
  * Prisma-backed loaders live in `@/lib/site-settings` (server-only) and
  * re-export everything here for server callers.
  */
-import { PHARMACY_BRANCHES } from "@/data/pharmacy-branches"
+import {
+  PHARMACY_BRANCHES,
+  PHARMACY_EMAIL,
+  type PharmacyBranch,
+} from "@/data/pharmacy-branches"
 import { toWhatsAppPhone } from "@/lib/whatsapp"
 
 export type SocialLinkKey =
@@ -34,11 +38,13 @@ export type PublicWhatsAppBranch = {
 }
 
 export type PublicSiteSettings = {
+  contactEmail: string
   socialLinks: SocialLink[]
   whatsappBranches: PublicWhatsAppBranch[]
 }
 
 export type SiteSettingsFormData = {
+  contactEmail: string
   facebookUrl: string
   linkedinUrl: string
   instagramUrl: string
@@ -53,6 +59,7 @@ export type SiteSettingsFormData = {
 export const SITE_SETTINGS_ID = "site"
 
 export const DEFAULT_SITE_SETTINGS: SiteSettingsFormData = {
+  contactEmail: PHARMACY_EMAIL,
   facebookUrl: "https://www.facebook.com/enviropharmacygh",
   linkedinUrl: "https://www.linkedin.com/company/enviropharmacygh",
   instagramUrl: "https://www.instagram.com/enviropharmacygh",
@@ -92,7 +99,10 @@ function normalizeUrlInput(value: string | null | undefined): string | null {
   return trimmed ? trimmed : null
 }
 
-export function buildPublicSiteSettings(form: SiteSettingsFormData): PublicSiteSettings {
+export function buildPublicSiteSettings(
+  form: SiteSettingsFormData,
+  branches: PharmacyBranch[] = PHARMACY_BRANCHES
+): PublicSiteSettings {
   const socialLinks: SocialLink[] = (
     Object.entries(SOCIAL_META) as [SocialLinkKey, (typeof SOCIAL_META)[SocialLinkKey]][]
   )
@@ -111,7 +121,7 @@ export function buildPublicSiteSettings(form: SiteSettingsFormData): PublicSiteS
     santeo: normalizePhoneInput(form.whatsappSanteo),
   }
 
-  const whatsappBranches: PublicWhatsAppBranch[] = PHARMACY_BRANCHES.map((branch) => {
+  const whatsappBranches: PublicWhatsAppBranch[] = branches.map((branch) => {
     const overridePhone = whatsappById[branch.id]
     const phone = overridePhone ?? branch.phone
     const tel = overridePhone ?? branch.tel
@@ -126,13 +136,16 @@ export function buildPublicSiteSettings(form: SiteSettingsFormData): PublicSiteS
     }
   })
 
-  return { socialLinks, whatsappBranches }
+  const contactEmail = form.contactEmail.trim() || PHARMACY_EMAIL
+
+  return { contactEmail, socialLinks, whatsappBranches }
 }
 
 export function sanitizeSiteSettingsInput(
   input: SiteSettingsFormData
 ): SiteSettingsFormData {
   return {
+    contactEmail: input.contactEmail?.trim() ?? "",
     facebookUrl: normalizeUrlInput(input.facebookUrl) ?? "",
     linkedinUrl: normalizeUrlInput(input.linkedinUrl) ?? "",
     instagramUrl: normalizeUrlInput(input.instagramUrl) ?? "",

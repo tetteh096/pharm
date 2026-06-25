@@ -44,8 +44,6 @@ import {
   type InventorySearchHit,
 } from "@/app/dashboard/actions"
 
-type Branch = { id: string; name: string; location: string | null }
-
 type CartLine = {
   product: InventorySearchHit
   quantity: number
@@ -62,7 +60,7 @@ const PAYMENT_OPTIONS = [
 const TEXTAREA_CLASS =
   "flex min-h-[90px] w-full rounded-md border border-input bg-white px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring dark:bg-[oklch(0.28_0.03_260)]"
 
-export function ManualOrderForm({ branches }: { branches: Branch[] }) {
+export function ManualOrderForm() {
   const router = useRouter()
 
   const [customer, setCustomer] = React.useState({
@@ -73,9 +71,6 @@ export function ManualOrderForm({ branches }: { branches: Branch[] }) {
   const [fulfillmentType, setFulfillmentType] = React.useState<
     "PICKUP" | "DELIVERY"
   >("PICKUP")
-  const [branchName, setBranchName] = React.useState<string>(
-    branches[0]?.name ?? ""
-  )
   const [delivery, setDelivery] = React.useState({
     address: "",
     notes: "",
@@ -199,10 +194,6 @@ export function ManualOrderForm({ branches }: { branches: Branch[] }) {
       toast.error("Please add the customer's phone number")
       return
     }
-    if (!branchName) {
-      toast.error("Please pick a branch")
-      return
-    }
     if (cart.length === 0) {
       toast.error("Add at least one product to the order")
       return
@@ -220,7 +211,7 @@ export function ManualOrderForm({ branches }: { branches: Branch[] }) {
         email: customer.email || undefined,
       },
       fulfillmentType,
-      branchName,
+      branchName: null,
       deliveryAddress: delivery.address || undefined,
       deliveryNotes: delivery.notes || undefined,
       paymentMethod,
@@ -243,7 +234,7 @@ export function ManualOrderForm({ branches }: { branches: Branch[] }) {
       toast.success(`Order ${result.orderNumber} created · receipt emailed`)
     } else if (sendEmail && customer.email) {
       toast.success(`Order ${result.orderNumber} created`, {
-        description: "We couldn't email the customer — check SMTP settings.",
+        description: "We couldn't email the customer — check Resend / email settings.",
       })
     } else {
       toast.success(`Order ${result.orderNumber} created`)
@@ -347,29 +338,6 @@ export function ManualOrderForm({ branches }: { branches: Branch[] }) {
                   </button>
                 )
               })}
-            </div>
-
-            <div className="space-y-1.5">
-              <Label htmlFor="branch">Branch *</Label>
-              <Select value={branchName} onValueChange={setBranchName}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Pick a branch" />
-                </SelectTrigger>
-                <SelectContent>
-                  {branches.length === 0 ? (
-                    <SelectItem value="" disabled>
-                      No active branches — add one first
-                    </SelectItem>
-                  ) : (
-                    branches.map((b) => (
-                      <SelectItem key={b.id} value={b.name}>
-                        {b.name}
-                        {b.location ? ` · ${b.location}` : ""}
-                      </SelectItem>
-                    ))
-                  )}
-                </SelectContent>
-              </Select>
             </div>
 
             {fulfillmentType === "DELIVERY" && (

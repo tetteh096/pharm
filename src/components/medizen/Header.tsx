@@ -62,7 +62,6 @@ const Header = () => {
   const [isSticky, setIsSticky] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isAboutDropdownOpen, setIsAboutDropdownOpen] = useState(false);
   const { theme, toggleTheme } = useTheme();
   const { count: cartCount, isHydrated: cartReady } = useCart();
   const pathname = usePathname();
@@ -100,10 +99,6 @@ const Header = () => {
     window.addEventListener("resize", setHeaderOffset);
     return () => window.removeEventListener("resize", setHeaderOffset);
   }, [isSticky]);
-
-  useEffect(() => {
-    setIsAboutDropdownOpen(false);
-  }, [pathname]);
 
   return (
     <>
@@ -153,50 +148,37 @@ const Header = () => {
                       />
                     </li>
 
-                    <li
-                      className="position-relative dropdown-nav"
-                      onMouseEnter={() => setIsAboutDropdownOpen(true)}
-                      onMouseLeave={() => setIsAboutDropdownOpen(false)}
-                    >
+                    <li className="position-relative dropdown-nav">
                       <button
                         type="button"
                         className={`nav-link-modern fs-seven fw_700 transition-all position-relative bg-transparent border-0 cursor-pointer d-inline-flex align-items-center gap-1${isAboutSectionActive ? " is-active" : ""}`}
                         style={{ paddingBottom: "6px" }}
-                        aria-expanded={isAboutDropdownOpen}
                         aria-haspopup="true"
                         aria-current={isAboutSectionActive ? "page" : undefined}
                       >
                         About
                         <i
-                          className="fas fa-chevron-down"
-                          style={{
-                            fontSize: "0.65rem",
-                            transform: isAboutDropdownOpen
-                              ? "rotate(180deg)"
-                              : undefined,
-                            transition: "transform 0.18s",
-                          }}
+                          className="fas fa-chevron-down nav-dropdown-chevron"
+                          style={{ fontSize: "0.65rem" }}
                         />
                         <span className="dot p1-bg" />
                       </button>
 
-                      {isAboutDropdownOpen ? (
-                        <div
-                          className="nav-dropdown-panel position-absolute"
-                          role="menu"
-                          aria-label="About pages"
-                        >
-                          {aboutDropdown.map((item) => {
-                            const itemActive = isActiveLink(item.href);
-                            return (
-                              <Link
-                                key={item.href}
-                                href={item.href}
-                                className={`nav-dropdown-item${itemActive ? " is-active" : ""}`}
-                                aria-current={itemActive ? "page" : undefined}
-                                role="menuitem"
-                                onClick={() => setIsAboutDropdownOpen(false)}
-                              >
+                      <div
+                        className="nav-dropdown-panel position-absolute"
+                        role="menu"
+                        aria-label="About pages"
+                      >
+                        {aboutDropdown.map((item) => {
+                          const itemActive = isActiveLink(item.href);
+                          return (
+                            <Link
+                              key={item.href}
+                              href={item.href}
+                              className={`nav-dropdown-item${itemActive ? " is-active" : ""}`}
+                              aria-current={itemActive ? "page" : undefined}
+                              role="menuitem"
+                            >
                                 <div
                                   className="d-flex align-items-center justify-content-center rounded-circle flex-shrink-0"
                                   style={{
@@ -232,8 +214,7 @@ const Header = () => {
                               </Link>
                             );
                           })}
-                        </div>
-                      ) : null}
+                      </div>
                     </li>
 
                     {navItemsAfterAbout.map((item) => (

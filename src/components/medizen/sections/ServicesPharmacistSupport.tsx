@@ -3,11 +3,16 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { MessageCircle, Phone, ShoppingBag, MapPin } from "lucide-react";
+import {
+  PHARMACY_PRIMARY_PHONE,
+  pharmacyPrimaryTelHref,
+} from "@/data/pharmacy-branches";
+import { CollapseBlock } from "@/components/medizen/CollapseBlock";
 
 const benefits = [
   {
     title: "Help when you need it",
-    text: "Worried about a missed dose or a new prescription? Call or visit us — we're open 24 hours for urgent pharmacy support.",
+    text: "Worried about a missed dose or a new prescription? Call or visit us during branch hours for pharmacist support.",
   },
   {
     title: "Private & personal",
@@ -45,8 +50,8 @@ const channels = [
   {
     icon: Phone,
     label: "Call us",
-    detail: "055 461 2072 · 059 937 6675",
-    href: "tel:+233554612072",
+    detail: PHARMACY_PRIMARY_PHONE,
+    href: pharmacyPrimaryTelHref(),
     cta: "Call now",
   },
   {
@@ -117,10 +122,10 @@ export default function ServicesPharmacistSupport() {
                 className="d-flex flex-wrap gap-2 gap-md-3"
               >
                 <a
-                  href="tel:+233554612072"
+                  href={pharmacyPrimaryTelHref()}
                   className="common-btn box-style first-box d-inline-flex align-items-center gap-2 fw-semibold rounded100"
                 >
-                  <Phone size={16} /> Call us — 24 hours
+                  <Phone size={16} /> Call us
                 </a>
                 <Link
                   href="/team"
@@ -131,8 +136,8 @@ export default function ServicesPharmacistSupport() {
               </motion.div>
             </div>
 
-            {/* Chat-style mockup — inspired by DrugNet, decorative only */}
-            <div className="col-lg-6">
+            {/* Chat-style mockup — desktop only */}
+            <div className="col-lg-6 d-none d-lg-block">
               <motion.div
                 initial={{ opacity: 0, x: 24 }}
                 whileInView={{ opacity: 1, x: 0 }}
@@ -167,10 +172,13 @@ export default function ServicesPharmacistSupport() {
         </div>
       </div>
 
-      {/* Benefits grid */}
-      <div className="svc-support-benefits section-padding pt-100 pb-100">
+      <CollapseBlock
+        title="Why patients choose us"
+        subtitle="Reliable, local, human pharmacy care"
+        className="svc-support-benefits section-padding svc-support-benefits--collapse"
+      >
         <div className="container">
-          <div className="row justify-content-center mb-4 mb-md-5">
+          <div className="row justify-content-center mb-4 mb-md-5 d-none d-lg-flex">
             <div className="col-lg-8 text-center">
               <span className="svc-eyebrow mb-3 d-inline-block">Why patients choose us</span>
               <h3 className="fw_800 black mb-3" style={{ fontSize: "clamp(1.45rem, 2.8vw, 2rem)" }}>
@@ -182,7 +190,7 @@ export default function ServicesPharmacistSupport() {
               </p>
             </div>
           </div>
-          <div className="row g-4">
+          <div className="row g-3 g-md-4">
             {benefits.map((item, i) => (
               <motion.div
                 key={item.title}
@@ -200,8 +208,13 @@ export default function ServicesPharmacistSupport() {
             ))}
           </div>
         </div>
-      </div>
+      </CollapseBlock>
 
+      <CollapseBlock
+        title="How it works"
+        subtitle="Three simple steps"
+        className="svc-support-steps-collapse"
+      >
       {/* How it works — solid overlay + background image */}
       <div className="svc-support-steps-wrap">
         <img
@@ -244,9 +257,10 @@ export default function ServicesPharmacistSupport() {
           </p>
         </div>
       </div>
+      </CollapseBlock>
 
       {/* Contact channels */}
-      <div className="svc-support-channels section-padding pb-100">
+      <div className="svc-support-channels section-padding svc-support-channels--compact pb-100">
         <div className="container">
           <div className="row g-3 g-md-4">
             {channels.map((ch, i) => {

@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { ArrowRight, Clock3, MapPin, Phone } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 
 interface PageTitleProps {
   title: string;
@@ -13,7 +13,8 @@ interface PageTitleProps {
 const heroCopy: Record<string, { eyebrow: string; description: string }> = {
   "About Us": {
     eyebrow: "Trusted pharmacy care",
-    description: "Learn how Enviro Pharmacy supports families across Madina, Odorkor, Sakumono and Santeo with reliable care, real guidance, and genuine medications.",
+    description:
+      "Learn how Enviro Pharmacy supports families with reliable care, real guidance, and genuine medications.",
   },
   "Health Insights & News": {
     eyebrow: "Pharmacy updates",
@@ -28,18 +29,18 @@ const heroCopy: Record<string, { eyebrow: string; description: string }> = {
     description: "Browse trusted wellness products, everyday pharmacy items, and medical essentials in one place.",
   },
   "Contact Us": {
-    eyebrow: "Four Accra branches",
-    description: "Reach the branch nearest to you, ask about stock, and get help arranging pickup or delivery.",
+    eyebrow: "Get in touch",
+    description: "Call, email, or visit us for stock checks, directions, and help with pickup or delivery.",
   },
   Services: {
     eyebrow: "Pharmacy support",
     description:
-      "Walk-in health checks, prescription dispensing, and pharmacist consultations at our Madina, Odorkor, Sakumono and Santeo branches.",
+      "Walk-in health checks, prescription dispensing, and pharmacist consultations at our branches.",
   },
   Service: {
     eyebrow: "Pharmacy support",
     description:
-      "Walk-in health checks, prescription dispensing, and pharmacist consultations at our Madina, Odorkor, Sakumono and Santeo branches.",
+      "Walk-in health checks, prescription dispensing, and pharmacist consultations at our branches.",
   },
   "Service Details": {
     eyebrow: "Care details",
@@ -78,7 +79,7 @@ const heroCopy: Record<string, { eyebrow: string; description: string }> = {
 const heroImages: Record<string, string> = {
   "About Us":               "/jhfhj.jpg",
   "Health Insights & News": "https://images.unsplash.com/photo-1505751172876-fa1923c5c528?auto=format&fit=crop&w=1600&q=80",
-  "Blog Details":           "https://images.unsplash.com/photo-1498837167922-ddd27525d352?auto=format&fit=crop&w=1600&q=80",
+  "Blog Details":           "/pharmacy-img-1.jpg",
   "Pharmacy Shop":          "https://images.unsplash.com/photo-1587854692152-cbe660dbde88?auto=format&fit=crop&w=1600&q=80",
   "Contact Us":             "/photo/43b0ac4ca1cba7ec8ce5b1d878f89a45.jpg",
   "Services":               "/photo/15e95618a2a142e412902a71f1419cca.jpg",
@@ -92,16 +93,12 @@ const heroImages: Record<string, string> = {
   "Meet the Team":          "/hero1.png",
 };
 
-/** Pages where the branch/locations sidebar card should not appear in the hero. */
-const pagesWithoutInfoCard = new Set(["Checkout"]);
-
 const PageTitle: React.FC<PageTitleProps> = ({ title, heroKey }) => {
   const lookupKey = heroKey ?? title;
   const bgImage = heroImages[lookupKey] ?? null;
-  const showInfoCard = !pagesWithoutInfoCard.has(title) && !pagesWithoutInfoCard.has(lookupKey);
   const content = heroCopy[lookupKey] ?? {
     eyebrow: "Enviro Pharmacy",
-    description: "Clear information, fast branch access, and a better pharmacy experience across every page.",
+    description: "Clear information and a better pharmacy experience on every page.",
   };
 
   return (
@@ -126,7 +123,6 @@ const PageTitle: React.FC<PageTitleProps> = ({ title, heroKey }) => {
               zIndex: 0,
             }}
           />
-          {/* Dark overlay */}
           <div
             aria-hidden="true"
             style={{
@@ -143,7 +139,7 @@ const PageTitle: React.FC<PageTitleProps> = ({ title, heroKey }) => {
 
       <div className="container position-relative" style={{ zIndex: 2 }}>
         <div className="row g-4 align-items-center">
-          <div className={showInfoCard ? "col-lg-8" : "col-lg-10"}>
+          <div className="col-lg-10">
             <div className="page-title-content">
               <span
                 className={`page-title-eyebrow d-inline-flex align-items-center gap-2 mb-4${bgImage ? " page-title-eyebrow--image" : ""}`}
@@ -180,34 +176,6 @@ const PageTitle: React.FC<PageTitleProps> = ({ title, heroKey }) => {
               </ul>
             </div>
           </div>
-
-          {showInfoCard && (
-          <div className="col-lg-4">
-            <div className={`page-title-info-card ms-lg-auto${bgImage ? " page-title-info-card--image" : ""}`}>
-              <div className={`page-title-info-row${bgImage ? " page-title-info-row--image" : ""}`}>
-                <Clock3 className="h-[18px] w-[18px] page-title-info-icon page-title-info-icon--clock" />
-                <div>
-                  <span className={`page-title-info-label${bgImage ? " page-title-info-label--image" : ""}`}>Madina branch</span>
-                  <p className={`page-title-info-value mb-0${bgImage ? " page-title-info-value--image" : ""}`}>Open 24 hours</p>
-                </div>
-              </div>
-              <div className={`page-title-info-row${bgImage ? " page-title-info-row--image" : ""}`}>
-                <MapPin className="h-[18px] w-[18px] page-title-info-icon page-title-info-icon--map" />
-                <div>
-                  <span className={`page-title-info-label${bgImage ? " page-title-info-label--image" : ""}`}>Locations</span>
-                  <p className={`page-title-info-value mb-0${bgImage ? " page-title-info-value--image" : ""}`}>Madina · Odorkor · Sakumono · Santeo</p>
-                </div>
-              </div>
-              <div className="page-title-info-row page-title-info-row--last">
-                <Phone className="h-[18px] w-[18px] page-title-info-icon page-title-info-icon--phone" />
-                <div>
-                  <span className={`page-title-info-label${bgImage ? " page-title-info-label--image" : ""}`}>Quick contact</span>
-                  <p className={`page-title-info-value mb-0${bgImage ? " page-title-info-value--image" : ""}`}>055 461 2072</p>
-                </div>
-              </div>
-            </div>
-          </div>
-          )}
         </div>
       </div>
     </section>

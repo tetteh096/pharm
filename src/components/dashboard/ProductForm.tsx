@@ -271,7 +271,7 @@ export function ProductForm({
   }
 
   return (
-    <div className="dashboard-page max-w-4xl space-y-6 pb-12">
+    <div className="dashboard-page space-y-6 pb-12">
       <div className="flex items-center gap-3">
         <Button variant="outline" size="sm" asChild>
           <Link href="/dashboard/products">

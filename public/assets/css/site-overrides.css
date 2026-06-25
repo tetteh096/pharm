@@ -1,0 +1,19 @@
+/* Loaded after main.css — homepage sponsor ticker */
+.medizen-wrapper .sponsor-marquee__track {
+  display: inline-flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  align-items: center;
+  width: max-content;
+}
+.medizen-wrapper .sponsor-marquee__group {
+  display: inline-flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  align-items: center;
+  flex-shrink: 0;
+}
+.medizen-wrapper .sponsor-marquee__text {
+  display: inline-block !important;
+  white-space: nowrap !important;
+}

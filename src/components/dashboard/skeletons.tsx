@@ -114,7 +114,7 @@ export function CardGridSkeleton({ count = 4 }: { count?: number }) {
 /** Form page skeleton (used by add/edit product). */
 export function FormSkeleton() {
   return (
-    <div className="dashboard-page max-w-4xl space-y-6">
+    <div className="dashboard-page space-y-6">
       <div className="flex items-center gap-3">
         <Skeleton className="h-9 w-24" />
         <div className="space-y-2 flex-1">
